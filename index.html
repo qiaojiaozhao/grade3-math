@@ -3,175 +3,305 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>三年级奥数 · 看得懂的知识站</title>
+<title>浅奥母题地图</title>
+<meta name="description" content="三年级浅奥六种母题。衣服可以换，骨头不能换。">
 <!-- 这个文件由 tools/build-index.mjs 生成，不要手改。加了新内容就跑 npm run index -->
+<link rel="icon" href="demos/assets/鸡.png">
 <style>
+  :root {
+    --sky: #dbebff;
+    --cream: #fff7e8;
+    --paper: #fffdf8;
+    --ink: #2a3340;
+    --soft: #5c6b7a;
+    --brand: #1f5f9e;
+    --accent: #e0662c;
+  }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
-    font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-    background: radial-gradient(ellipse at top, #fff6e0 0%, #e7f3ff 55%, #d7ebff 100%);
+    font-family: "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", sans-serif;
+    color: var(--ink);
+    background:
+      radial-gradient(900px 420px at 12% -10%, #ffe8b0 0%, transparent 60%),
+      radial-gradient(800px 380px at 100% 0%, #cfe4ff 0%, transparent 55%),
+      linear-gradient(180deg, var(--cream) 0%, var(--sky) 70%, #e4f0ff 100%);
     min-height: 100vh;
-    color: #2b3a46;
-    padding: 40px 20px 60px;
   }
-  .wrap { max-width: 760px; margin: 0 auto; }
-  header { text-align: center; margin-bottom: 32px; }
-  h1 { font-size: 30px; color: #1f5f9e; margin-bottom: 10px; }
-  .sub { font-size: 16px; color: #5b6b7a; line-height: 1.7; }
+  .page { max-width: 1080px; margin: 0 auto; padding: 36px 22px 72px; }
 
-  h2 {
-    font-size: 19px;
-    color: #1f5f9e;
-    margin: 32px 0 14px;
-    padding-left: 12px;
-    border-left: 5px solid #e0662c;
+  .hero {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    background: var(--paper);
+    border-radius: 28px;
+    padding: 32px 36px;
+    box-shadow: 0 18px 40px #1f4a7a14, 0 2px 0 #fff inset;
+    margin-bottom: 28px;
   }
-
-  .card {
-    display: block;
-    background: #fff;
-    border-radius: 16px;
-    padding: 18px 22px;
-    margin-bottom: 14px;
+  .hero-copy { flex: 1; min-width: 0; }
+  .cast {
+    flex: 0 0 200px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    gap: 4px;
+  }
+  .cast img { width: 96px; height: auto; background: none; }
+  .eyebrow {
+    display: inline-block;
+    font-size: 13px; font-weight: 800; letter-spacing: .12em;
+    color: var(--accent);
+    background: #ffe8d4;
+    border-radius: 999px;
+    padding: 4px 12px;
+    margin-bottom: 12px;
+  }
+  h1 { font-size: 40px; line-height: 1.2; color: var(--brand); letter-spacing: .02em; }
+  .lead { margin-top: 12px; font-size: 18px; line-height: 1.75; color: var(--soft); max-width: 34em; }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+  .btn {
+    display: inline-flex; align-items: center;
+    height: 42px; padding: 0 18px;
+    border-radius: 999px;
+    font-size: 15px; font-weight: 800;
     text-decoration: none;
-    color: inherit;
-    box-shadow: 0 4px 14px rgba(40,70,110,.10);
+  }
+  .btn.primary { background: var(--accent); color: #fff; }
+  .btn.ghost { background: #eef5ff; color: var(--brand); }
+
+  .sec { margin: 34px 0 12px; display: flex; align-items: baseline; gap: 12px; }
+  .sec h2 { font-size: 22px; color: var(--brand); }
+  .sec p { font-size: 14px; color: var(--soft); }
+
+  .shows { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .show {
+    display: grid; gap: 8px;
+    background: #fff;
+    border-radius: 22px;
+    padding: 22px 24px 20px;
+    text-decoration: none; color: inherit;
+    box-shadow: 0 10px 28px #1f4a7a12;
+    border: 1px solid #ffffffaa;
     transition: transform .15s, box-shadow .15s;
   }
-  .card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(40,70,110,.16);
+  .show:hover { transform: translateY(-3px); box-shadow: 0 16px 34px #1f4a7a18; }
+  .show .go {
+    width: max-content;
+    background: var(--accent); color: #fff;
+    font-size: 12px; font-weight: 800; letter-spacing: .08em;
+    border-radius: 999px; padding: 3px 10px;
   }
-  .card .t { font-size: 19px; font-weight: 800; color: #1f5f9e; margin-bottom: 6px; }
-  .card .d { font-size: 15px; line-height: 1.7; color: #55636f; }
-  .card .m { font-size: 13px; color: #8798a6; margin-top: 8px; }
-  .card .m span { color: #e0662c; font-weight: 700; text-decoration: underline; }
-  .card.play { border-left: 6px solid #e0662c; }
-  .card.play .t::before { content: "▶ "; color: #e0662c; }
+  .show strong { font-size: 20px; color: var(--brand); }
+  .show span { font-size: 14px; line-height: 1.65; color: var(--soft); }
 
-  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  .grid .card { margin-bottom: 0; }
-  @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } }
+  .map {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .tile {
+    background: var(--paper);
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 12px 28px #1f4a7a10;
+    display: flex; flex-direction: column;
+    min-height: 250px;
+    outline: 3px solid transparent;
+    transition: transform .15s, outline-color .15s;
+  }
+  .tile:hover { transform: translateY(-3px); outline-color: var(--ink); }
+  .tile-main {
+    flex: 1;
+    display: block;
+    padding: 22px 22px 12px;
+    text-decoration: none;
+    color: inherit;
+    background: linear-gradient(180deg, var(--paper) 40%, var(--paper));
+  }
+  .tile-mark {
+    font-size: 12px; font-weight: 800; letter-spacing: .08em;
+    color: var(--ink);
+    background: var(--paper);
+    border: 1.5px solid color-mix(in srgb, var(--ink) 28%, white);
+    display: inline-block;
+    border-radius: 999px;
+    padding: 3px 10px;
+    margin-bottom: 12px;
+  }
+  .tile h3 { font-size: 28px; color: var(--ink); margin-bottom: 10px; }
+  .motto {
+    font-size: 16px; line-height: 1.65; font-weight: 700;
+    color: #3a4654;
+  }
+  .tile-foot {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    padding: 0 18px 18px;
+  }
+  .chip {
+    font-size: 13px; font-weight: 800;
+    text-decoration: none;
+    color: var(--ink);
+    background: var(--paper);
+    border: 1.5px solid color-mix(in srgb, var(--ink) 22%, white);
+    border-radius: 999px;
+    padding: 5px 11px;
+  }
+  .chip.play { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .chip.quiet { color: #6b7784; }
 
-  .tip {
+  .how {
+    margin-top: 36px;
     background: #fff8ec;
-    border-radius: 14px;
-    padding: 16px 22px;
-    font-size: 15px;
-    line-height: 1.9;
+    border-radius: 22px;
+    padding: 22px 26px;
     color: #6b5335;
-    margin-top: 28px;
+    font-size: 15px; line-height: 1.9;
   }
-  .tip b { color: #c0662c; }
-  footer { text-align: center; margin-top: 36px; font-size: 13px; color: #8798a6; }
+  .how b { color: #c0662c; }
+  footer {
+    text-align: center; margin-top: 28px;
+    font-size: 13px; color: #7d8b98;
+  }
+  footer a { color: var(--brand); }
+
+  @media (max-width: 880px) {
+    .map, .shows { grid-template-columns: 1fr 1fr; }
+    h1 { font-size: 32px; }
+    .cast { flex-basis: 160px; }
+    .cast img { width: 80px; }
+  }
+  @media (max-width: 560px) {
+    .map, .shows { grid-template-columns: 1fr; }
+    .hero { padding: 28px 22px; flex-direction: column; align-items: flex-start; }
+    .cast { display: none; }
+  }
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="page">
 
-  <header>
-    <h1>三年级奥数 · 看得懂的知识站</h1>
-    <p class="sub">浅奥六种母题，衣服可以换，骨头不能换。<br>先认出是哪一类，再看动画，再动笔算。</p>
+  <header class="hero">
+    <div class="hero-copy">
+      <div class="eyebrow">三年级 · 浅奥</div>
+      <h1>母题地图</h1>
+      <p class="lead">看起来题很多，骨架只有这几种。<b>衣服可以换，骨头不能换。</b>先认出是哪一类，再看动画，再动笔。</p>
+      <div class="actions">
+        <a class="btn primary" href="https://smileyes.gitbook.io/smileyes-docs/ren-chu-mu-ti">我这道题是哪一类？</a>
+        <a class="btn ghost" href="https://smileyes.gitbook.io/smileyes-docs">打开完整讲解</a>
+      </div>
+    </div>
+    <div class="cast" aria-hidden="true">
+      <img src="demos/assets/鸡.png" alt="">
+      <img src="demos/assets/兔.png" alt="">
+    </div>
   </header>
 
-  <h2>互动动画</h2>
-  <a class="card play" href="demos/倒油问题-移多补少与差倍.html">
-    <div class="t">倒油问题：看油流过去</div>
-    <div class="d">小油壶在两桶之间来回搬油。看甲多出来的那截怎么裂成两块 15，再看甲桶怎么一层层亮成 4 份。</div>
-    <div class="m">也可以<span data-mp4="demos/倒油问题-移多补少与差倍.mp4">下载 mp4</span>直接发微信</div>
-  </a>
-  <a class="card play" href="demos/鸡兔同笼-假设法.html">
-    <div class="t">鸡兔同笼：把鸡一只只换成兔</div>
-    <div class="d">8 只鸡站成一排，一只只被添上脚变成兔。脚数尺每次只前进 2 格，填满那段空缺正好 5 步——「除以 2」是看得见的。</div>
-    <div class="m">也可以<span data-mp4="demos/鸡兔同笼-假设法.mp4">下载 mp4</span>直接发微信</div>
-  </a>
+  <div class="sec">
+    <h2>先看动画</h2>
+    <p>卡住多半不是不会算，是脑子里没有画面。</p>
+  </div>
+  <div class="shows">
+    
+<a class="show" href="demos/%E5%80%92%E6%B2%B9%E9%97%AE%E9%A2%98-%E7%A7%BB%E5%A4%9A%E8%A1%A5%E5%B0%91%E4%B8%8E%E5%B7%AE%E5%80%8D.html">
+  <span class="go">播放</span>
+  <strong>倒油问题：看油流过去</strong>
+  <span>小油壶在两桶之间来回搬油。看甲多出来的那截怎么裂成两块 15，再看甲桶怎么一层层亮成 4 份。</span>
+</a>
 
-  <h2>母题</h2>
-  <div class="grid">
-  <a class="card" href="docs/知识点/差倍问题.md">
-    <div class="t">差倍</div>
-    <div class="d">差 ÷ (倍数 − 1) = 1 份。</div>
-  </a>
-  <a class="card" href="docs/知识点/和倍问题.md">
-    <div class="t">和倍</div>
-    <div class="d">和 ÷ (倍数 + 1) = 1 份。</div>
-  </a>
-  <a class="card" href="docs/知识点/和差问题.md">
-    <div class="t">和差</div>
-    <div class="d">（和 + 差）÷ 2 = 大数；（和 − 差）÷ 2 = 小数。</div>
-  </a>
-  <a class="card" href="docs/知识点/假设法.md">
-    <div class="t">假设法</div>
-    <div class="d">先当全是鸡，少的脚两只两只添，添几次就有几只兔。</div>
-  </a>
-  <a class="card" href="docs/知识点/简单推理.md">
-    <div class="t">图形推理</div>
-    <div class="d">两个算式摆一起，划掉一样多的，剩下的就露出来。</div>
-  </a>
-  <a class="card" href="docs/知识点/移多补少.md">
-    <div class="t">移多补少</div>
-    <div class="d">倒过去 1 份，差距缩小 2 份。</div>
-  </a>
+<a class="show" href="demos/%E9%B8%A1%E5%85%94%E5%90%8C%E7%AC%BC-%E5%81%87%E8%AE%BE%E6%B3%95.html">
+  <span class="go">播放</span>
+  <strong>鸡兔同笼：把鸡一只只换成兔</strong>
+  <span>8 只鸡站成一排，一只只被添上脚变成兔。脚数尺每次只前进 2 格，填满那段空缺正好 5 步——「除以 2」是看得见的。</span>
+</a>
   </div>
 
-  <h2>例题</h2>
-  <a class="card" href="docs/题目/倒油问题.md">
-    <div class="t">倒油问题</div>
-    <div class="d">有甲、乙两桶油。若从甲桶倒入乙桶 15 千克，则两桶油质量相等；若从乙桶倒入甲桶 48 千克，则甲桶油是乙桶油重量的 4 倍。甲桶原有油多…</div>
+  <div class="sec">
+    <h2>六种母题</h2>
+    <p>点卡片看骨架，点下面的小标签看例题或动画。</p>
+  </div>
+  <div class="map">
+    
+<article class="tile" style="--ink:#2f7a5b;--paper:#e8f6ee">
+  <a class="tile-main" href="https://smileyes.gitbook.io/smileyes-docs/zhi-shi-dian/he-cha-wen-ti">
+    <div class="tile-mark">和 + 差</div>
+    <h3>和差</h3>
+    <p class="motto">（和 + 差）÷ 2 = 大数；（和 − 差）÷ 2 = 小数。</p>
   </a>
-  <a class="card" href="docs/题目/鸡兔同笼.md">
-    <div class="t">鸡兔同笼</div>
-    <div class="d">笼子里关着鸡和兔。数一数，一共有 8 个头，26 只脚。鸡和兔各有几只？</div>
-  </a>
-  <a class="card" href="docs/题目/甲乙两堆书.md">
-    <div class="t">甲乙两堆书</div>
-    <div class="d">甲、乙两堆书一共有 48 本，甲堆是乙堆的 3 倍。甲、乙两堆各有多少本？</div>
-  </a>
-  <a class="card" href="docs/题目/图形算式.md">
-    <div class="t">图形算式</div>
-    <div class="d">下面算式中，△ 和 ○ 各代表多少？</div>
-  </a>
-  <a class="card" href="docs/题目/兄弟分糖.md">
-    <div class="t">兄弟分糖</div>
-    <div class="d">哥哥和弟弟一共有 60 颗糖，哥哥比弟弟多 12 颗。哥哥、弟弟各有多少颗糖？</div>
-  </a>
+  <div class="tile-foot">
+    <a class="chip" href="https://smileyes.gitbook.io/smileyes-docs/li-ti/xiong-di-fen-tang">兄弟分糖</a>
+    
+  </div>
+</article>
 
-  <div class="tip">
-    <b>怎么陪孩子用：</b>先让他猜这是哪道母题 → 点开动画看一遍 → 念一遍口诀 → 合上页面自己写算式 → 再换一身衣服讲给你听。<br>
-    孩子卡住，多半不是不会算，而是脑子里<b>没有画面</b>。
+<article class="tile" style="--ink:#2c6fb3;--paper:#e7f1fb">
+  <a class="tile-main" href="https://smileyes.gitbook.io/smileyes-docs/zhi-shi-dian/he-bei-wen-ti">
+    <div class="tile-mark">和 + 倍</div>
+    <h3>和倍</h3>
+    <p class="motto">和 ÷ (倍数 + 1) = 1 份。</p>
+  </a>
+  <div class="tile-foot">
+    <a class="chip" href="https://smileyes.gitbook.io/smileyes-docs/li-ti/jia-yi-liang-dui-shu">甲乙两堆书</a>
+    
+  </div>
+</article>
+
+<article class="tile" style="--ink:#c05621;--paper:#fff1e4">
+  <a class="tile-main" href="https://smileyes.gitbook.io/smileyes-docs/zhi-shi-dian/cha-bei-wen-ti">
+    <div class="tile-mark">差 + 倍</div>
+    <h3>差倍</h3>
+    <p class="motto">差 ÷ (倍数 − 1) = 1 份。</p>
+  </a>
+  <div class="tile-foot">
+    <a class="chip" href="https://smileyes.gitbook.io/smileyes-docs/li-ti/dao-you-wen-ti">倒油问题</a>
+    <a class="chip play" href="demos/%E5%80%92%E6%B2%B9%E9%97%AE%E9%A2%98-%E7%A7%BB%E5%A4%9A%E8%A1%A5%E5%B0%91%E4%B8%8E%E5%B7%AE%E5%80%8D.html">看动画</a><a class="chip quiet" href="demos/%E5%80%92%E6%B2%B9%E9%97%AE%E9%A2%98-%E7%A7%BB%E5%A4%9A%E8%A1%A5%E5%B0%91%E4%B8%8E%E5%B7%AE%E5%80%8D.mp4">mp4</a>
+  </div>
+</article>
+
+<article class="tile" style="--ink:#8a4ec7;--paper:#f3eaff">
+  <a class="tile-main" href="https://smileyes.gitbook.io/smileyes-docs/zhi-shi-dian/yi-duo-bu-shao">
+    <div class="tile-mark">倒过去就相等</div>
+    <h3>移多补少</h3>
+    <p class="motto">倒过去 1 份，差距缩小 2 份。</p>
+  </a>
+  <div class="tile-foot">
+    <a class="chip" href="https://smileyes.gitbook.io/smileyes-docs/li-ti/dao-you-wen-ti">倒油问题</a>
+    <a class="chip play" href="demos/%E5%80%92%E6%B2%B9%E9%97%AE%E9%A2%98-%E7%A7%BB%E5%A4%9A%E8%A1%A5%E5%B0%91%E4%B8%8E%E5%B7%AE%E5%80%8D.html">看动画</a><a class="chip quiet" href="demos/%E5%80%92%E6%B2%B9%E9%97%AE%E9%A2%98-%E7%A7%BB%E5%A4%9A%E8%A1%A5%E5%B0%91%E4%B8%8E%E5%B7%AE%E5%80%8D.mp4">mp4</a>
+  </div>
+</article>
+
+<article class="tile" style="--ink:#b45309;--paper:#fff6d8">
+  <a class="tile-main" href="https://smileyes.gitbook.io/smileyes-docs/zhi-shi-dian/jia-she-fa">
+    <div class="tile-mark">两种混在一起</div>
+    <h3>鸡兔同笼</h3>
+    <p class="motto">先当全是鸡，少的脚两只两只添，添几次就有几只兔。</p>
+  </a>
+  <div class="tile-foot">
+    <a class="chip" href="https://smileyes.gitbook.io/smileyes-docs/li-ti/ji-tu-tong-long">鸡兔同笼</a>
+    <a class="chip play" href="demos/%E9%B8%A1%E5%85%94%E5%90%8C%E7%AC%BC-%E5%81%87%E8%AE%BE%E6%B3%95.html">看动画</a><a class="chip quiet" href="demos/%E9%B8%A1%E5%85%94%E5%90%8C%E7%AC%BC-%E5%81%87%E8%AE%BE%E6%B3%95.mp4">mp4</a>
+  </div>
+</article>
+
+<article class="tile" style="--ink:#0f766e;--paper:#e6f7f4">
+  <a class="tile-main" href="https://smileyes.gitbook.io/smileyes-docs/zhi-shi-dian/jian-dan-tui-li">
+    <div class="tile-mark">图形代表数</div>
+    <h3>图形推理</h3>
+    <p class="motto">两个算式摆一起，划掉一样多的，剩下的就露出来。</p>
+  </a>
+  <div class="tile-foot">
+    <a class="chip" href="https://smileyes.gitbook.io/smileyes-docs/li-ti/tu-xing-suan-shi">图形算式</a>
+    
+  </div>
+</article>
   </div>
 
-  <footer>完整母题地图在 GitBook 上：认出题 → 看骨架 → 换一身衣服。</footer>
+  <div class="how">
+    <b>怎么陪孩子用：</b>让他先猜这是哪道母题 → 有动画就看一遍 → 把口诀念出来 → 合上页面自己写算式 → 再换一身衣服讲给你听。
+  </div>
 
+  <footer>
+    讲解在 <a href="https://smileyes.gitbook.io/smileyes-docs">GitBook</a>，动画在这一页。加新课之后跑 <code>npm run index</code>。
+  </footer>
 </div>
-
-<script>
-// GitHub Pages 会把 .md 当文件下载，所以在 github.io 上把这些链接改指到
-// 仓库的 Markdown 渲染页。本地直接双击打开时保持相对路径不动。
-(function () {
-  const host = location.hostname;
-  if (!host.endsWith('.github.io')) return;
-
-  const user = host.replace('.github.io', '');
-  // 项目站点是 /<仓库名>/...，用户主站点（user.github.io）的仓库名就是域名本身
-  const repo = location.pathname.split('/').filter(Boolean)[0] || host;
-
-  const base = 'https://github.com/' + user + '/' + repo + '/blob/main/';
-  document.querySelectorAll('a[href$=".md"]').forEach(function (a) {
-    a.href = base + a.getAttribute('href');
-    a.target = '_blank';
-    a.rel = 'noopener';
-  });
-})();
-
-// 「下载 mp4」不能用嵌套的 <a>，所以做成点击拦截
-document.querySelectorAll('[data-mp4]').forEach(function (el) {
-  el.addEventListener('click', function (e) {
-    e.preventDefault();
-    e.stopPropagation();
-    window.open(el.getAttribute('data-mp4'), '_blank');
-  });
-});
-</script>
 </body>
 </html>

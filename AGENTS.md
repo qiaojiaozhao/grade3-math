@@ -82,6 +82,8 @@ npm run index    # 重新生成 GitHub Pages 落地页
 npm run check    # 查所有内部链接
 ```
 
+落地页是母题地图。新母题还要在 `tools/build-index.mjs` 的 `MOTIFS` 里加一行（名字、GitBook 路径、配色、挂哪段动画），再跑 `npm run index`。
+
 再手工把新页面加进这三个手写文件（`npm run index` 不会动它们）：
 
 - `docs/SUMMARY.md` —— GitBook 侧栏，按母题分组
