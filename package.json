@@ -1,0 +1,19 @@
+{
+  "name": "grade3-math",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "三年级奥数知识站：每个知识点配一句口诀，每道例题配一个互动动画",
+  "scripts": {
+    "check": "node tools/check-links.mjs",
+    "index": "node tools/build-index.mjs",
+    "shoot": "node tools/shoot.mjs",
+    "record": "node tools/record.mjs",
+    "pdf": "node tools/pdf2png.mjs",
+    "setup": "npm install && npx playwright install chromium"
+  },
+  "devDependencies": {
+    "mupdf": "^1.28.1",
+    "playwright": "^1.63.0"
+  }
+}

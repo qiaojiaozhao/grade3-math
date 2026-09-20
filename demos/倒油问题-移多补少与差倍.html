@@ -4,81 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>倒油问题 · 动态演示</title>
+<meta name="description" content="小油壶在两桶之间来回搬油。看甲多出来的那截怎么裂成两块 15，再看甲桶怎么一层层亮成 4 份。">
+<link rel="stylesheet" href="lib/anim.css">
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  /* 这道题专有的东西：两只桶、油面、小油壶、油滴、分层、参考线、色块。
+     页面外壳、旁白气泡、播放控件都在 lib/anim.css 里。 */
   :root {
     --oil-a: #f4a025;
     --oil-a-deep: #d97a0b;
     --oil-b: #3ea0e8;
     --oil-b-deep: #1b74c4;
     --wood: #8b6946;
-  }
-  body {
-    font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-    background: radial-gradient(ellipse at top, #fff6e0 0%, #e7f3ff 55%, #d7ebff 100%);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 16px 12px 36px;
-    color: #333;
-  }
-  h1 { font-size: 24px; color: #1f5f9e; margin-bottom: 8px; letter-spacing: .5px; }
-  .problem {
-    max-width: 860px;
-    background: #fff;
-    border-radius: 14px;
-    padding: 10px 18px;
-    font-size: 16px;
-    line-height: 1.75;
-    box-shadow: 0 3px 12px rgba(0,0,0,.08);
-    margin-bottom: 12px;
-  }
-  .problem b { color: #e0662c; }
-
-  .stage-wrap {
-    width: 860px;
-    max-width: 96vw;
-    background: #fff;
-    border-radius: 20px;
-    box-shadow: 0 10px 28px rgba(40,70,110,.12);
-    overflow: hidden;
-    position: relative;
-  }
-  .stage {
-    position: relative;
-    height: 500px;
-    /* 桌沿锚定在距底部 129px～110px。桶和油面都按 bottom 定位，
-       所以加高 stage 只会在顶部多出留白，留给旁白气泡，不会移动桌面。 */
-    background:
-      linear-gradient(#0000 0 calc(100% - 129px), #e8d7b0 calc(100% - 129px) calc(100% - 110px), #d4be8a calc(100% - 110px)),
-      linear-gradient(180deg, #f7fbff 0%, #eef6ff 100%);
-  }
-  .speech {
-    position: absolute;
-    left: 18px; right: 18px; top: 12px;
-    /* 按两行文字预留高度：旁白最长就是两行，固定住才不会忽高忽低压到桶顶 */
-    min-height: 78px;
-    box-sizing: border-box;
-    background: #fff;
-    border-radius: 14px;
-    padding: 10px 16px;
-    font-size: 18px;
-    line-height: 1.6;
-    box-shadow: 0 4px 14px rgba(0,0,0,.08);
-    z-index: 8;
-    border-left: 6px solid #2c6fb3;
-  }
-  .speech b { color: #e0662c; }
-  .speech .tag {
-    display: inline-block;
-    background: #2c6fb3;
-    color: #fff;
-    font-size: 13px;
-    padding: 1px 8px;
-    border-radius: 999px;
-    margin-right: 8px;
-    vertical-align: 2px;
   }
 
   .barrel {
@@ -92,8 +28,6 @@
   }
   #barrelA { left: 118px; }
   #barrelB { right: 118px; }
-  .barrel.tilt-right { transform: rotate(17deg); }
-  .barrel.tilt-left  { transform: rotate(-17deg); }
   .barrel .name {
     position: absolute; top: -34px; left: 50%; transform: translateX(-50%);
     font-size: 22px; font-weight: 800; color: #6b4f2d; white-space: nowrap;
@@ -129,6 +63,7 @@
     opacity: .55;
   }
   @keyframes wave { to { transform: translateX(28px); } }
+
   .amount {
     position: absolute; left: 50%; transform: translateX(-50%);
     font-size: 22px; font-weight: 800; color: #fff;
@@ -138,9 +73,10 @@
     z-index: 4;
   }
 
+  /* 横着的参考线，用来标出「乙的油面在这个高度」 */
   .guide {
     position: absolute;
-    left: 118px; width: 624px;
+    left: 118px; right: 118px;
     border-top: 2px dashed #c0392b88;
     z-index: 3;
     opacity: 0;
@@ -153,6 +89,7 @@
     font-size: 14px; color: #c0392b; font-weight: 700; white-space: nowrap;
   }
 
+  /* 把「多出来的那一截」拆成两块，其中一块会飞去补给乙 */
   .chunk {
     position: absolute;
     width: 118px;
@@ -175,11 +112,8 @@
   .chunk.fly {
     transition: left 1.2s cubic-bezier(.35,.1,.25,1), bottom 1.2s cubic-bezier(.2,1.5,.3,1);
   }
-  .guide {
-    width: auto;
-    right: 118px;
-  }
 
+  /* 搬油的小油壶 */
   .jug {
     position: absolute;
     width: 92px; height: 92px;
@@ -233,6 +167,7 @@
     100% { opacity: 0; transform: translateY(70px) scale(.6); }
   }
 
+  /* 把甲桶的油切成等高的若干份，一层层亮起来 */
   .layers {
     position: absolute; left: 124px; width: 136px;
     display: flex; flex-direction: column-reverse;
@@ -252,42 +187,9 @@
   }
   .layers .layer.show {
     opacity: 1;
-    transform: scaleX(1);
     transition: opacity .35s, transform .45s cubic-bezier(.2,1.4,.3,1);
+    transform: scaleX(1);
   }
-
-  .spark {
-    position: absolute; left: 50%; top: 210px; transform: translateX(-50%);
-    font-size: 28px; font-weight: 800; color: #c0392b;
-    opacity: 0; z-index: 7; pointer-events: none; white-space: nowrap;
-    text-shadow: 0 2px 0 #fff;
-  }
-  .spark.pop { animation: pop 1.6s ease-out forwards; }
-  @keyframes pop {
-    0% { opacity: 0; transform: translateX(-50%) scale(.6) translateY(10px); }
-    20% { opacity: 1; transform: translateX(-50%) scale(1.12) translateY(0); }
-    80% { opacity: 1; }
-    100% { opacity: 0; transform: translateX(-50%) scale(1) translateY(-18px); }
-  }
-
-  .controls {
-    margin-top: 14px;
-    display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
-  }
-  button {
-    font-size: 17px; font-weight: 800;
-    padding: 10px 22px; border: none; border-radius: 999px;
-    cursor: pointer; box-shadow: 0 3px 8px #0002;
-  }
-  button:active { transform: scale(.96); }
-  button:disabled { opacity: .4; cursor: not-allowed; }
-  #playBtn { background: #e0662c; color: #fff; }
-  #nextBtn { background: #2c6fb3; color: #fff; }
-  #prevBtn, #replayBtn { background: #eef2f6; color: #445; }
-  .dots { margin-top: 10px; display: flex; gap: 7px; }
-  .dot { width: 10px; height: 10px; border-radius: 50%; background: #c5ced6; }
-  .dot.on { background: #2c6fb3; }
-  .hint { margin-top: 8px; font-size: 13px; color: #6a7a88; }
 </style>
 </head>
 <body>
@@ -300,13 +202,11 @@
 </div>
 
 <div class="stage-wrap">
-  <div class="stage" id="stage">
-    <div class="speech" id="speech"><span class="tag">开始</span>两桶都有油。甲看起来比乙多一点点。我们先<b>看油怎么倒</b>，再找秘密。</div>
+  <div class="stage has-table" id="stage">
     <div class="guide" id="guide"><span></span></div>
     <div class="chunk" id="chunkStay"></div>
     <div class="chunk" id="chunkMove"></div>
     <div class="layers" id="layers"></div>
-    <div class="spark" id="spark"></div>
 
     <div class="barrel" id="barrelA">
       <div class="name">甲桶</div>
@@ -316,6 +216,7 @@
       </div>
     </div>
     <div class="amount" id="amtA">?</div>
+
     <div class="barrel" id="barrelB">
       <div class="name">乙桶</div>
       <div class="rim"></div>
@@ -336,58 +237,42 @@
   </div>
 </div>
 
-<div class="controls">
-  <button id="playBtn">▶ 自动播放整段动画</button>
-  <button id="prevBtn">← 上一段</button>
-  <button id="replayBtn">重播这一段</button>
-  <button id="nextBtn">下一段 →</button>
-</div>
-<div class="dots" id="dots"></div>
-<div class="hint">建议先点「自动播放」看完整动画片，再一段一段回看。</div>
-
+<script src="lib/anim.js"></script>
 <script>
-const SCALE = 1.42;
-const TABLE = 86;
-const JAR_H = 270;
+const { sleep, cancelled, tween, lerp, say, pop } = Anim;
+
+const SCALE = 1.42;   // 1 千克画多少像素
+const TABLE = 86;     // 桶底距舞台底部
 const A_LEFT = 118;
 function bLeft() { return Math.max(stage.clientWidth - 118 - 148, 360); }
+
+const stage = document.getElementById('stage');
 const oilA = document.getElementById('oilA');
 const oilB = document.getElementById('oilB');
 const amtA = document.getElementById('amtA');
 const amtB = document.getElementById('amtB');
 const barrelA = document.getElementById('barrelA');
 const barrelB = document.getElementById('barrelB');
-const speech = document.getElementById('speech');
 const guide = document.getElementById('guide');
 const chunkStay = document.getElementById('chunkStay');
 const chunkMove = document.getElementById('chunkMove');
 const layers = document.getElementById('layers');
-const spark = document.getElementById('spark');
 const jug = document.getElementById('jug');
 const jugOil = document.getElementById('jugOil');
 const jugLabel = document.getElementById('jugLabel');
-const stage = document.getElementById('stage');
-let jugX = 0, jugY = 0, jugTilt = 0;
 
 let kgA = 120, kgB = 90;
 let showNum = false;
-let token = 0;
-let autoPlaying = false;
-
-function sleep(ms) {
-  return new Promise(r => setTimeout(r, ms));
-}
-function cancelled(id) { return id !== token; }
-function ease(t) { return t < .5 ? 2*t*t : 1 - Math.pow(-2*t+2, 2)/2; }
-function lerp(a, b, t) { return a + (b - a) * t; }
+let jugX = 0, jugY = 0, jugTilt = 0;
 
 function oilBottom(kg) { return TABLE + kg * SCALE; }
+
 function setOilInstant(a, b) {
   kgA = a; kgB = b;
   oilA.style.height = (a * SCALE) + 'px';
   oilB.style.height = (b * SCALE) + 'px';
   const place = (el, kg, left) => {
-    el.textContent = showNum ? kg.toFixed(0) + '千克' : (kg ? '?' : '?');
+    el.textContent = showNum ? kg.toFixed(0) + '千克' : '?';
     el.style.left = (left + 74) + 'px';
     el.style.bottom = (TABLE + Math.max(kg * SCALE - 28, 18)) + 'px';
   };
@@ -397,27 +282,9 @@ function setOilInstant(a, b) {
 
 async function tweenOil(a1, b1, ms, id) {
   const a0 = kgA, b0 = kgB;
-  const t0 = performance.now();
-  return new Promise(resolve => {
-    function frame(now) {
-      if (cancelled(id)) return resolve();
-      const t = Math.min(1, (now - t0) / ms);
-      setOilInstant(lerp(a0, a1, ease(t)), lerp(b0, b1, ease(t)));
-      if (t < 1) requestAnimationFrame(frame); else resolve();
-    }
-    requestAnimationFrame(frame);
-  });
+  await tween(ms, id, (e) => setOilInstant(lerp(a0, a1, e), lerp(b0, b1, e)));
 }
 
-function say(tag, html) {
-  speech.innerHTML = '<span class="tag">' + tag + '</span>' + html;
-}
-function pop(text) {
-  spark.textContent = text;
-  spark.classList.remove('pop');
-  void spark.offsetWidth;
-  spark.classList.add('pop');
-}
 function hideChunks() {
   chunkStay.className = 'chunk';
   chunkMove.className = 'chunk';
@@ -431,37 +298,27 @@ function showGuide(kg, text) {
   guide.classList.add('show');
 }
 function hideLayers() { layers.innerHTML = ''; }
+
 function hideJug() {
   jug.classList.remove('show');
   jugOil.style.height = '0';
   jug.style.transform = 'rotate(0deg)';
   jugTilt = 0;
 }
-
 function placeJug(x, y, tilt) {
   jugX = x; jugY = y; jugTilt = tilt;
   jug.style.left = x + 'px';
   jug.style.bottom = y + 'px';
   jug.style.transform = 'rotate(' + tilt + 'deg)';
 }
-
 async function moveJug(x1, y1, tilt, ms, id) {
-  const x0 = jugX, y0 = jugY, t0ang = jugTilt;
-  const t0 = performance.now();
-  return new Promise(resolve => {
-    function frame(now) {
-      if (cancelled(id)) return resolve();
-      const t = Math.min(1, (now - t0) / ms);
-      const e = ease(t);
-      const lift = Math.sin(Math.PI * e) * 70;
-      placeJug(lerp(x0, x1, e), lerp(y0, y1, e) + lift, lerp(t0ang, tilt, e));
-      if (t < 1) requestAnimationFrame(frame); else resolve();
-    }
-    requestAnimationFrame(frame);
+  const x0 = jugX, y0 = jugY, a0 = jugTilt;
+  await tween(ms, id, (e) => {
+    const lift = Math.sin(Math.PI * e) * 70;  // 走一条拱形，像真的拎起来搬
+    placeJug(lerp(x0, x1, e), lerp(y0, y1, e) + lift, lerp(a0, tilt, e));
   });
 }
-
-function dripFromJug(color, id) {
+function dripFromJug(color) {
   const d = document.createElement('div');
   d.className = 'drop go';
   d.style.background = color;
@@ -471,6 +328,7 @@ function dripFromJug(color, id) {
   setTimeout(() => d.remove(), 750);
 }
 
+/** 完整搬一次油：舀起来 → 拎过去 → 倒下去 */
 async function pour(fromA, amount, id) {
   const color = fromA ? '#f4a025' : '#3ea0e8';
   const srcLeft = fromA ? A_LEFT : bLeft();
@@ -499,7 +357,7 @@ async function pour(fromA, amount, id) {
 
   for (let i = 0; i < 8; i++) {
     if (cancelled(id)) return;
-    dripFromJug(color, id);
+    dripFromJug(color);
     await sleep(120);
   }
   jugOil.style.height = '0';
@@ -509,23 +367,22 @@ async function pour(fromA, amount, id) {
   hideJug();
 }
 
+/** 每一幕开始前由引擎调用，把上一幕的残留清干净 */
 function resetVisuals() {
+  showNum = false;
   hideChunks();
   hideGuide();
   hideLayers();
   hideJug();
-  document.querySelectorAll('.drop').forEach(el => el.remove());
+  stage.querySelectorAll('.drop').forEach((el) => el.remove());
   barrelA.classList.remove('tilt-right', 'tilt-left');
   barrelB.classList.remove('tilt-right', 'tilt-left');
-  spark.classList.remove('pop');
 }
 
-const scenes = [
+Anim.run([
   {
     title: '原来的样子',
     async play(id) {
-      showNum = false;
-      resetVisuals();
       setOilInstant(120, 90);
       say('原来', '两个桶里都有油，但<b>先不看数字</b>。仔细看：甲桶的油面，比乙桶<b>高一截</b>。');
       await sleep(700);
@@ -536,8 +393,6 @@ const scenes = [
   {
     title: '甲倒给乙 15 千克',
     async play(id) {
-      showNum = false;
-      resetVisuals();
       setOilInstant(120, 90);
       say('线索一', '甲桶往乙桶<b>倒 15 千克</b>。看！油真的从甲流到乙，两桶慢慢变成一样高。');
       await pour(true, 15, id);
@@ -549,8 +404,6 @@ const scenes = [
   {
     title: '秘密：为什么差是 15×2',
     async play(id) {
-      showNum = false;
-      resetVisuals();
       setOilInstant(120, 90);
       say('倒回去看', '把油倒回去。甲比乙多出来的那一截，其实是<b>两块 15 千克</b>。');
       await sleep(500);
@@ -584,8 +437,6 @@ const scenes = [
   {
     title: '乙倒给甲 48 千克',
     async play(id) {
-      showNum = false;
-      resetVisuals();
       setOilInstant(120, 90);
       say('线索二', '这次反过来：乙往甲<b>倒 48 千克</b>。甲会涨得很高，乙会变得很少。');
       await sleep(400);
@@ -599,8 +450,6 @@ const scenes = [
   {
     title: '把甲拆成 4 份',
     async play(id) {
-      showNum = false;
-      resetVisuals();
       setOilInstant(168, 42);
       say('差倍', '把乙现在的油看成 <b>1 份</b>。甲刚好能拆成<b>同样高的 4 份</b>。看它们一层一层亮起来。');
       showGuide(42, '1 份这么高');
@@ -626,8 +475,6 @@ const scenes = [
   {
     title: '把 48 还给乙',
     async play(id) {
-      showNum = false;
-      resetVisuals();
       setOilInstant(168, 42);
       say('倒推', '乙现在只剩 42，是因为它刚才送走了 48。把 48 <b>倒回去</b>，就是原来的乙。');
       await pour(true, 48, id);
@@ -642,7 +489,6 @@ const scenes = [
     title: '验算两遍',
     async play(id) {
       showNum = true;
-      resetVisuals();
       setOilInstant(120, 90);
       say('验算 ①', '甲倒 15 给乙：120−15=105，90+15=105。看它们会不会对齐。');
       await sleep(500);
@@ -652,6 +498,7 @@ const scenes = [
       pop('105 = 105 ✓');
       await sleep(900);
       if (cancelled(id)) return;
+
       setOilInstant(120, 90);
       say('验算 ②', '乙倒 48 给甲：120+48=168，90−48=42。168 是不是 42 的 4 倍？');
       await pour(false, 48, id);
@@ -670,58 +517,7 @@ const scenes = [
       say('答案', '<b>甲桶原有油 120 千克</b>，乙桶原有 90 千克。可以再点自动播放复习一遍。');
     }
   }
-];
-
-let cur = 0;
-const dotsBox = document.getElementById('dots');
-scenes.forEach(() => {
-  const d = document.createElement('div');
-  d.className = 'dot';
-  dotsBox.appendChild(d);
-});
-
-function paintDots() {
-  [...dotsBox.children].forEach((d, i) => d.classList.toggle('on', i === cur));
-  document.getElementById('prevBtn').disabled = cur === 0 || autoPlaying;
-  document.getElementById('nextBtn').disabled = cur === scenes.length - 1 || autoPlaying;
-  document.getElementById('replayBtn').disabled = autoPlaying;
-  document.getElementById('playBtn').disabled = false;
-}
-
-async function runScene(i) {
-  cur = i;
-  paintDots();
-  const id = ++token;
-  await scenes[i].play(id);
-}
-
-async function playAll() {
-  if (autoPlaying) {
-    autoPlaying = false;
-    token++;
-    document.getElementById('playBtn').textContent = '▶ 自动播放整段动画';
-    paintDots();
-    return;
-  }
-  autoPlaying = true;
-  document.getElementById('playBtn').textContent = '❚❚ 停止';
-  for (let i = 0; i < scenes.length; i++) {
-    if (!autoPlaying) break;
-    await runScene(i);
-    if (!autoPlaying) break;
-    await sleep(900);
-  }
-  autoPlaying = false;
-  document.getElementById('playBtn').textContent = '▶ 自动播放整段动画';
-  paintDots();
-}
-
-document.getElementById('playBtn').onclick = playAll;
-document.getElementById('nextBtn').onclick = () => { if (cur < scenes.length - 1) runScene(cur + 1); };
-document.getElementById('prevBtn').onclick = () => { if (cur > 0) runScene(cur - 1); };
-document.getElementById('replayBtn').onclick = () => runScene(cur);
-
-runScene(0);
+], { reset: resetVisuals });
 </script>
 </body>
 </html>

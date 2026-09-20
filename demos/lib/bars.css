@@ -1,0 +1,122 @@
+/* 条形对比组件的样式。配套 bars.js。
+   和差、和倍、差倍、平均数、盈亏这类题都能用它表达：
+   每个量画一根条，高矮就是大小，一眼看出谁多谁少、多多少。 */
+
+.bars {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.bar {
+  position: absolute;
+  /* 默认 86px：和 .stage.has-table 的桌沿对齐，条形看起来是站在桌面上的 */
+  bottom: var(--bars-base, 86px);
+  width: var(--bars-w, 110px);
+}
+
+.bar-fill {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 0;
+  border-radius: 10px 10px 3px 3px;
+  box-shadow: inset -6px 0 12px #0002, 0 2px 6px #0003;
+}
+
+/* 条顶的小高光，让它看起来是立体的一根，不是一块色块 */
+.bar-fill::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  height: 6px;
+  background: #ffffff55;
+  border-radius: 10px 10px 0 0;
+}
+
+.bar-name {
+  position: absolute;
+  bottom: -32px; left: 50%;
+  transform: translateX(-50%);
+  font-size: 20px;
+  font-weight: 800;
+  color: #6b4f2d;
+  white-space: nowrap;
+}
+
+.bar-value {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 20px;
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 0 2px 6px #0006;
+  white-space: nowrap;
+  z-index: 4;
+}
+
+/* 横向参考线：用来标「另一根的高度在这儿」 */
+.bar-guide {
+  position: absolute;
+  left: 24px; right: 24px;
+  border-top: 2px dashed #c0392b88;
+  opacity: 0;
+  transition: opacity .4s, bottom .6s;
+  z-index: 3;
+}
+.bar-guide.show { opacity: 1; }
+.bar-guide span {
+  position: absolute; right: 12px; top: -25px;
+  font-size: 14px; font-weight: 700; color: #c0392b;
+  white-space: nowrap;
+}
+
+/* 把一根条切成等高的若干份，一份一份亮起来 */
+.bar-segs {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  display: flex;
+  flex-direction: column-reverse;
+  z-index: 5;
+}
+.bar-seg {
+  border-top: 2px dashed #fff9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+  text-shadow: 0 1px 3px #0006;
+  opacity: 0;
+  transform: scaleX(.4);
+}
+.bar-seg.show {
+  opacity: 1;
+  transform: scaleX(1);
+  transition: opacity .35s, transform .45s cubic-bezier(.2, 1.4, .3, 1);
+}
+
+/* 差值括号：标出两根条之间差了多少 */
+.bar-diff {
+  position: absolute;
+  border: 3px solid #c0392b;
+  border-left: none;
+  border-radius: 0 10px 10px 0;
+  opacity: 0;
+  transition: opacity .4s;
+  z-index: 6;
+}
+.bar-diff.show { opacity: 1; }
+.bar-diff span {
+  position: absolute;
+  left: 12px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 17px;
+  font-weight: 800;
+  color: #c0392b;
+  white-space: nowrap;
+  background: #ffffffcc;
+  padding: 1px 6px;
+  border-radius: 6px;
+}

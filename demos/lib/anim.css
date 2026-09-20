@@ -1,0 +1,149 @@
+/* 动画通用外壳：页面排版、旁白气泡、强调文字、播放控件。
+   每个动画只需要自己写「舞台里的东西」，这一层不用碰。
+   配套 anim.js，两个文件一起改。 */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --ink: #333;
+  --ink-soft: #6a7a88;
+  --brand: #2c6fb3;
+  --accent: #e0662c;
+  --stage-h: 500px;
+  /* 桌沿：距舞台底部多少像素。has-table 才用得上 */
+  --table-edge: 129px;
+  --table-face: 110px;
+}
+
+body {
+  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  background: radial-gradient(ellipse at top, #fff6e0 0%, #e7f3ff 55%, #d7ebff 100%);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 12px 36px;
+  color: var(--ink);
+}
+
+h1 {
+  font-size: 24px;
+  color: #1f5f9e;
+  margin-bottom: 8px;
+  letter-spacing: .5px;
+  text-align: center;
+}
+
+.problem {
+  max-width: 860px;
+  background: #fff;
+  border-radius: 14px;
+  padding: 10px 18px;
+  font-size: 16px;
+  line-height: 1.75;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, .08);
+  margin-bottom: 12px;
+}
+.problem b { color: var(--accent); }
+
+.stage-wrap {
+  width: 860px;
+  max-width: 96vw;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 10px 28px rgba(40, 70, 110, .12);
+  overflow: hidden;
+  position: relative;
+}
+
+.stage {
+  position: relative;
+  height: var(--stage-h);
+  background: linear-gradient(180deg, #f7fbff 0%, #eef6ff 100%);
+}
+
+/* 需要「桌面」的场景加这个类。桌沿锚定在距底部固定像素处，
+   所以调高 --stage-h 只会在顶部多出留白，桌子和桌上的东西不会移动。 */
+.stage.has-table {
+  background:
+    linear-gradient(#0000 0 calc(100% - var(--table-edge)),
+                    #e8d7b0 calc(100% - var(--table-edge)) calc(100% - var(--table-face)),
+                    #d4be8a calc(100% - var(--table-face))),
+    linear-gradient(180deg, #f7fbff 0%, #eef6ff 100%);
+}
+
+/* 旁白气泡。高度按两行预留并固定，否则文字长短会让气泡忽高忽低，压到舞台里的东西。 */
+.speech {
+  position: absolute;
+  left: 18px; right: 18px; top: 12px;
+  min-height: 78px;
+  background: #fff;
+  border-radius: 14px;
+  padding: 10px 16px;
+  font-size: 18px;
+  line-height: 1.6;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .08);
+  z-index: 8;
+  border-left: 6px solid var(--brand);
+}
+.speech b { color: var(--accent); }
+.speech .tag {
+  display: inline-block;
+  background: var(--brand);
+  color: #fff;
+  font-size: 13px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  margin-right: 8px;
+  vertical-align: 2px;
+}
+
+/* 关键结论弹一下就消失，用来敲重点 */
+.spark {
+  position: absolute;
+  left: 50%; top: 210px;
+  transform: translateX(-50%);
+  font-size: 28px;
+  font-weight: 800;
+  color: #c0392b;
+  opacity: 0;
+  z-index: 7;
+  pointer-events: none;
+  white-space: nowrap;
+  text-shadow: 0 2px 0 #fff;
+}
+.spark.pop { animation: anim-pop 1.6s ease-out forwards; }
+@keyframes anim-pop {
+  0%   { opacity: 0; transform: translateX(-50%) scale(.6) translateY(10px); }
+  20%  { opacity: 1; transform: translateX(-50%) scale(1.12) translateY(0); }
+  80%  { opacity: 1; }
+  100% { opacity: 0; transform: translateX(-50%) scale(1) translateY(-18px); }
+}
+
+.controls {
+  margin-top: 14px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.controls button {
+  font-size: 17px;
+  font-weight: 800;
+  padding: 10px 22px;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  box-shadow: 0 3px 8px #0002;
+}
+.controls button:active { transform: scale(.96); }
+.controls button:disabled { opacity: .4; cursor: not-allowed; }
+#playBtn { background: var(--accent); color: #fff; }
+#nextBtn { background: var(--brand); color: #fff; }
+#prevBtn, #replayBtn { background: #eef2f6; color: #445; }
+
+.dots { margin-top: 10px; display: flex; gap: 7px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: #c5ced6; }
+.dot.on { background: var(--brand); }
+
+.hint { margin-top: 8px; font-size: 13px; color: var(--ink-soft); }

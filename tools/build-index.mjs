@@ -1,4 +1,92 @@
-<!DOCTYPE html>
+#!/usr/bin/env node
+/* 扫描仓库，重新生成 GitHub Pages 的落地页 index.html。
+ * 用法: npm run index
+ *
+ * 标题和摘要直接从文件里读，不用另外维护清单：
+ *   - demos/*.html  标题取 <h1>，摘要取 <meta name="description">
+ *   - 知识点/*.md    标题取 # 一级标题，摘要取「一句话口诀」那条引用
+ *   - 题目/*.md      标题取 # 一级标题，摘要取题面第一句
+ * 想自己写摘要，在文件顶部加一行 <!-- 摘要: ... --> 就会优先用它。
+ */
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+
+const readDir = (d) =>
+  fs.existsSync(path.join(ROOT, d))
+    ? fs.readdirSync(path.join(ROOT, d)).sort((a, b) => a.localeCompare(b, 'zh'))
+    : [];
+
+const esc = (s) =>
+  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+const clip = (s, n) => (s.length > n ? s.slice(0, n - 1) + '…' : s);
+
+function explicitSummary(text) {
+  const m = text.match(/<!--\s*摘要:\s*(.+?)\s*-->/);
+  return m ? m[1] : null;
+}
+
+function mdTitle(text, fallback) {
+  const m = text.match(/^#\s+(.+)$/m);
+  return m ? m[1].trim() : fallback;
+}
+
+/** 知识点页的摘要就是口诀：`> **倒过去 1 份，差距缩小 2 份。**` */
+function mdMotto(text) {
+  const m = text.match(/^>\s*\*\*(.+?)\*\*\s*$/m);
+  return m ? m[1].trim() : null;
+}
+
+/** 例题页的摘要取题面第一句，去掉 Markdown 记号 */
+function mdProblem(text) {
+  const block = text.split('\n').filter((l) => l.startsWith('> ') && !l.startsWith('> ```'));
+  const line = block.map((l) => l.slice(2).trim()).find((l) => l.length > 6);
+  if (!line) return null;
+  return clip(line.replace(/\*\*(.+?)\*\*/g, '$1').replace(/`/g, ''), 70);
+}
+
+const animations = readDir('demos')
+  .filter((f) => f.endsWith('.html'))
+  .map((f) => {
+    const text = fs.readFileSync(path.join(ROOT, 'demos', f), 'utf8');
+    const h1 = text.match(/<h1>([\s\S]*?)<\/h1>/);
+    const desc = text.match(/<meta\s+name="description"\s+content="(.*?)"/);
+    const mp4 = f.replace(/\.html$/, '.mp4');
+    return {
+      href: `demos/${f}`,
+      title: h1 ? h1[1].replace(/<[^>]+>/g, '').trim() : f.replace(/\.html$/, ''),
+      desc: desc ? desc[1] : '',
+      mp4: fs.existsSync(path.join(ROOT, 'demos', mp4)) ? `demos/${mp4}` : null,
+    };
+  });
+
+const collect = (dir, summarize) =>
+  readDir(dir)
+    .filter((f) => f.endsWith('.md'))
+    .map((f) => {
+      const text = fs.readFileSync(path.join(ROOT, dir, f), 'utf8');
+      return {
+        href: `${dir}/${f}`,
+        title: mdTitle(text, f.replace(/\.md$/, '')),
+        desc: explicitSummary(text) || summarize(text) || '',
+      };
+    });
+
+const points = collect('知识点', mdMotto);
+const problems = collect('题目', mdProblem);
+
+const card = (it, cls = '') =>
+  `  <a class="card${cls}" href="${esc(it.href)}">
+    <div class="t">${esc(it.title)}</div>
+    <div class="d">${esc(it.desc)}</div>${
+      it.mp4 ? `\n    <div class="m">也可以<span data-mp4="${esc(it.mp4)}">下载 mp4</span>直接发微信</div>` : ''
+    }
+  </a>`;
+
+const html = `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -75,37 +163,15 @@
   </header>
 
   <h2>互动动画</h2>
-  <a class="card play" href="demos/倒油问题-移多补少与差倍.html">
-    <div class="t">倒油问题：看油流过去</div>
-    <div class="d">小油壶在两桶之间来回搬油。看甲多出来的那截怎么裂成两块 15，再看甲桶怎么一层层亮成 4 份。</div>
-    <div class="m">也可以<span data-mp4="demos/倒油问题-移多补少与差倍.mp4">下载 mp4</span>直接发微信</div>
-  </a>
+${animations.map((a) => card(a, ' play')).join('\n')}
 
   <h2>知识点</h2>
   <div class="grid">
-  <a class="card" href="知识点/差倍问题.md">
-    <div class="t">差倍问题</div>
-    <div class="d">差 ÷ (倍数 − 1) = 1 份。</div>
-  </a>
-  <a class="card" href="知识点/简单推理.md">
-    <div class="t">简单推理</div>
-    <div class="d">两个算式摆一起，划掉一样多的，剩下的就露出来。</div>
-  </a>
-  <a class="card" href="知识点/移多补少.md">
-    <div class="t">移多补少</div>
-    <div class="d">倒过去 1 份，差距缩小 2 份。</div>
-  </a>
+${points.map((p) => card(p)).join('\n')}
   </div>
 
   <h2>例题</h2>
-  <a class="card" href="题目/倒油问题.md">
-    <div class="t">倒油问题</div>
-    <div class="d">有甲、乙两桶油。若从甲桶倒入乙桶 15 千克，则两桶油质量相等；若从乙桶倒入甲桶 48 千克，则甲桶油是乙桶油重量的 4 倍。甲桶原有油多…</div>
-  </a>
-  <a class="card" href="题目/图形算式.md">
-    <div class="t">图形算式</div>
-    <div class="d">下面算式中，△ 和 ○ 各代表多少？</div>
-  </a>
+${problems.map((p) => card(p)).join('\n')}
 
   <div class="tip">
     <b>怎么陪孩子用：</b>先让他读题自己想一分钟 → 点开动画看一遍 → 念一遍口诀 → 合上页面自己写算式 → 用例题页末尾的验算对答案。<br>
@@ -146,3 +212,9 @@ document.querySelectorAll('[data-mp4]').forEach(function (el) {
 </script>
 </body>
 </html>
+`;
+
+fs.writeFileSync(path.join(ROOT, 'index.html'), html);
+console.log(
+  `✓ index.html 已生成：${animations.length} 个动画、${points.length} 个知识点、${problems.length} 道例题`
+);

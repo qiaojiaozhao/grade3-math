@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>【题目名】· 动态演示</title>
+<meta name="description" content="【一句话说清动画里孩子能看见什么，会显示在首页卡片上】">
+<!-- 复制这个文件到 demos/，改名成「题目名-知识点.html」，然后把两处 ../demos/ 改成 lib/ -->
+<link rel="stylesheet" href="../demos/lib/anim.css">
+<link rel="stylesheet" href="../demos/lib/bars.css">
+</head>
+<body>
+
+<h1>【题目名】：【一句话说清这个动画要让孩子看见什么】</h1>
+<div class="problem">
+  【把题面抄在这里，关键数字用 <b>15</b> 这样标红】
+</div>
+
+<div class="stage-wrap">
+  <div class="stage has-table" id="stage">
+    <!-- 条形由 bars.js 生成。如果这道题不适合用条形，
+         就删掉 bars 的两个引用，自己在这里写元素，参考 demos/倒油问题-移多补少与差倍.html -->
+  </div>
+</div>
+
+<script src="../demos/lib/anim.js"></script>
+<script src="../demos/lib/bars.js"></script>
+<script>
+const { sleep, cancelled, say, pop } = Anim;
+
+const bars = Bars.create({
+  items: [
+    { name: '甲', color: '#f4a025' },
+    { name: '乙', color: '#3ea0e8' },
+  ],
+  // 1 个单位画多少像素。用「最大的量 × scale ≤ 290」来定，
+  // 再高就会顶到旁白气泡（npm run shoot 会报出来）。这里最大 168，168×1.7≈286。
+  scale: 1.7,
+  unit: '千克',
+});
+
+// 每一幕开始前由引擎自动调用，把上一幕的痕迹清掉
+function resetVisuals() {
+  bars.reset();
+}
+
+Anim.run([
+  {
+    title: '原来的样子',
+    async play(id) {
+      bars.set([120, 90]);
+      say('原来', '先<b>不看数字</b>，只看高矮：甲比乙高一截。');
+      await sleep(700);
+      if (cancelled(id)) return;
+      bars.guide(90, '乙的高度在这儿');
+      await sleep(600);
+      if (cancelled(id)) return;
+      bars.diff(0, 1, '多出这一截');
+    }
+  },
+  {
+    title: '发生了什么',
+    async play(id) {
+      bars.set([120, 90]);
+      say('线索', '【描述题目里的第一个条件，让画面动起来】');
+      await bars.tween([105, 105], 900, id);
+      if (cancelled(id)) return;
+      bars.guide(105, '现在一样高了');
+      pop('两边相等！');
+    }
+  },
+  {
+    title: '拆成几份',
+    async play(id) {
+      bars.set([168, 42]);
+      say('差倍', '把乙看成 <b>1 份</b>，甲正好是<b>同样高的 4 份</b>。');
+      bars.guide(42, '1 份这么高');
+      await bars.split(0, 4, ' 份', id);
+      if (cancelled(id)) return;
+      pop('3 份 = 126 → 1 份 = 42');
+    }
+  },
+  {
+    title: '答案',
+    async play(id) {
+      bars.set([120, 90]);
+      bars.showNumbers(true);
+      say('答案', '<b>甲 120 千克</b>，乙 90 千克。可以再点自动播放复习一遍。');
+      await sleep(300);
+      if (cancelled(id)) return;
+      pop('甲 120，乙 90');
+    }
+  },
+], { reset: resetVisuals });
+</script>
+</body>
+</html>
