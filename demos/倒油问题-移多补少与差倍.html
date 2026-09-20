@@ -47,15 +47,19 @@
   }
   .stage {
     position: relative;
-    height: 460px;
+    height: 500px;
+    /* 桌沿锚定在距底部 129px～110px。桶和油面都按 bottom 定位，
+       所以加高 stage 只会在顶部多出留白，留给旁白气泡，不会移动桌面。 */
     background:
-      linear-gradient(#0000 0 72%, #e8d7b0 72% 76%, #d4be8a 76%),
+      linear-gradient(#0000 0 calc(100% - 129px), #e8d7b0 calc(100% - 129px) calc(100% - 110px), #d4be8a calc(100% - 110px)),
       linear-gradient(180deg, #f7fbff 0%, #eef6ff 100%);
   }
   .speech {
     position: absolute;
     left: 18px; right: 18px; top: 12px;
-    min-height: 52px;
+    /* 按两行文字预留高度：旁白最长就是两行，固定住才不会忽高忽低压到桶顶 */
+    min-height: 78px;
+    box-sizing: border-box;
     background: #fff;
     border-radius: 14px;
     padding: 10px 16px;
@@ -653,7 +657,17 @@ const scenes = [
       await pour(false, 48, id);
       if (cancelled(id)) return;
       pop('42 × 4 = 168 ✓');
-      say('完成', '两条线索都对上了！<b>甲桶原有油 120 千克。</b>可以再点自动播放复习一遍。');
+      await sleep(1200);
+      if (cancelled(id)) return;
+
+      // 收尾要定格在「原来」的样子，否则画面停在验算态的 168/42，和答案对不上
+      say('倒回去', '两条线索都对上了。把这 48 倒回去，就回到两桶<b>原来</b>的样子。');
+      await tweenOil(120, 90, 800, id);
+      if (cancelled(id)) return;
+      await sleep(400);
+      if (cancelled(id)) return;
+      pop('甲 120，乙 90');
+      say('答案', '<b>甲桶原有油 120 千克</b>，乙桶原有 90 千克。可以再点自动播放复习一遍。');
     }
   }
 ];
