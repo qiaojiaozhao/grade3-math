@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>联欢会握手 · 动态演示</title>
+<meta name="description" content="最后一个女生握了 7 个手，那不是男生人数。从 7 数到全部，两头都算上，再和 50 收口。">
+<link rel="stylesheet" href="lib/anim.css">
+<style>
+  :root {
+    --boy: #3d8bd8;
+    --boy-deep: #1f5f9e;
+    --girl: #e36b8a;
+    --girl-deep: #b43d5c;
+  }
+
+  .cast {
+    position: absolute;
+    left: 40px; right: 40px; top: 118px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 72px;
+    padding: 8px 14px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 3px 12px #0001;
+    transition: opacity .35s, transform .35s;
+  }
+  .row.dim { opacity: .22; }
+  .row.gone { opacity: 0; pointer-events: none; }
+
+  .who {
+    flex: none;
+    width: 86px;
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--girl-deep);
+    line-height: 1.25;
+  }
+
+  .hands {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 44px;
+  }
+
+  .kid {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    position: relative;
+    animation: breathe 2.6s ease-in-out infinite;
+  }
+  .kid:nth-child(2) { animation-delay: .15s; }
+  .kid:nth-child(3) { animation-delay: .3s; }
+  .kid:nth-child(4) { animation-delay: .45s; }
+  .kid:nth-child(5) { animation-delay: .2s; }
+  .kid:nth-child(6) { animation-delay: .35s; }
+  .kid:nth-child(7) { animation-delay: .5s; }
+  @keyframes breathe {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-2px); }
+  }
+  .kid.boy {
+    background: radial-gradient(circle at 32% 28%, #8ec6f5, var(--boy) 58%, var(--boy-deep));
+    box-shadow: 0 2px 0 var(--boy-deep);
+  }
+  .kid.miss {
+    opacity: .18;
+    animation: none;
+  }
+  .kid.miss::after {
+    content: '';
+    position: absolute;
+    left: 3px; right: 3px; top: 50%;
+    height: 3px;
+    background: #c0392b;
+    border-radius: 2px;
+    transform: rotate(-28deg);
+  }
+  .kid.keep {
+    animation: none;
+    box-shadow: 0 0 0 3px #e0662c55, 0 2px 0 var(--boy-deep);
+  }
+
+  .more {
+    color: #8aa0b3;
+    font-weight: 800;
+    letter-spacing: 2px;
+    font-size: 18px;
+  }
+
+  .all-bar {
+    height: 28px;
+    flex: 1;
+    max-width: 320px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #8ec6f5, var(--boy));
+    box-shadow: 0 2px 0 var(--boy-deep);
+    position: relative;
+  }
+  .all-bar span {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-size: 14px;
+    font-weight: 800;
+    color: #fff;
+    text-shadow: 0 1px 0 #0003;
+  }
+
+  .count {
+    flex: none;
+    min-width: 52px;
+    text-align: center;
+    font-size: 22px;
+    font-weight: 800;
+    color: #1f5f9e;
+  }
+  .count.hot { color: #e0662c; transform: scale(1.12); }
+  .count.ghost { opacity: .28; }
+
+  .path {
+    position: absolute;
+    left: 48px; right: 48px; top: 140px;
+    height: 88px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 3px 12px #0001;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 22px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .35s;
+  }
+  .path.show { opacity: 1; }
+
+  .post {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    width: 36px;
+  }
+  .post .stem {
+    width: 10px; height: 28px;
+    background: #3d8a4a;
+    border-radius: 3px 3px 0 0;
+  }
+  .post .crown {
+    width: 22px; height: 22px;
+    margin-bottom: -6px;
+    background: #5bb86a;
+    border-radius: 50%;
+  }
+  .post .lab {
+    font-size: 13px;
+    font-weight: 800;
+    color: #2f5a38;
+    white-space: nowrap;
+  }
+  .post.end .crown { background: #e0662c; }
+  .post.end .stem { background: #c05621; }
+  .post.end .lab { color: #c05621; }
+  .post.gap .stem, .post.gap .crown { opacity: .28; }
+  .post.gap .lab { color: #8aa0b3; }
+
+  .rail {
+    position: absolute;
+    left: 70px; right: 70px; top: 36px;
+    height: 4px;
+    background: #d7e6d9;
+    z-index: 0;
+  }
+
+  .formula {
+    position: absolute;
+    left: 50%; bottom: 28px;
+    transform: translateX(-50%) translateY(8px);
+    min-width: 320px;
+    text-align: center;
+    padding: 10px 22px;
+    background: #fff6d8;
+    border: 2px solid #e0a010;
+    border-radius: 16px;
+    font-size: 22px;
+    font-weight: 800;
+    color: #8a5a10;
+    box-shadow: 0 6px 16px #e0a01033;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .35s, transform .35s;
+  }
+  .formula.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  .formula b { color: #e0662c; }
+
+  .answer {
+    position: absolute;
+    left: 50%; bottom: 28px;
+    transform: translateX(-50%) translateY(8px);
+    min-width: 280px;
+    text-align: center;
+    padding: 12px 24px;
+    background: #e8f6ee;
+    border: 2px solid #2f7a5b;
+    border-radius: 16px;
+    font-size: 26px;
+    font-weight: 800;
+    color: #1f5a3d;
+    box-shadow: 0 6px 16px #2f7a5b33;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .35s, transform .35s;
+  }
+  .answer.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<h1>联欢会握手：7 不是男生人数</h1>
+<div class="problem">
+  50 人联欢。第一个女生和<b>全部男生</b>握手，下一个少 1 个，最后那个女生只握了 <b>7</b> 个。男生多少人？
+</div>
+
+<div class="stage-wrap">
+  <div class="stage" id="stage">
+    <div class="cast" id="cast">
+      <div class="row" id="rowFirst">
+        <div class="who">第 1 个<br>女生</div>
+        <div class="hands" id="handsFirst"></div>
+        <div class="count ghost" id="nFirst">?</div>
+      </div>
+      <div class="row" id="rowLast">
+        <div class="who">最后 1 个<br>女生</div>
+        <div class="hands" id="handsLast"></div>
+        <div class="count" id="nLast">7</div>
+      </div>
+    </div>
+    <div class="path" id="path">
+      <div class="rail"></div>
+    </div>
+    <div class="formula" id="formula">女生 = 男生 − 7 + 1 = <b>男生 − 6</b></div>
+    <div class="answer" id="answer">男生 28 人</div>
+  </div>
+</div>
+
+<script src="lib/anim.js"></script>
+<script>
+const { sleep, cancelled, say, pop } = Anim;
+
+function boy(extra) {
+  const el = document.createElement('div');
+  el.className = 'kid boy' + (extra ? ' ' + extra : '');
+  return el;
+}
+
+function fillFirst(mode) {
+  const box = document.getElementById('handsFirst');
+  box.innerHTML = '';
+  if (mode === 'bar') {
+    const bar = document.createElement('div');
+    bar.className = 'all-bar';
+    bar.innerHTML = '<span>全部男生</span>';
+    box.appendChild(bar);
+    return;
+  }
+  for (let i = 0; i < 7; i++) box.appendChild(boy());
+  const more = document.createElement('span');
+  more.className = 'more';
+  more.textContent = '···';
+  box.appendChild(more);
+  box.appendChild(boy());
+}
+
+function fillLast(missCount) {
+  const box = document.getElementById('handsLast');
+  box.innerHTML = '';
+  for (let i = 0; i < 7; i++) box.appendChild(boy(i < missCount ? 'miss' : ''));
+}
+
+function buildPath() {
+  const path = document.getElementById('path');
+  path.innerHTML = '<div class="rail"></div>';
+  const nums = [
+    { n: '7', end: true },
+    { n: '8', gap: true },
+    { n: '9', gap: true },
+    { n: '…', gap: true },
+    { n: '男生', end: true },
+  ];
+  nums.forEach((item) => {
+    const post = document.createElement('div');
+    post.className = 'post' + (item.end ? ' end' : '') + (item.gap ? ' gap' : '');
+    post.innerHTML = '<div class="crown"></div><div class="stem"></div><div class="lab">' + item.n + '</div>';
+    path.appendChild(post);
+  });
+}
+
+function resetVisuals() {
+  fillFirst('bar');
+  fillLast(0);
+  document.getElementById('rowFirst').className = 'row';
+  document.getElementById('rowLast').className = 'row';
+  document.getElementById('nFirst').textContent = '?';
+  document.getElementById('nFirst').className = 'count ghost';
+  document.getElementById('nLast').textContent = '7';
+  document.getElementById('nLast').className = 'count';
+  document.getElementById('path').classList.remove('show');
+  document.getElementById('path').innerHTML = '<div class="rail"></div>';
+  document.getElementById('formula').classList.remove('show');
+  document.getElementById('answer').classList.remove('show');
+}
+
+Anim.run([
+  {
+    title: '先看握手',
+    async play(id) {
+      say('原来', '先<b>不猜男生几人</b>。只看：第一个女生握全部，最后一个只握了 7 个。');
+      await sleep(800);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '一个比一个少',
+    async play(id) {
+      say('少 1 个', '第二个少握 1 个，第三个少 2 个。一个比一个<b>少 1</b>，一直少到最后那个 7。');
+      await sleep(600);
+      if (cancelled(id)) return;
+      pop('每次少 1 个');
+      await sleep(500);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '7 不是男生人数',
+    async play(id) {
+      fillLast(0);
+      [...document.getElementById('handsLast').children].forEach((el) => el.classList.add('keep'));
+      document.getElementById('nLast').classList.add('hot');
+      say('卡点', '最后握了 <b>7</b> 个——这是她碰到的人数，<b>不是</b>男生一共几人。');
+      pop('7 不是男生人数！');
+      await sleep(700);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '从头数到尾',
+    async play(id) {
+      document.getElementById('rowFirst').classList.add('gone');
+      document.getElementById('rowLast').classList.add('gone');
+      buildPath();
+      document.getElementById('path').classList.add('show');
+      say('植树', '握手数从 <b>7</b> 一直排到「全部男生」。两头都站着人，像路边种树。');
+      await sleep(800);
+      if (cancelled(id)) return;
+      pop('两头都算上');
+    }
+  },
+  {
+    title: '差完还要加 1',
+    async play(id) {
+      document.getElementById('rowFirst').classList.add('gone');
+      document.getElementById('rowLast').classList.add('gone');
+      buildPath();
+      document.getElementById('path').classList.add('show');
+      document.getElementById('formula').classList.add('show');
+      say('加 1', '从 7 数到男生，减完只剩中间的空档。两头都算：女生 = 男生 − 7 + 1。');
+      await sleep(700);
+      if (cancelled(id)) return;
+      pop('女生 = 男生 − 6');
+    }
+  },
+  {
+    title: '和 50 收口',
+    async play(id) {
+      document.getElementById('rowFirst').classList.add('gone');
+      document.getElementById('rowLast').classList.add('gone');
+      buildPath();
+      document.getElementById('path').classList.add('show');
+      const box = document.getElementById('formula');
+      box.classList.add('show');
+      box.innerHTML = '男生 +（男生 − 6）= <b>50</b>';
+      say('收口', '男生加女生是 <b>50</b> 人。两个「男生」加起来，再去掉 6，等于 50。');
+      await sleep(700);
+      if (cancelled(id)) return;
+      pop('2 × 男生 − 6 = 50');
+    }
+  },
+  {
+    title: '男生 28 人',
+    async play(id) {
+      fillFirst('bar');
+      fillLast(0);
+      document.getElementById('nFirst').textContent = '28';
+      document.getElementById('nFirst').className = 'count hot';
+      document.getElementById('nLast').className = 'count';
+      document.getElementById('path').classList.remove('show');
+      document.getElementById('formula').classList.remove('show');
+      document.getElementById('answer').classList.add('show');
+      say('答案', '男生是 <b>28</b> 人。女生 22 人。28 + 22 = 50，从 28 数到 7 正好 22 个。');
+      pop('男生 28 人');
+      await sleep(400);
+      if (cancelled(id)) return;
+    }
+  },
+], { reset: resetVisuals });
+</script>
+</body>
+</html>

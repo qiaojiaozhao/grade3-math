@@ -69,6 +69,12 @@ layout:
       <td>两种分法，一多一少。多了加少了，除以两次分的差</td>
       <td><a href="知识点/盈亏问题.md">盈亏</a></td>
     </tr>
+    <tr>
+      <td><i class="fa-tree"></i></td>
+      <td><strong>植树</strong></td>
+      <td>从一头数到另一头。从头数到尾，两头都算上</td>
+      <td><a href="知识点/植树问题.md">植树</a></td>
+    </tr>
   </tbody>
 </table>
 
@@ -107,6 +113,12 @@ layout:
       <td><strong>图形算式</strong></td>
       <td>图形推理。两个算式摆一起划掉，剩下的 ○ + △ = 22 就是钥匙</td>
       <td><a href="题目/图形算式.md">图形算式</a></td>
+    </tr>
+    <tr>
+      <td><i class="fa-handshake"></i></td>
+      <td><strong>联欢会握手</strong></td>
+      <td>植树。最后握了 7 个不是男生人数，两头都算再和 50 收口</td>
+      <td><a href="题目/联欢会握手.md">联欢会握手</a></td>
     </tr>
   </tbody>
 </table>

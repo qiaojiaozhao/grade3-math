@@ -82,6 +82,15 @@ const MOTIFS = [
     paper: '#ffe4e6',
     demo: [],
   },
+  {
+    file: '植树问题.md',
+    name: '植树',
+    slug: 'zhi-shi-dian/zhi-shu-wen-ti',
+    mark: '两头都算',
+    ink: '#3d8a4a',
+    paper: '#e8f6ee',
+    demo: ['握手'],
+  },
 ];
 
 const PROBLEM_SLUG = {
@@ -91,6 +100,7 @@ const PROBLEM_SLUG = {
   '图形算式.md': 'li-ti/tu-xing-suan-shi',
   '鸡兔同笼.md': 'li-ti/ji-tu-tong-long',
   '分苹果.md': 'li-ti/fen-ping-guo',
+  '联欢会握手.md': 'li-ti/lian-huan-hui-wo-shou',
 };
 
 const readDir = (d) =>
