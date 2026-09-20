@@ -94,15 +94,19 @@ AGENTS.md        给 AI 的操作手册
 
 > **初次同步的方向别选反。** 两边内容各有各的新：GitBook 上用了步骤器、提示框这些富排版；
 > 仓库里则多了「简单推理」和「图形算式」两页，GitBook 上还没有。
-> 所以要先选 **GitBook → GitHub** 把线上内容拉进 `docs/`，人工合并完再切成 GitHub → GitBook。
-> 一上来就选 GitHub → GitBook，会用仓库里的版本盖掉线上的富排版，页面地址也会跟着变。
+> 所以第一次要让 **GitBook 当源**，把线上内容拉进仓库，人工合并完再反过来。
+> 一上来就用仓库覆盖线上，会丢掉那些富排版，页面地址也会跟着变。
 
 1. 打开 [GitBook 站点后台](https://app.gitbook.com/o/1LnHUumneylpRhnARYHW/sites/site_rh5ao)，左侧点 **Git Sync**。
-2. **Connect GitHub**，授权 GitBook 访问你的 GitHub 账号。如果列表里找不到仓库，去 GitBook 的 GitHub App 设置里把该仓库加进可访问范围。
+2. **Connect GitHub**，授权 GitBook 访问你的 GitHub 账号。如果列表里找不到仓库，去 [GitBook 的 GitHub App](https://github.com/apps/gitbook-com) 设置里把该仓库加进可访问范围。
 3. **Source repository** 选 `qiaojiaozhao/grade3-math`，分支选 `main`。
-4. **初次同步方向**保持 **GitBook → GitHub**。界面上的 *Swap direction* 是反向，这一步别点。
-5. **Content mapping** 里把空间映射到 `/docs`，不要映射仓库根目录——根目录留给 GitHub Pages 的 `index.html`、`demos/`、`.nojekyll`，两边互不干扰。
-6. 点 **Sync**。同步完成后仓库里会多出 `docs/` 目录，里面是 GitBook 导出的规范 Markdown。
-7. 把 `知识点/` 和 `题目/` 里比线上新的内容合进 `docs/`，确认无误后再在 GitBook 里切换成 GitHub → GitBook，从此以仓库为准。
+4. **初次同步方向**保持默认（GitBook 当源）。界面上那个 **Swap direction** 的意思是「用仓库内容替换 GitBook 内容」，这一步别点。
+5. **Project directory** 留空。这一栏只决定 GitBook 把自己的 `docs.yaml` 放在哪，和内容放哪是两回事，别和下一步搞混。
+6. **Content mapping** 里把空间映射到 `/docs`。开头的 `/` 表示从仓库根算起。不要映射仓库根目录——根目录要留给 GitHub Pages 的 `index.html`、`demos/`、`.nojekyll`，两边互不干扰。
+7. 点 **Sync**。同步完成后仓库里会多出 `docs/`，里面是 GitBook 导出的规范 Markdown。
+8. 把 `知识点/` 和 `题目/` 里比线上新的内容合进 `docs/`，确认无误后再在 GitBook 里把方向反过来，从此以仓库为准。
 
-第 7 步做完之前，`知识点/`、`题目/`、`SUMMARY.md` 还是主稿，别删。
+第 8 步做完之前，`知识点/`、`题目/`、`SUMMARY.md` 还是主稿，别删。
+
+同步完成后还要收拾一件事：`.gitbook.yaml` 必须待在**空间映射到的那个目录**里。空间映射到 `/docs` 之后，
+根目录现在这个 `.gitbook.yaml` 就不再被读取了，留着会让人以为它还在起作用，该删掉。
