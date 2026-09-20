@@ -72,7 +72,7 @@ layout:
     <tr>
       <td><i class="fa-tree"></i></td>
       <td><strong>植树</strong></td>
-      <td>从一头数到另一头。从头数到尾，两头都算上</td>
+      <td>从一头数到另一头。点过去，头和尾都要点</td>
       <td><a href="知识点/植树问题.md">植树</a></td>
     </tr>
   </tbody>
@@ -117,7 +117,7 @@ layout:
     <tr>
       <td><i class="fa-handshake"></i></td>
       <td><strong>联欢会握手</strong></td>
-      <td>植树。最后握了 7 个不是男生人数，两头都算再和 50 收口</td>
+      <td>植树。先点 7 到 10 看清空档，女生少 6，再用和差收口</td>
       <td><a href="题目/联欢会握手.md">联欢会握手</a></td>
     </tr>
   </tbody>
