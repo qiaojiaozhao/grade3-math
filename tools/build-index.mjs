@@ -385,7 +385,7 @@ const html = `<!DOCTYPE html>
       <p class="lead">看起来题很多，骨架只有这几种。<b>衣服可以换，骨头不能换。</b>先认出是哪一类，再看动画，再动笔。</p>
       <div class="actions">
         <a class="btn primary" href="${BOOK}/ren-chu-mu-ti">我这道题是哪一类？</a>
-        <a class="btn ghost" href="${BOOK}">打开完整讲解</a>
+        <a class="btn ghost" href="${BOOK}/da-gang">三年级还有哪些</a>
       </div>
     </div>
     <div class="cast" aria-hidden="true">
