@@ -212,6 +212,25 @@
     transition: opacity .3s;
   }
   .bar-box.show { opacity: 1; }
+
+  .diff-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .diff-row .person { width: 24px; animation: none; }
+  .diff-row .head { width: 16px; height: 16px; }
+  .diff-row .body { width: 12px; height: 14px; margin-top: -2px; }
+  .diff-row .hands { gap: 5px; align-items: center; }
+  .diff-row { min-height: 64px; padding: 8px 12px; }
+  .diff-row .who { width: 78px; font-size: 14px; }
+  .split {
+    width: 14px;
+    text-align: center;
+    font-weight: 800;
+    color: #8aa0b3;
+    font-size: 18px;
+  }
 </style>
 </head>
 <body>
@@ -241,6 +260,11 @@
     <div class="scene-box gone" id="boxCount">
       <div class="stepper" id="stepper"></div>
       <div class="note" id="note"></div>
+    </div>
+
+    <div class="scene-box gone" id="boxDiff">
+      <div class="diff-list" id="diffList"></div>
+      <div class="note" id="noteDiff"></div>
     </div>
 
     <div class="bar-box" id="barBox"></div>
@@ -325,7 +349,35 @@ function buildReal() {
 function show(id) {
   document.getElementById('boxHands').classList.toggle('gone', id !== 'hands');
   document.getElementById('boxCount').classList.toggle('gone', id !== 'count');
+  document.getElementById('boxDiff').classList.toggle('gone', id !== 'diff');
   document.getElementById('barBox').classList.toggle('show', id === 'bars');
+}
+
+function fillRow(box, kind, n) {
+  for (let i = 0; i < n; i++) box.appendChild(person(kind));
+}
+
+function makeDiffRow(label, girls, boys) {
+  const row = document.createElement('div');
+  row.className = 'card diff-row';
+  const who = document.createElement('div');
+  who.className = 'who';
+  who.textContent = label;
+  const hands = document.createElement('div');
+  hands.className = 'hands';
+  fillRow(hands, 'girl', girls);
+  const split = document.createElement('span');
+  split.className = 'split';
+  split.textContent = '|';
+  hands.appendChild(split);
+  fillRow(hands, 'boy', boys);
+  const n = document.createElement('div');
+  n.className = 'n hot';
+  n.textContent = '多 6';
+  row.appendChild(who);
+  row.appendChild(hands);
+  row.appendChild(n);
+  return row;
 }
 
 function resetVisuals() {
@@ -338,6 +390,8 @@ function resetVisuals() {
   document.getElementById('cardFirst').style.display = '';
   document.getElementById('cardFirst').style.opacity = '1';
   document.getElementById('note').textContent = '';
+  document.getElementById('diffList').innerHTML = '';
+  document.getElementById('noteDiff').textContent = '';
   document.getElementById('answer').classList.remove('show');
   show('hands');
   bars.reset();
@@ -396,13 +450,28 @@ Anim.run([
     }
   },
   {
-    title: '这道题也一样',
+    title: '为什么少 6 个',
     async play(id) {
-      show('count');
-      buildReal();
-      document.getElementById('note').innerHTML = '男生 − 7 + 1 = 男生 − <b>6</b>';
-      say('少 6 个', '真题也这样点：最后是 7，第一是全部男生。减完加 1，女生比男生<b>少 6 个</b>。');
-      await sleep(800);
+      show('diff');
+      const list = document.getElementById('diffList');
+      const note = document.getElementById('noteDiff');
+      list.innerHTML = '';
+      note.innerHTML = '1 个女生，7 个男生：7 − 1 = <b>6</b>';
+      list.appendChild(makeDiffRow('最后', 1, 7));
+      say('已经多 6', '先只看最后那个女生：<b>1 个女生、7 个男生</b>，男生已经多 6 个。');
+      await sleep(900);
+      if (cancelled(id)) return;
+
+      list.appendChild(makeDiffRow('再早一个', 2, 8));
+      note.innerHTML = '女生 +1，男生也 +1，还是 <b>多 6</b>';
+      say('还是 6', '往前加一个女生，她多握 1 个手，男生变成 8。2 和 8，还是多 6。');
+      await sleep(900);
+      if (cancelled(id)) return;
+
+      list.appendChild(makeDiffRow('再早一个', 3, 9));
+      note.innerHTML = '再加还是多 6。一直到第一人，<b>男生总比女生多 6</b>';
+      say('一直多 6', '每往前一个女生，男生也多 1 个。多出来的 6 <b>不会变</b>。');
+      await sleep(700);
       if (cancelled(id)) return;
     }
   },

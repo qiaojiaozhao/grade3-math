@@ -117,7 +117,7 @@ layout:
     <tr>
       <td><i class="fa-handshake"></i></td>
       <td><strong>联欢会握手</strong></td>
-      <td>植树。先点 7 到 10 看清空档，女生少 6，再用和差收口</td>
+      <td>植树。1 个女生对 7 个男生已经多 6，这 6 一直不变</td>
       <td><a href="题目/联欢会握手.md">联欢会握手</a></td>
     </tr>
   </tbody>
