@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>鸡兔同笼 · 动态演示</title>
+<meta name="description" content="8 只鸡站成一排，一只只被添上脚变成兔。脚数尺每次只前进 2 格，填满那段空缺正好 5 步——「除以 2」是看得见的。">
+<link rel="stylesheet" href="lib/anim.css">
+<style>
+  /* 这道题专有的东西：一排会变身的小动物、一把脚数尺。
+     页面外壳、旁白气泡、播放控件都在 lib/anim.css 里。 */
+  :root {
+    --chick: #f6c445;
+    --chick-deep: #e0a010;
+    --bun: #c49a78;
+    --bun-deep: #9c7250;
+    --leg: #7a5a36;
+  }
+
+  /* ---------- 脚数尺 ---------- */
+  .meter-wrap {
+    position: absolute;
+    /* 尺子上方那行「脚：N」是往上伸的（top:-34），所以整条尺要离旁白气泡
+       远一点。气泡底边在 90px 左右，134 - 34 = 100，留 10px 富余。 */
+    left: 40px; right: 40px; top: 134px;
+    z-index: 4;
+  }
+  .meter {
+    position: relative;
+    height: 34px;
+    background: #e9eef4;
+    border-radius: 999px;
+    box-shadow: inset 0 2px 5px #0001;
+    overflow: visible;
+  }
+  .meter-fill {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 0;
+    border-radius: 999px;
+    background: linear-gradient(180deg, var(--chick), var(--chick-deep));
+  }
+  /* 已经填到的地方和目标之间的缺口，就是「少的脚」 */
+  .meter-gap {
+    position: absolute;
+    top: 0; bottom: 0;
+    border-radius: 4px;
+    background: repeating-linear-gradient(45deg, #c0392b33 0 7px, #c0392b11 7px 14px);
+    border: 2px dashed #c0392b88;
+    opacity: 0;
+    transition: opacity .35s;
+  }
+  .meter-gap.show { opacity: 1; }
+  .meter-gap span {
+    position: absolute; left: 50%; top: -28px;
+    transform: translateX(-50%);
+    font-size: 15px; font-weight: 800; color: #c0392b;
+    white-space: nowrap;
+  }
+  .meter-target {
+    position: absolute;
+    top: -8px; bottom: -8px;
+    width: 3px;
+    /* 线要骑在 26 这个位置上，不能从它右边开始长 ——
+       最后一幕「正好填满到红线」是这段动画的落点，差几像素都看得出来 */
+    transform: translateX(-50%);
+    background: #c0392b;
+    border-radius: 2px;
+  }
+  .meter-target span {
+    position: absolute; left: 50%; bottom: -26px;
+    transform: translateX(-50%);
+    font-size: 14px; font-weight: 800; color: #c0392b;
+    white-space: nowrap;
+  }
+  .meter-num {
+    position: absolute;
+    left: 0; top: -34px;
+    font-size: 19px; font-weight: 800; color: #6b4f2d;
+    white-space: nowrap;
+  }
+  .meter-num b { color: #e0662c; font-size: 23px; }
+
+  .swap-badge {
+    position: absolute;
+    right: 0; top: -34px;
+    font-size: 17px; font-weight: 800; color: #2c6fb3;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity .3s;
+  }
+  .swap-badge.show { opacity: 1; }
+
+  /* ---------- 小动物 ---------- */
+  .animal {
+    position: absolute;
+    bottom: 86px;
+    width: 84px;
+    height: 118px;
+    z-index: 2;
+  }
+  .animal .body {
+    position: absolute;
+    left: 9px; bottom: 30px;
+    width: 66px; height: 54px;
+    border-radius: 50% 50% 46% 46%;
+    background: linear-gradient(180deg, var(--chick), var(--chick-deep));
+    box-shadow: inset -7px -4px 10px #0002, 0 2px 6px #0003;
+    transition: background .5s;
+  }
+  .animal .eye {
+    position: absolute;
+    right: 15px; top: 16px;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #3a2a18;
+  }
+  /* 鸡嘴：变成兔子时收起来 */
+  .animal .beak {
+    position: absolute;
+    right: -8px; top: 24px;
+    width: 0; height: 0;
+    border: 6px solid transparent;
+    border-left-color: #e8873a;
+    transition: opacity .35s;
+  }
+  /* 兔耳：平时压平藏着，变兔时立起来 */
+  .animal .ears {
+    position: absolute;
+    left: 22px; bottom: 78px;
+    width: 40px; height: 34px;
+  }
+  .animal .ears i {
+    position: absolute;
+    bottom: 0;
+    width: 13px; height: 34px;
+    border-radius: 50% 50% 30% 30%;
+    background: var(--bun);
+    transform: scaleY(0);
+    transform-origin: bottom center;
+    opacity: 0;
+    transition: transform .45s cubic-bezier(.2,1.5,.3,1), opacity .3s;
+  }
+  .animal .ears i:first-child { left: 0; rotate: -12deg; }
+  .animal .ears i:last-child { right: 0; rotate: 12deg; }
+
+  .animal .legs {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 9px;
+  }
+  .animal .leg {
+    width: 8px; height: 30px;
+    border-radius: 3px;
+    background: var(--leg);
+  }
+  /* 外侧两条是「添上去」的那两只脚 */
+  .animal .leg.extra {
+    transform: scaleY(0);
+    transform-origin: top center;
+    opacity: 0;
+    transition: transform .5s cubic-bezier(.2,1.5,.3,1), opacity .3s;
+  }
+
+  .animal.rabbit .body { background: linear-gradient(180deg, var(--bun), var(--bun-deep)); }
+  .animal.rabbit .beak { opacity: 0; }
+  .animal.rabbit .ears i { transform: scaleY(1); opacity: 1; }
+  .animal.rabbit .leg.extra { transform: scaleY(1); opacity: 1; }
+
+  /* 还看不出是鸡是兔的时候 */
+  .animal.unknown .body { background: linear-gradient(180deg, #b9c3cc, #93a0ab); }
+  .animal.unknown .beak { opacity: 0; }
+  .animal .qmark {
+    position: absolute;
+    left: 0; right: 0; bottom: 48px;
+    text-align: center;
+    font-size: 26px; font-weight: 800; color: #fff;
+    text-shadow: 0 2px 4px #0004;
+    opacity: 0;
+    transition: opacity .3s;
+  }
+  .animal.unknown .qmark { opacity: 1; }
+
+  /* 数脚的时候点名用 */
+  .animal.spot { animation: spot .5s ease; }
+  @keyframes spot {
+    50% { transform: translateY(-14px); }
+  }
+
+  .animal .tick {
+    position: absolute;
+    left: 0; right: 0; bottom: -26px;
+    text-align: center;
+    font-size: 15px; font-weight: 800; color: #2c6fb3;
+    opacity: 0;
+    transition: opacity .3s;
+  }
+  .animal .tick.show { opacity: 1; }
+
+  /* 「+2」飘一下，强调每次只添两只 */
+  .plus2 {
+    position: absolute;
+    font-size: 22px; font-weight: 800; color: #c0392b;
+    text-shadow: 0 2px 0 #fff;
+    pointer-events: none;
+    z-index: 7;
+    opacity: 0;
+  }
+  .plus2.go { animation: plus2 1.1s ease-out forwards; }
+  @keyframes plus2 {
+    0%   { opacity: 0; transform: translateY(6px) scale(.7); }
+    25%  { opacity: 1; transform: translateY(-6px) scale(1.1); }
+    75%  { opacity: 1; }
+    100% { opacity: 0; transform: translateY(-34px) scale(1); }
+  }
+</style>
+</head>
+<body>
+
+<h1>鸡兔同笼：把鸡一只只换成兔</h1>
+<div class="problem">
+  笼子里关着鸡和兔。数一数，一共有 <b>8 个头</b>，<b>26 只脚</b>。鸡和兔各有几只？
+</div>
+
+<div class="stage-wrap">
+  <div class="stage has-table" id="stage">
+    <div class="meter-wrap">
+      <div class="meter-num" id="meterNum">脚：<b>0</b></div>
+      <div class="swap-badge" id="swapBadge">已换 0 只兔</div>
+      <div class="meter">
+        <div class="meter-fill" id="meterFill"></div>
+        <div class="meter-gap" id="meterGap"><span></span></div>
+        <div class="meter-target" id="meterTarget"><span>要凑够 26</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="lib/anim.js"></script>
+<script>
+const { sleep, cancelled, tween, lerp, say, pop } = Anim;
+
+const N = 8;            // 头的总数
+const TARGET = 26;      // 脚的总数
+const SCALE_MAX = 32;   // 脚数尺画到 32，26 才不会顶到最右边
+
+const stage = document.getElementById('stage');
+const meterFill = document.getElementById('meterFill');
+const meterGap = document.getElementById('meterGap');
+const meterNum = document.getElementById('meterNum');
+const meterTarget = document.getElementById('meterTarget');
+const swapBadge = document.getElementById('swapBadge');
+
+// 八只小动物一次性建出来，之后只切换它们的类
+const animals = [];
+for (let i = 0; i < N; i++) {
+  const el = document.createElement('div');
+  el.className = 'animal unknown';
+  el.innerHTML =
+    '<div class="ears"><i></i><i></i></div>' +
+    '<div class="body"><div class="eye"></div><div class="beak"></div></div>' +
+    '<div class="qmark">?</div>' +
+    '<div class="legs">' +
+      '<div class="leg extra"></div><div class="leg"></div>' +
+      '<div class="leg"></div><div class="leg extra"></div>' +
+    '</div>' +
+    '<div class="tick"></div>';
+  stage.appendChild(el);
+  animals.push(el);
+}
+
+function layout() {
+  const W = stage.clientWidth;
+  const AW = 84, PAD = 46;
+  const step = (W - PAD * 2 - AW) / (N - 1);
+  animals.forEach((el, i) => { el.style.left = (PAD + step * i) + 'px'; });
+}
+layout();
+addEventListener('resize', layout);
+
+meterTarget.style.left = (TARGET / SCALE_MAX * 100) + '%';
+
+let legs = 0;
+let rabbits = 0;
+
+function setLegs(v) {
+  legs = v;
+  meterFill.style.width = (Math.max(v, 0) / SCALE_MAX * 100) + '%';
+  meterNum.innerHTML = '脚：<b>' + Math.round(v) + '</b>';
+}
+
+function showGap(from, to, text) {
+  meterGap.style.left = (from / SCALE_MAX * 100) + '%';
+  meterGap.style.width = ((to - from) / SCALE_MAX * 100) + '%';
+  meterGap.querySelector('span').textContent = text;
+  meterGap.classList.add('show');
+}
+function hideGap() { meterGap.classList.remove('show'); }
+
+function setRabbits(n) {
+  rabbits = n;
+  animals.forEach((el, i) => {
+    el.classList.remove('unknown');
+    el.classList.toggle('rabbit', i < n);
+  });
+  swapBadge.textContent = '已换 ' + n + ' 只兔';
+}
+
+/** 在某只动物头顶飘一个「+2」 */
+function plus2At(i) {
+  const el = document.createElement('div');
+  el.className = 'plus2 go';
+  el.textContent = '+2';
+  el.style.left = (animals[i].offsetLeft + 26) + 'px';
+  el.style.bottom = (86 + 124) + 'px';
+  stage.appendChild(el);
+  setTimeout(() => el.remove(), 1200);
+}
+
+/** 把第 i 只鸡添上两只脚变成兔，脚数条同步前进 2 */
+async function swapOne(i, id) {
+  animals[i].classList.add('rabbit');
+  plus2At(i);
+  const from = legs;
+  await tween(520, id, (e) => setLegs(lerp(from, from + 2, e)));
+  if (cancelled(id)) return;
+  rabbits = i + 1;
+  swapBadge.textContent = '已换 ' + rabbits + ' 只兔';
+}
+
+/** 每一幕开始前由引擎调用，把上一幕的痕迹清干净 */
+function resetVisuals() {
+  hideGap();
+  swapBadge.classList.remove('show');
+  stage.querySelectorAll('.plus2').forEach((el) => el.remove());
+  animals.forEach((el) => {
+    el.classList.remove('spot');
+    el.querySelector('.tick').classList.remove('show');
+    el.querySelector('.tick').textContent = '';
+  });
+}
+
+Anim.run([
+  {
+    title: '笼子里有什么',
+    async play(id) {
+      animals.forEach((el) => { el.className = 'animal unknown'; });
+      setLegs(0);
+      say('题目', '笼子里有鸡也有兔，<b>看不出谁是谁</b>。只知道一共 8 个头、26 只脚。');
+      await sleep(900);
+      if (cancelled(id)) return;
+      say('先数头', '8 个头，就是 <b>8 只动物</b>。不管怎么分，鸡加兔一定是 8。');
+      await sleep(600);
+      if (cancelled(id)) return;
+      pop('鸡 + 兔 = 8');
+    }
+  },
+  {
+    title: '先当全是鸡',
+    async play(id) {
+      setRabbits(0);
+      setLegs(0);
+      say('假设', '先来个大胆的假设：<b>假装 8 只全是鸡</b>。兔子先委屈一下，也当成鸡。');
+      await sleep(700);
+      if (cancelled(id)) return;
+      for (let i = 0; i < N; i++) {
+        animals[i].classList.add('spot');
+        await sleep(110);
+        if (cancelled(id)) return;
+      }
+      await sleep(400);
+      if (cancelled(id)) return;
+      say('每只 2 只脚', '鸡只有 <b>2 只脚</b>。现在这一排全是两条腿的。');
+    }
+  },
+  {
+    title: '数一数有多少只脚',
+    async play(id) {
+      setRabbits(0);
+      setLegs(0);
+      say('数脚', '一只一只数过去，<b>每只加 2</b>。看尺子往前走。');
+      await sleep(500);
+      if (cancelled(id)) return;
+      for (let i = 0; i < N; i++) {
+        animals[i].classList.add('spot');
+        const tick = animals[i].querySelector('.tick');
+        tick.textContent = (i + 1) * 2;
+        tick.classList.add('show');
+        const from = legs;
+        await tween(220, id, (e) => setLegs(lerp(from, from + 2, e)));
+        if (cancelled(id)) return;
+        animals[i].classList.remove('spot');
+        await sleep(90);
+        if (cancelled(id)) return;
+      }
+      await sleep(500);
+      if (cancelled(id)) return;
+      pop('2 × 8 = 16 只脚');
+      say('才 16 只', '全当成鸡的话，只有 <b>16 只脚</b>。可题目说有 26 只。');
+    }
+  },
+  {
+    title: '少了多少只脚',
+    async play(id) {
+      setRabbits(0);
+      setLegs(16);
+      say('对比', '红线是题目要的 26。我们只数到 16，<b>中间空了一截</b>。');
+      await sleep(800);
+      if (cancelled(id)) return;
+      showGap(16, TARGET, '少了 10 只脚');
+      await sleep(900);
+      if (cancelled(id)) return;
+      pop('26 − 16 = 10');
+      say('少的脚在哪', '这 10 只脚，是被我们<b>当成鸡而藏起来</b>的——它们本来长在兔子身上。');
+    }
+  },
+  {
+    title: '换一只，只多 2 只脚',
+    async play(id) {
+      setRabbits(0);
+      setLegs(16);
+      showGap(16, TARGET, '还差 10 只');
+      swapBadge.classList.add('show');
+      say('关键', '把第一只鸡变回兔。注意看：它<b>不是重新长 4 只脚</b>，而是在原来 2 只上<b>再添 2 只</b>。');
+      await sleep(1100);
+      if (cancelled(id)) return;
+      await swapOne(0, id);
+      if (cancelled(id)) return;
+      showGap(18, TARGET, '还差 8 只');
+      await sleep(500);
+      if (cancelled(id)) return;
+      pop('只多了 2，不是 4！');
+      say('每次 +2', '尺子只往前走了 <b>2 格</b>：16 变 18。这就是为什么后面要<b>除以 2</b>。');
+    }
+  },
+  {
+    title: '一直换到 26',
+    async play(id) {
+      setRabbits(1);
+      setLegs(18);
+      swapBadge.classList.add('show');
+      showGap(18, TARGET, '还差 8 只');
+      say('继续', '还差 8 只脚，就继续换。<b>数一数一共换了几只</b>。');
+      await sleep(800);
+      if (cancelled(id)) return;
+      for (let i = 1; i < 5; i++) {
+        await swapOne(i, id);
+        if (cancelled(id)) return;
+        const left = TARGET - legs;
+        if (left > 0) showGap(legs, TARGET, '还差 ' + Math.round(left) + ' 只');
+        else hideGap();
+        await sleep(550);
+        if (cancelled(id)) return;
+      }
+      hideGap();
+      await sleep(400);
+      if (cancelled(id)) return;
+      pop('换了 5 只，正好 26');
+      say('数出来了', '一共换了 <b>5 只</b>，脚数正好填满到 26。所以兔有 5 只。');
+    }
+  },
+  {
+    title: '答案',
+    async play(id) {
+      setRabbits(5);
+      setLegs(TARGET);
+      swapBadge.classList.add('show');
+      say('算式', '少的 10 只脚，每换一只补 2 只：<b>10 ÷ 2 = 5</b> 只兔。头一共 8 个，<b>8 − 5 = 3</b> 只鸡。');
+      await sleep(1400);
+      if (cancelled(id)) return;
+      animals.forEach((el, i) => {
+        const tick = el.querySelector('.tick');
+        tick.textContent = i < 5 ? '兔' : '鸡';
+        tick.classList.add('show');
+      });
+      await sleep(900);
+      if (cancelled(id)) return;
+      pop('兔 5 只，鸡 3 只');
+      say('验算', '头：3 + 5 = 8 ✓　脚：3×2 + 5×4 = 6 + 20 = 26 ✓　<b>兔 5 只，鸡 3 只</b>。');
+    }
+  },
+], { reset: resetVisuals });
+</script>
+</body>
+</html>

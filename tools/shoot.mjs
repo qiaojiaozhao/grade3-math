@@ -60,22 +60,52 @@ for (let i = 0; i < layout.scenes; i++) {
   await page.evaluate((n) => Anim.goto(n), i);
   await page.waitForTimeout(900); // 等这一幕的头几个动作演完再拍
 
-  // 旁白气泡是绝对定位的，文字一多就会往下长，压住舞台里的标签
+  // 旁白气泡是绝对定位的，文字一多就会往下长，压住舞台里的标签。
+  // 不要写死选择器 —— 每个动画的元素都不一样，写死等于只检查了某一个动画。
+  // 这里扫舞台里所有「自己直接带文字」且真的可见的元素，算它和气泡的重叠。
   const overlap = await page.evaluate(() => {
-    const s = document.querySelector('.speech');
-    if (!s) return 0;
-    const box = s.getBoundingClientRect();
-    const labels = [...document.querySelectorAll('.barrel .name, .bar-name, .bar-value')];
-    if (!labels.length) return 0;
-    return Math.round(Math.max(...labels.map((l) => box.bottom - l.getBoundingClientRect().top)));
+    const speech = document.querySelector('.speech');
+    if (!speech) return null;
+    const sb = speech.getBoundingClientRect();
+
+    // 祖先链上任何一层透明或隐藏，这个元素就是看不见的，不该算重叠
+    const visible = (el) => {
+      for (let n = el; n && n !== document.body; n = n.parentElement) {
+        const st = getComputedStyle(n);
+        if (st.display === 'none' || st.visibility === 'hidden') return false;
+        if (parseFloat(st.opacity) < 0.05) return false;
+      }
+      return true;
+    };
+
+    let worst = 0;
+    let who = '';
+    for (const el of document.querySelectorAll('#stage *')) {
+      if (speech.contains(el) || el.contains(speech)) continue;
+      const own = [...el.childNodes]
+        .filter((n) => n.nodeType === Node.TEXT_NODE)
+        .map((n) => n.textContent.trim())
+        .join('');
+      if (!own || !visible(el)) continue;
+
+      const b = el.getBoundingClientRect();
+      if (!b.width || !b.height) continue;
+      const dx = Math.min(sb.right, b.right) - Math.max(sb.left, b.left);
+      const dy = Math.min(sb.bottom, b.bottom) - Math.max(sb.top, b.top);
+      if (dx > 0 && dy > worst) {
+        worst = dy;
+        who = own.slice(0, 14);
+      }
+    }
+    return { px: Math.round(worst), who };
   });
 
   const shot = path.join(outDir, `scene${i + 1}.png`);
   await page.screenshot({ path: shot });
 
-  if (overlap > 0) {
+  if (overlap && overlap.px > 0) {
     problems++;
-    console.error(`  第 ${i + 1} 幕  ✗ 旁白压住标签 ${overlap}px`);
+    console.error(`  第 ${i + 1} 幕  ✗ 旁白压住「${overlap.who}」${overlap.px}px`);
   } else {
     console.log(`  第 ${i + 1} 幕  ✓`);
   }
