@@ -30,18 +30,22 @@ npm run pdf -- ~/Downloads/讲义.pdf
 
 ### 2. 写知识点页
 
-从 `模板/知识点模板.md` 复制到 `知识点/<知识点名>.md`。模板里每一节都写了填写要求，照着填。
+从 `模板/知识点模板.md` 复制到 `docs/知识点/<知识点名>.md`。模板里每一节都写了填写要求，照着填。
 
 口诀这一条格外重要，它会被首页卡片抓去当摘要，必须能独立看懂：
 
 - 好：「倒过去 1 份，差距缩小 2 份。」「两个算式摆一起，划掉一样多的。」
 - 坏：「本节介绍移多补少的基本原理。」「a − b = 2c。」
 
-**知识点已经有了就别新建。** 先看 `知识点/` 下现成的，能挂上去就挂上去，只补一条配套例题链接。
+**知识点已经有了就别新建。** 先看 `docs/知识点/` 下现成的，能挂上去就挂上去，只补一条配套例题链接。
 
 ### 3. 写例题页
 
-从 `模板/例题模板.md` 复制到 `题目/<例题名>.md`。
+从 `模板/例题模板.md` 复制到 `docs/题目/<例题名>.md`。
+
+例题页里指向动画的链接要用 **GitHub Pages 的绝对地址**
+（`https://qiaojiaozhao.github.io/grade3-math/demos/<文件名>`），不能用 `../demos/`。
+`docs/` 是 GitBook 的根，相对路径出不去，而且 GitBook 上也跑不了本地 HTML。
 
 「孩子容易错在哪」至少写三条，第一条就是第 1 步找到的那个卡点。这一节的价值常常比解题过程还高。
 
@@ -77,7 +81,7 @@ npm run index    # 重新生成 GitHub Pages 落地页
 npm run check    # 查所有内部链接
 ```
 
-再手工把新页面加进 `SUMMARY.md`（GitBook 的目录）和 `README.md` 末尾的知识点表格。
+再手工把新页面加进 `docs/SUMMARY.md`（GitBook 的目录）和 `docs/README.md` 里的知识点表格。
 这两个文件是手写的，`npm run index` 不会动它们。
 
 ### 8. 提交发布
@@ -86,7 +90,8 @@ npm run check    # 查所有内部链接
 git add -A && git commit -m "加一课：<知识点名>" && git push
 ```
 
-推上去 GitHub Pages 就更新了。GitBook 那边见 README 的「发布」一节。
+推上去两边都会自动更新：GitHub Pages 跑动画，GitBook 靠 Git Sync 拉 `docs/`。
+**仓库是唯一的源**，别在 GitBook 网页上直接改内容，那会和仓库打架。
 
 ## 动画怎么写
 
@@ -139,15 +144,20 @@ Anim.run([
 ## 目录
 
 ```
-知识点/          一个知识点一页
-题目/            一道例题一页
+docs/            GitBook 站点的内容，也只有这个目录会同步到 GitBook
+  README.md      站点首页，写给家长和孩子
+  SUMMARY.md     站点目录，手写
+  知识点/         一个知识点一页
+  题目/           一道例题一页
 demos/           互动动画 + 配套 mp4
   lib/           动画引擎，改这里会影响所有动画
 模板/            新建页面从这里复制
 tools/           命令脚本
 index.html       GitHub Pages 落地页，由 npm run index 生成，别手改
-SUMMARY.md       GitBook 目录，手写
 ```
+
+根目录的 `README.md` 和这份 `AGENTS.md` 是写给维护者的，**不在 `docs/` 里，不会进站点**。
+内容页一律放 `docs/` 下。
 
 ## 命令
 

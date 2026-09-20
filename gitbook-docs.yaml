@@ -1,0 +1,20 @@
+# GitBook 站点级 Git Sync 的结构文件。
+# 它必须待在 Git Sync 设置里「Project directory」指定的目录下；那一栏留空（或填 /）
+# 就是仓库根目录，也就是这里。
+#
+# 只映射 docs/ 一个目录：站点上只会出现 docs/SUMMARY.md 里列出的页面。
+# 根目录的 README.md、AGENTS.md、模板/ 都是给维护者看的，不进站点，
+# 也不会被 Git Sync 反向改写。
+$schema: https://api.gitbook.com/gitbook-docs.yaml
+
+site:
+  title: 三年级奥数 · 看得懂的知识站
+  structure:
+    - type: space
+      key: grade3-math
+      title: 三年级奥数
+      path: grade3-math
+      default: true
+      content:
+        directory: ./docs
+        language: zh

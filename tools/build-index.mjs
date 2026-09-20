@@ -3,9 +3,9 @@
  * 用法: npm run index
  *
  * 标题和摘要直接从文件里读，不用另外维护清单：
- *   - demos/*.html  标题取 <h1>，摘要取 <meta name="description">
- *   - 知识点/*.md    标题取 # 一级标题，摘要取「一句话口诀」那条引用
- *   - 题目/*.md      标题取 # 一级标题，摘要取题面第一句
+ *   - demos/*.html       标题取 <h1>，摘要取 <meta name="description">
+ *   - docs/知识点/*.md    标题取 # 一级标题，摘要取「一句话口诀」那条引用
+ *   - docs/题目/*.md      标题取 # 一级标题，摘要取题面第一句
  * 想自己写摘要，在文件顶部加一行 <!-- 摘要: ... --> 就会优先用它。
  */
 import fs from 'node:fs';
@@ -75,8 +75,8 @@ const collect = (dir, summarize) =>
       };
     });
 
-const points = collect('知识点', mdMotto);
-const problems = collect('题目', mdProblem);
+const points = collect('docs/知识点', mdMotto);
+const problems = collect('docs/题目', mdProblem);
 
 const card = (it, cls = '') =>
   `  <a class="card${cls}" href="${esc(it.href)}">

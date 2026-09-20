@@ -1,35 +1,8 @@
 # 三年级奥数 · 看得懂的知识站
 
-这里沉淀孩子学过的奥数知识点。每个知识点都配一句能记住的口诀和一张图；每道例题都尽量配一个**可以点着看的动画**，让孩子先看明白，再动笔算。
+每个知识点配一句能记住的口诀，每道例题尽量配一个可以点着看的动画。孩子卡住，多半不是不会算，而是脑子里没有画面。
 
-## 怎么用
-
-给孩子讲一道题时，建议按这个顺序：
-
-1. 先读**例题**页的题面，让孩子自己想一分钟。
-2. 点开页面里的**互动动画**，点「自动播放」，看一遍。
-3. 回到**知识点**页，把这道题用到的口诀念一遍。
-4. 合上页面，让孩子自己把算式写一遍，再用页面末尾的验算对答案。
-
-关键是第 2 步：孩子卡住，多半不是不会算，而是脑子里没有画面。
-
-## 已经覆盖的知识点
-
-| 知识点 | 一句话口诀 | 配套例题 |
-| --- | --- | --- |
-| [移多补少](知识点/移多补少.md) | 倒过去 1 份，差距缩小 2 份 | [倒油问题](题目/倒油问题.md) |
-| [差倍问题](知识点/差倍问题.md) | 差 ÷ (倍数 − 1) = 1 份 | [倒油问题](题目/倒油问题.md) |
-| [简单推理](知识点/简单推理.md) | 两个算式摆一起，划掉一样多的 | [图形算式](题目/图形算式.md) |
-
-## 互动动画
-
-动画是独立的网页，在线打开或本地双击都行：
-
-- 倒油问题：看油流过去 —— [在线打开](https://qiaojiaozhao.github.io/grade3-math/demos/%E5%80%92%E6%B2%B9%E9%97%AE%E9%A2%98-%E7%A7%BB%E5%A4%9A%E8%A1%A5%E5%B0%91%E4%B8%8E%E5%B7%AE%E5%80%8D.html) ｜ [本地文件](demos/倒油问题-移多补少与差倍.html)
-
-每个动画还录了一份 mp4，方便直接发微信或投屏，文件和网页放在一起（`demos/*.mp4`）。
-
----
+给孩子看的内容在 [docs/](docs/README.md)，这份 README 是写给维护这个仓库的人的。
 
 ## 想再加一课
 
@@ -40,28 +13,38 @@
 
 | 要加什么 | 从哪复制 | 放到哪 |
 | --- | --- | --- |
-| 知识点 | `模板/知识点模板.md` | `知识点/<名字>.md` |
-| 例题 | `模板/例题模板.md` | `题目/<名字>.md` |
+| 知识点 | `模板/知识点模板.md` | `docs/知识点/<名字>.md` |
+| 例题 | `模板/例题模板.md` | `docs/题目/<名字>.md` |
 | 动画 | `模板/动画模板.html` | `demos/<例题名>-<知识点>.html` |
 
-### 目录结构
+写完把新页面加进 `docs/SUMMARY.md`，再跑一次 `npm run index` 和 `npm run check`。
+
+## 目录结构
 
 ```
-知识点/          一个知识点一页
-题目/            一道例题一页
+docs/            GitBook 站点的内容，也只有这个目录会同步到 GitBook
+  README.md      站点首页，写给家长和孩子
+  SUMMARY.md     站点目录，手写
+  .gitbook.yaml  告诉 GitBook 首页和目录是哪两个文件
+  知识点/         一个知识点一页
+  题目/           一道例题一页
 demos/           互动动画 + 配套 mp4
   lib/           动画引擎：anim.css/js 是外壳和分幕调度，bars.css/js 是条形对比组件
 模板/            新建页面从这里复制
 tools/           命令脚本
+gitbook-docs.yaml  GitBook 站点级 Git Sync 的结构文件，把 docs/ 映射成站点
 index.html       GitHub Pages 落地页，由 npm run index 生成，别手改
-SUMMARY.md       GitBook 目录，手写
 AGENTS.md        给 AI 的操作手册
 ```
+
+**为什么内容要单独放在 `docs/`：** Git Sync 是双向的，GitBook 会重写被同步目录里的
+Markdown。只映射 `docs/`，根目录的 README、AGENTS.md、`模板/` 就不会被当成站点页面抓进去，
+也不会被 GitBook 改写。
 
 动画不用从零写。`demos/lib/` 里的引擎管掉了分幕、播放按钮、旁白气泡、补间动画，
 新动画只写这道题特有的画面和台词。和差倍、平均数、盈亏这类题还能直接用现成的条形组件。
 
-### 命令
+## 命令
 
 新机器先跑一次 `npm run setup`（装依赖和 Chromium）。录视频还需要 `ffmpeg`，没有就 `brew install ffmpeg`。
 
@@ -73,40 +56,34 @@ AGENTS.md        给 AI 的操作手册
 | `npm run check` | 查所有内部链接有没有断 |
 | `npm run pdf -- 讲义.pdf` | 扫描版讲义转成图片 |
 
----
-
 ## 发布
 
-同一套内容，两条发布线，都已上线：
+同一套内容，两条发布线：
 
-| | 地址 | 负责什么 |
+| | 负责什么 | 地址 |
 | --- | --- | --- |
-| **GitBook** | <https://zhaos-organization-4.gitbook.io/san-nian-ji-ao-shu-kan-de-dong-de-zhi-shi-zhan/> | 知识站本身：目录、讲解、搜索 |
-| **GitHub Pages** | <https://qiaojiaozhao.github.io/grade3-math/> | 跑 `demos/` 里的互动动画 |
+| **GitHub Pages** | 跑 `demos/` 里的互动动画 | <https://qiaojiaozhao.github.io/grade3-math/> |
+| **GitBook** | 知识站本身：目录、讲解、搜索 | 待发布后填 |
 
-之所以分两条线：GitBook 页面里不能直接运行仓库中的 HTML，动画必须另外托管，GitBook 的例题页通过链接指过去。
+之所以分两条线：GitBook 页面里不能直接运行仓库中的 HTML，动画必须另外托管，
+所以 `docs/` 里的例题页用绝对地址链到 GitHub Pages 上的动画。
 
-推到 `main` 之后 GitHub Pages 会自动更新。仓库里放了 `.nojekyll`，GitHub 不会拿 Jekyll 去处理这些文件，HTML 会原样提供。
+推到 `main` 之后 GitHub Pages 会自动更新。仓库里放了 `.nojekyll`，GitHub 不会拿 Jekyll
+去处理这些文件，HTML 会原样提供。
 
-### GitBook 还没接上 Git Sync
+### GitBook Git Sync
 
-现在 GitBook 上的页面是早先用 API 单独写上去的，和仓库里的 Markdown 是两份，得手工对齐。接上 Git Sync 之后就只维护仓库这一份。
+**仓库是唯一的源**，方向是 GitHub → GitBook：改仓库、推送，站点自动更新。不要在 GitBook
+网页上直接改内容，那会和仓库打架。
 
-> **初次同步的方向别选反。** 两边内容各有各的新：GitBook 上用了步骤器、提示框这些富排版；
-> 仓库里则多了「简单推理」和「图形算式」两页，GitBook 上还没有。
-> 所以第一次要让 **GitBook 当源**，把线上内容拉进仓库，人工合并完再反过来。
-> 一上来就用仓库覆盖线上，会丢掉那些富排版，页面地址也会跟着变。
+在站点后台左侧点 **Git Sync**，配置是：
 
-1. 打开 [GitBook 站点后台](https://app.gitbook.com/o/1LnHUumneylpRhnARYHW/sites/site_rh5ao)，左侧点 **Git Sync**。
-2. **Connect GitHub**，授权 GitBook 访问你的 GitHub 账号。如果列表里找不到仓库，去 [GitBook 的 GitHub App](https://github.com/apps/gitbook-com) 设置里把该仓库加进可访问范围。
-3. **Source repository** 选 `qiaojiaozhao/grade3-math`，分支选 `main`。
-4. **初次同步方向**保持默认（GitBook 当源）。界面上那个 **Swap direction** 的意思是「用仓库内容替换 GitBook 内容」，这一步别点。
-5. **Project directory** 留空。这一栏只决定 GitBook 把自己的 `docs.yaml` 放在哪，和内容放哪是两回事，别和下一步搞混。
-6. **Content mapping** 里把空间映射到 `/docs`。开头的 `/` 表示从仓库根算起。不要映射仓库根目录——根目录要留给 GitHub Pages 的 `index.html`、`demos/`、`.nojekyll`，两边互不干扰。
-7. 点 **Sync**。同步完成后仓库里会多出 `docs/`，里面是 GitBook 导出的规范 Markdown。
-8. 把 `知识点/` 和 `题目/` 里比线上新的内容合进 `docs/`，确认无误后再在 GitBook 里把方向反过来，从此以仓库为准。
+| 栏位 | 填什么 |
+| --- | --- |
+| Source repository | `qiaojiaozhao/grade3-math`，分支 `main` |
+| Initial sync direction | **GitHub → GitBook**（小字是 *Content in GitHub will replace content in GitBook*） |
+| Project directory | 留空，或填 `/` |
+| Content mapping | 由仓库根目录的 `gitbook-docs.yaml` 决定，不用手填 |
 
-第 8 步做完之前，`知识点/`、`题目/`、`SUMMARY.md` 还是主稿，别删。
-
-同步完成后还要收拾一件事：`.gitbook.yaml` 必须待在**空间映射到的那个目录**里。空间映射到 `/docs` 之后，
-根目录现在这个 `.gitbook.yaml` 就不再被读取了，留着会让人以为它还在起作用，该删掉。
+方向这一栏要看清楚小字再点，别只看 **Swap direction** 这个按钮名——它只是「反过来」的意思，
+具体当前是哪个方向，以那行小字为准。反了会用 GitBook 的内容覆盖仓库。
