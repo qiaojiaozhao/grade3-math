@@ -79,7 +79,18 @@
     font-size: 19px; font-weight: 800; color: #6b4f2d;
     white-space: nowrap;
   }
-  .meter-num b { color: #e0662c; font-size: 23px; }
+  .meter-num b {
+    display: inline-block;
+    color: #e0662c; font-size: 23px;
+    transform-origin: center;
+  }
+  /* 脚数往上跳的时候数字弹一下，强化「只走了 2」 */
+  .meter-num.bump b { animation: bump .45s ease-out; }
+  @keyframes bump {
+    0%   { transform: scale(1); }
+    35%  { transform: scale(1.38); }
+    100% { transform: scale(1); }
+  }
 
   .swap-badge {
     position: absolute;
@@ -92,69 +103,57 @@
   .swap-badge.show { opacity: 1; }
 
   /* ---------- 小动物 ---------- */
+  /* 身体是图片，腿是 CSS。这个分工是有意的：
+     「添 2 只脚」是这段动画的命门，腿必须是能一根根数清楚的元素，
+     交给图片就说不清了。图片只负责好看。 */
   .animal {
     position: absolute;
     bottom: 86px;
     width: 84px;
-    height: 118px;
+    height: 150px;
     z-index: 2;
   }
-  .animal .body {
+  .animal .art {
     position: absolute;
-    left: 9px; bottom: 30px;
-    width: 66px; height: 54px;
-    border-radius: 50% 50% 46% 46%;
-    background: linear-gradient(180deg, var(--chick), var(--chick-deep));
-    box-shadow: inset -7px -4px 10px #0002, 0 2px 6px #0003;
-    transition: background .5s;
-  }
-  .animal .eye {
-    position: absolute;
-    right: 15px; top: 16px;
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: #3a2a18;
-  }
-  /* 鸡嘴：变成兔子时收起来 */
-  .animal .beak {
-    position: absolute;
-    right: -8px; top: 24px;
-    width: 0; height: 0;
-    border: 6px solid transparent;
-    border-left-color: #e8873a;
-    transition: opacity .35s;
-  }
-  /* 兔耳：平时压平藏着，变兔时立起来 */
-  .animal .ears {
-    position: absolute;
-    left: 22px; bottom: 78px;
-    width: 40px; height: 34px;
-  }
-  .animal .ears i {
-    position: absolute;
-    bottom: 0;
-    width: 13px; height: 34px;
-    border-radius: 50% 50% 30% 30%;
-    background: var(--bun);
-    transform: scaleY(0);
+    left: 0; right: 0;
+    bottom: 22px;          /* 往下探一点，腿看着像从身体里长出来的 */
+    height: 118px;
+    background-repeat: no-repeat;
+    background-size: contain;
+    /* 贴着底边对齐，鸡和兔虽然一高一矮，也站在同一条线上 */
+    background-position: bottom center;
     transform-origin: bottom center;
-    opacity: 0;
-    transition: transform .45s cubic-bezier(.2,1.5,.3,1), opacity .3s;
+    transition: opacity .5s, filter .5s;
+    /* 待机时轻轻起伏。完全静止的角色最显死板，每只错开一点相位 */
+    animation: breathe 2.6s ease-in-out infinite;
   }
-  .animal .ears i:first-child { left: 0; rotate: -12deg; }
-  .animal .ears i:last-child { right: 0; rotate: 12deg; }
+  @keyframes breathe {
+    0%, 100% { transform: translateY(0) scaleY(1); }
+    50%      { transform: translateY(-2px) scaleY(1.018); }
+  }
+  .art-chick { background-image: url(assets/鸡.png); }
+  /* 兔子图里身体只占画面宽度的七成左右，两边是耳朵和尾巴；
+     按和鸡一样的框缩放，身体会明显小一圈。给它一个略宽略高的框补回来。 */
+  .art-bun {
+    background-image: url(assets/兔.png);
+    left: -6px; right: -6px;
+    height: 126px;
+    opacity: 0;
+  }
+  .animal.rabbit .art-chick { opacity: 0; }
+  .animal.rabbit .art-bun   { opacity: 1; }
 
   .animal .legs {
     position: absolute;
     left: 0; right: 0; bottom: 0;
-    height: 30px;
+    height: 26px;
     display: flex;
     justify-content: center;
     align-items: flex-start;
     gap: 9px;
   }
   .animal .leg {
-    width: 8px; height: 30px;
+    width: 8px; height: 26px;
     border-radius: 3px;
     background: var(--leg);
   }
@@ -166,20 +165,17 @@
     transition: transform .5s cubic-bezier(.2,1.5,.3,1), opacity .3s;
   }
 
-  .animal.rabbit .body { background: linear-gradient(180deg, var(--bun), var(--bun-deep)); }
-  .animal.rabbit .beak { opacity: 0; }
-  .animal.rabbit .ears i { transform: scaleY(1); opacity: 1; }
   .animal.rabbit .leg.extra { transform: scaleY(1); opacity: 1; }
 
-  /* 还看不出是鸡是兔的时候 */
-  .animal.unknown .body { background: linear-gradient(180deg, #b9c3cc, #93a0ab); }
-  .animal.unknown .beak { opacity: 0; }
+  /* 还看不出是鸡是兔的时候，压成灰剪影 */
+  .animal.unknown .art-chick { filter: grayscale(1) brightness(1.12) contrast(.75); }
+  .animal.unknown .leg { background: #9aa4ad; }
   .animal .qmark {
     position: absolute;
-    left: 0; right: 0; bottom: 48px;
+    left: 0; right: 0; bottom: 62px;
     text-align: center;
-    font-size: 26px; font-weight: 800; color: #fff;
-    text-shadow: 0 2px 4px #0004;
+    font-size: 30px; font-weight: 800; color: #5b6772;
+    text-shadow: 0 2px 5px #fff, 0 0 10px #fff;
     opacity: 0;
     transition: opacity .3s;
   }
@@ -189,6 +185,17 @@
   .animal.spot { animation: spot .5s ease; }
   @keyframes spot {
     50% { transform: translateY(-14px); }
+  }
+
+  /* 变身那一下压一下再弹回来。动画十二原则里的 squash & stretch，
+     一个关键帧就能让「咔哒」那一下有分量 */
+  .animal { transform-origin: bottom center; }
+  .animal.squash { animation: squash .55s ease-out; }
+  @keyframes squash {
+    0%   { transform: scaleX(1)    scaleY(1); }
+    30%  { transform: scaleX(1.12) scaleY(.87); }
+    62%  { transform: scaleX(.96)  scaleY(1.05); }
+    100% { transform: scaleX(1)    scaleY(1); }
   }
 
   .animal .tick {
@@ -261,14 +268,16 @@ for (let i = 0; i < N; i++) {
   const el = document.createElement('div');
   el.className = 'animal unknown';
   el.innerHTML =
-    '<div class="ears"><i></i><i></i></div>' +
-    '<div class="body"><div class="eye"></div><div class="beak"></div></div>' +
+    '<div class="art art-chick"></div>' +
+    '<div class="art art-bun"></div>' +
     '<div class="qmark">?</div>' +
     '<div class="legs">' +
       '<div class="leg extra"></div><div class="leg"></div>' +
       '<div class="leg"></div><div class="leg extra"></div>' +
     '</div>' +
     '<div class="tick"></div>';
+  // 呼吸错开相位，不然八只一起起伏像机器
+  el.querySelectorAll('.art').forEach((a) => { a.style.animationDelay = (i * 0.19) + 's'; });
   stage.appendChild(el);
   animals.push(el);
 }
@@ -293,6 +302,12 @@ function setLegs(v) {
   meterNum.innerHTML = '脚：<b>' + Math.round(v) + '</b>';
 }
 
+function bumpNum() {
+  meterNum.classList.remove('bump');
+  void meterNum.offsetWidth;   // 逼浏览器重算，否则连续两次不会重播
+  meterNum.classList.add('bump');
+}
+
 function showGap(from, to, text) {
   meterGap.style.left = (from / SCALE_MAX * 100) + '%';
   meterGap.style.width = ((to - from) / SCALE_MAX * 100) + '%';
@@ -315,8 +330,9 @@ function plus2At(i) {
   const el = document.createElement('div');
   el.className = 'plus2 go';
   el.textContent = '+2';
-  el.style.left = (animals[i].offsetLeft + 26) + 'px';
-  el.style.bottom = (86 + 124) + 'px';
+  // 飘在身体右侧、旁白泡泡「26 − 16 = 10」那行字的下方，两边不打架
+  el.style.left = (animals[i].offsetLeft + 72) + 'px';
+  el.style.bottom = (86 + 86) + 'px';
   stage.appendChild(el);
   setTimeout(() => el.remove(), 1200);
 }
@@ -324,7 +340,11 @@ function plus2At(i) {
 /** 把第 i 只鸡添上两只脚变成兔，脚数条同步前进 2 */
 async function swapOne(i, id) {
   animals[i].classList.add('rabbit');
+  animals[i].classList.remove('squash');
+  void animals[i].offsetWidth;
+  animals[i].classList.add('squash');
   plus2At(i);
+  bumpNum();
   const from = legs;
   await tween(520, id, (e) => setLegs(lerp(from, from + 2, e)));
   if (cancelled(id)) return;
@@ -336,9 +356,10 @@ async function swapOne(i, id) {
 function resetVisuals() {
   hideGap();
   swapBadge.classList.remove('show');
+  meterNum.classList.remove('bump');
   stage.querySelectorAll('.plus2').forEach((el) => el.remove());
   animals.forEach((el) => {
-    el.classList.remove('spot');
+    el.classList.remove('spot', 'squash');
     el.querySelector('.tick').classList.remove('show');
     el.querySelector('.tick').textContent = '';
   });

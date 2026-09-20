@@ -10,6 +10,7 @@
     "shoot": "node tools/shoot.mjs",
     "record": "node tools/record.mjs",
     "pdf": "node tools/pdf2png.mjs",
+    "cutout": "node tools/cutout.mjs",
     "setup": "npm install && npx playwright install chromium"
   },
   "devDependencies": {

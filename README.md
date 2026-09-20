@@ -55,6 +55,7 @@ Markdown。只映射 `docs/`，根目录的 README、AGENTS.md、`模板/` 就�
 | `npm run index` | 重新生成首页 `index.html` |
 | `npm run check` | 查所有内部链接有没有断 |
 | `npm run pdf -- 讲义.pdf` | 扫描版讲义转成图片 |
+| `npm run cutout -- 图.png demos/assets/鸡.png` | 角色插图去白底、裁边、缩小 |
 
 ## 发布
 
