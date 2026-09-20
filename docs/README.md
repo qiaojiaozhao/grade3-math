@@ -1,34 +1,102 @@
-# 三年级奥数 · 看得懂的知识站
+---
+description: 三年级浅奥六种母题。先认出是哪一类，再看骨架，最后换一身衣服自己讲。
+icon: map
+layout:
+  width: wide
+  outline:
+    visible: false
+---
 
-这里沉淀孩子学过的奥数知识点。每个知识点都配一句能记住的口诀和一张图；每道例题都尽量配一个**可以点着看的动画**，让孩子先看明白，再动笔算。
+# 浅奥母题地图
 
-## 怎么陪孩子用
+三年级奥数看起来题很多，骨架只有这几种。**衣服可以换，骨头不能换。** 糖、油、鸡兔、书，都是同一根骨头套了不同的皮。
 
-给孩子讲一道题时，建议按这个顺序：
+{% hint style="info" %}
+陪孩子用的顺序：打开这张地图 → 让他猜是哪道母题 → 点进去看口诀和画面 → 做例题 → 合上页面，让他自己换一道「换了衣服」的题讲给你听。
+{% endhint %}
 
-1. 先读**例题**页的题面，让孩子自己想一分钟。
-2. 点开页面里的**互动动画**，点「自动播放」，看一遍。
-3. 回到**知识点**页，把这道题用到的口诀念一遍。
-4. 合上页面，让孩子自己把算式写一遍，再用页面末尾的验算对答案。
+## 六种母题
 
-关键是第 2 步：**孩子卡住，多半不是不会算，而是脑子里没有画面。**
+<table data-view="cards">
+  <thead>
+    <tr>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th data-hidden data-card-target data-type="content-ref"></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><i class="fa-scale-balanced"></i></td>
+      <td><strong>和差</strong></td>
+      <td>给了「一共多少」和「相差多少」。（和 ± 差）÷ 2</td>
+      <td><a href="知识点/和差问题.md">和差</a></td>
+    </tr>
+    <tr>
+      <td><i class="fa-layer-group"></i></td>
+      <td><strong>和倍</strong></td>
+      <td>给了「一共多少」和「是几倍」。和 ÷（倍数 + 1）= 1 份</td>
+      <td><a href="知识点/和倍问题.md">和倍</a></td>
+    </tr>
+    <tr>
+      <td><i class="fa-chart-simple"></i></td>
+      <td><strong>差倍</strong></td>
+      <td>给了「相差多少」和「是几倍」。差 ÷（倍数 − 1）= 1 份</td>
+      <td><a href="知识点/差倍问题.md">差倍</a></td>
+    </tr>
+    <tr>
+      <td><i class="fa-arrows-left-right"></i></td>
+      <td><strong>移多补少</strong></td>
+      <td>从多的那边倒一点给少的。倒过去 1 份，差距缩小 2 份</td>
+      <td><a href="知识点/移多补少.md">移多补少</a></td>
+    </tr>
+    <tr>
+      <td><i class="fa-paw"></i></td>
+      <td><strong>鸡兔同笼</strong></td>
+      <td>两种东西混在一起。先当全是鸡，少的脚两只两只添</td>
+      <td><a href="知识点/假设法.md">假设法</a></td>
+    </tr>
+    <tr>
+      <td><i class="fa-puzzle-piece"></i></td>
+      <td><strong>图形推理</strong></td>
+      <td>图形代表数。两个算式摆一起，划掉一样多的</td>
+      <td><a href="知识点/简单推理.md">简单推理</a></td>
+    </tr>
+  </tbody>
+</table>
 
-## 知识点一览
+看不清是哪一种？去 [认出这是哪道母题](认出母题.md)。那一页按「题目给了什么」来分，比按名字分更准。
 
-| 知识点 | 一句话口诀 | 配套例题 |
-| --- | --- | --- |
-| [移多补少](知识点/移多补少.md) | 倒过去 1 份，差距缩小 2 份 | [倒油问题](题目/倒油问题.md) |
-| [和差问题](知识点/和差问题.md) | （和+差）÷2=大数；（和−差）÷2=小数 | [兄弟分糖](题目/兄弟分糖.md) |
-| [和倍问题](知识点/和倍问题.md) | 和 ÷ (倍数 + 1) = 1 份 | [甲乙两堆书](题目/甲乙两堆书.md) |
-| [差倍问题](知识点/差倍问题.md) | 差 ÷ (倍数 − 1) = 1 份 | [倒油问题](题目/倒油问题.md) |
-| [简单推理](知识点/简单推理.md) | 两个算式摆一起，划掉一样多的 | [图形算式](题目/图形算式.md) |
-| [假设法](知识点/假设法.md) | 先当全是鸡，少的脚两只两只添 | [鸡兔同笼](题目/鸡兔同笼.md) |
+## 先看动画
 
-## 互动动画
+有画面的题，先看一遍再动笔。卡住的时候，多半不是不会算，是脑子里没有图。
 
-动画是能点着看的网页，每一幕都可以单独重播：
+<table data-view="cards">
+  <thead>
+    <tr>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th data-hidden data-card-target data-type="content-ref"></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><i class="fa-droplet"></i></td>
+      <td><strong>倒油问题</strong></td>
+      <td>移多补少 + 差倍。看甲多出来的那截怎么裂成两块 15</td>
+      <td><a href="题目/倒油问题.md">倒油问题</a></td>
+    </tr>
+    <tr>
+      <td><i class="fa-paw"></i></td>
+      <td><strong>鸡兔同笼</strong></td>
+      <td>假设法。8 只鸡一只只添上脚，尺子每次只走 2 格</td>
+      <td><a href="题目/鸡兔同笼.md">鸡兔同笼</a></td>
+    </tr>
+  </tbody>
+</table>
 
-- [倒油问题：看油流过去](https://qiaojiaozhao.github.io/grade3-math/demos/%E5%80%92%E6%B2%B9%E9%97%AE%E9%A2%98-%E7%A7%BB%E5%A4%9A%E8%A1%A5%E5%B0%91%E4%B8%8E%E5%B7%AE%E5%80%8D.html)
-- [鸡兔同笼：把鸡一只只换成兔](https://qiaojiaozhao.github.io/grade3-math/demos/%E9%B8%A1%E5%85%94%E5%90%8C%E7%AC%BC-%E5%81%87%E8%AE%BE%E6%B3%95.html)
-
-每个动画还录了一份 mp4，方便直接发微信或投屏。所有动画也可以在[动画索引页](https://qiaojiaozhao.github.io/grade3-math/)一起找到。
+{% hint style="success" %}
+每一道母题页末尾都有「换一身衣服」——同一根骨头，换成糖、车、硬币、绳子。合上页面还能讲出来，这道母题才算真正收下。
+{% endhint %}

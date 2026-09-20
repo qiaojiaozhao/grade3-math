@@ -159,13 +159,13 @@ const html = `<!DOCTYPE html>
 
   <header>
     <h1>三年级奥数 · 看得懂的知识站</h1>
-    <p class="sub">每个知识点配一句能记住的口诀，每道题尽量配一个点着看的动画。<br>先让孩子看明白，再动笔算。</p>
+    <p class="sub">浅奥六种母题，衣服可以换，骨头不能换。<br>先认出是哪一类，再看动画，再动笔算。</p>
   </header>
 
   <h2>互动动画</h2>
 ${animations.map((a) => card(a, ' play')).join('\n')}
 
-  <h2>知识点</h2>
+  <h2>母题</h2>
   <div class="grid">
 ${points.map((p) => card(p)).join('\n')}
   </div>
@@ -174,11 +174,11 @@ ${points.map((p) => card(p)).join('\n')}
 ${problems.map((p) => card(p)).join('\n')}
 
   <div class="tip">
-    <b>怎么陪孩子用：</b>先让他读题自己想一分钟 → 点开动画看一遍 → 念一遍口诀 → 合上页面自己写算式 → 用例题页末尾的验算对答案。<br>
+    <b>怎么陪孩子用：</b>先让他猜这是哪道母题 → 点开动画看一遍 → 念一遍口诀 → 合上页面自己写算式 → 再换一身衣服讲给你听。<br>
     孩子卡住，多半不是不会算，而是脑子里<b>没有画面</b>。
   </div>
 
-  <footer>知识点和例题页是 Markdown，在 GitBook 上阅读体验更好。</footer>
+  <footer>完整母题地图在 GitBook 上：认出题 → 看骨架 → 换一身衣服。</footer>
 
 </div>
 
@@ -216,5 +216,5 @@ document.querySelectorAll('[data-mp4]').forEach(function (el) {
 
 fs.writeFileSync(path.join(ROOT, 'index.html'), html);
 console.log(
-  `✓ index.html 已生成：${animations.length} 个动画、${points.length} 个知识点、${problems.length} 道例题`
+  `✓ index.html 已生成：${animations.length} 个动画、${points.length} 道母题、${problems.length} 道例题`
 );
