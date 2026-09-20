@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>三年级奥数 · 看得懂的知识站</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: radial-gradient(ellipse at top, #fff6e0 0%, #e7f3ff 55%, #d7ebff 100%);
+    min-height: 100vh;
+    color: #2b3a46;
+    padding: 40px 20px 60px;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; }
+  header { text-align: center; margin-bottom: 32px; }
+  h1 { font-size: 30px; color: #1f5f9e; margin-bottom: 10px; }
+  .sub { font-size: 16px; color: #5b6b7a; line-height: 1.7; }
+
+  h2 {
+    font-size: 19px;
+    color: #1f5f9e;
+    margin: 32px 0 14px;
+    padding-left: 12px;
+    border-left: 5px solid #e0662c;
+  }
+
+  .card {
+    display: block;
+    background: #fff;
+    border-radius: 16px;
+    padding: 18px 22px;
+    margin-bottom: 14px;
+    text-decoration: none;
+    color: inherit;
+    box-shadow: 0 4px 14px rgba(40,70,110,.10);
+    transition: transform .15s, box-shadow .15s;
+  }
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(40,70,110,.16);
+  }
+  .card .t { font-size: 19px; font-weight: 800; color: #1f5f9e; margin-bottom: 6px; }
+  .card .d { font-size: 15px; line-height: 1.7; color: #55636f; }
+  .card.play { border-left: 6px solid #e0662c; }
+  .card.play .t::before { content: "▶ "; color: #e0662c; }
+
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid .card { margin-bottom: 0; }
+  @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } }
+
+  .tip {
+    background: #fff8ec;
+    border-radius: 14px;
+    padding: 16px 22px;
+    font-size: 15px;
+    line-height: 1.9;
+    color: #6b5335;
+    margin-top: 28px;
+  }
+  .tip b { color: #c0662c; }
+  footer { text-align: center; margin-top: 36px; font-size: 13px; color: #8798a6; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>三年级奥数 · 看得懂的知识站</h1>
+    <p class="sub">每个知识点配一句能记住的口诀，每道题配一个点着看的动画。<br>先让孩子看明白，再动笔算。</p>
+  </header>
+
+  <h2>互动动画</h2>
+  <a class="card play" href="demos/倒油问题-移多补少与差倍.html">
+    <div class="t">倒油问题：看油流过去</div>
+    <div class="d">小油壶在两桶之间来回搬油。看甲多出来的那截怎么裂成两块 15，再看甲桶怎么一层层亮成 4 份。</div>
+  </a>
+
+  <h2>知识点</h2>
+  <div class="grid">
+    <a class="card" href="知识点/移多补少.md">
+      <div class="t">移多补少</div>
+      <div class="d">倒过去 1 份，差距缩小 2 份。</div>
+    </a>
+    <a class="card" href="知识点/差倍问题.md">
+      <div class="t">差倍问题</div>
+      <div class="d">差 ÷ (倍数 − 1) = 1 份。</div>
+    </a>
+  </div>
+
+  <h2>例题</h2>
+  <a class="card" href="题目/倒油问题.md">
+    <div class="t">倒油问题</div>
+    <div class="d">倒 15 就相等，倒 48 就变 4 倍，求甲桶原来有多少油。答案 120 千克。</div>
+  </a>
+
+  <div class="tip">
+    <b>怎么陪孩子用：</b>先让他读题自己想一分钟 → 点开动画看一遍 → 念一遍口诀 → 合上页面自己写算式 → 用例题页末尾的验算对答案。<br>
+    孩子卡住，多半不是不会算，而是脑子里<b>没有画面</b>。
+  </div>
+
+  <footer>知识点和例题页是 Markdown，在 GitBook 上阅读体验更好。</footer>
+
+</div>
+
+<script>
+// GitHub Pages 会把 .md 当文件下载，所以在 github.io 上把这些链接改指到
+// 仓库的 Markdown 渲染页（https://github.com/<账号>/<仓库>/blob/<分支>/...）。
+// 本地直接双击打开时不改动，保持相对路径。
+(function () {
+  const host = location.hostname;
+  if (!host.endsWith('.github.io')) return;
+
+  const user = host.replace('.github.io', '');
+  // 项目站点是 /<仓库名>/...，用户主站点（user.github.io）的仓库名就是域名本身
+  const repo = location.pathname.split('/').filter(Boolean)[0] || host;
+
+  const base = `https://github.com/${user}/${repo}/blob/main/`;
+  document.querySelectorAll('a[href$=".md"]').forEach(a => {
+    a.href = base + a.getAttribute('href');
+    a.target = '_blank';
+    a.rel = 'noopener';
+  });
+})();
+</script>
+</body>
+</html>

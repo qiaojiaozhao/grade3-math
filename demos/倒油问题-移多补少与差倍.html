@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>倒油问题 · 动态演示</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --oil-a: #f4a025;
+    --oil-a-deep: #d97a0b;
+    --oil-b: #3ea0e8;
+    --oil-b-deep: #1b74c4;
+    --wood: #8b6946;
+  }
+  body {
+    font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: radial-gradient(ellipse at top, #fff6e0 0%, #e7f3ff 55%, #d7ebff 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px 12px 36px;
+    color: #333;
+  }
+  h1 { font-size: 24px; color: #1f5f9e; margin-bottom: 8px; letter-spacing: .5px; }
+  .problem {
+    max-width: 860px;
+    background: #fff;
+    border-radius: 14px;
+    padding: 10px 18px;
+    font-size: 16px;
+    line-height: 1.75;
+    box-shadow: 0 3px 12px rgba(0,0,0,.08);
+    margin-bottom: 12px;
+  }
+  .problem b { color: #e0662c; }
+
+  .stage-wrap {
+    width: 860px;
+    max-width: 96vw;
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 10px 28px rgba(40,70,110,.12);
+    overflow: hidden;
+    position: relative;
+  }
+  .stage {
+    position: relative;
+    height: 460px;
+    background:
+      linear-gradient(#0000 0 72%, #e8d7b0 72% 76%, #d4be8a 76%),
+      linear-gradient(180deg, #f7fbff 0%, #eef6ff 100%);
+  }
+  .speech {
+    position: absolute;
+    left: 18px; right: 18px; top: 12px;
+    min-height: 52px;
+    background: #fff;
+    border-radius: 14px;
+    padding: 10px 16px;
+    font-size: 18px;
+    line-height: 1.6;
+    box-shadow: 0 4px 14px rgba(0,0,0,.08);
+    z-index: 8;
+    border-left: 6px solid #2c6fb3;
+  }
+  .speech b { color: #e0662c; }
+  .speech .tag {
+    display: inline-block;
+    background: #2c6fb3;
+    color: #fff;
+    font-size: 13px;
+    padding: 1px 8px;
+    border-radius: 999px;
+    margin-right: 8px;
+    vertical-align: 2px;
+  }
+
+  .barrel {
+    position: absolute;
+    bottom: 86px;
+    width: 148px;
+    height: 270px;
+    transform-origin: 50% 92%;
+    transition: transform .55s cubic-bezier(.4,.1,.2,1.2);
+    z-index: 2;
+  }
+  #barrelA { left: 118px; }
+  #barrelB { right: 118px; }
+  .barrel.tilt-right { transform: rotate(17deg); }
+  .barrel.tilt-left  { transform: rotate(-17deg); }
+  .barrel .name {
+    position: absolute; top: -34px; left: 50%; transform: translateX(-50%);
+    font-size: 22px; font-weight: 800; color: #6b4f2d; white-space: nowrap;
+  }
+  .jar {
+    position: absolute; inset: 0;
+    border: 6px solid var(--wood);
+    border-top: none;
+    border-radius: 10px 10px 28px 28px;
+    background: linear-gradient(90deg, #ffffffaa, #ffffff55 40%, #ffffff22);
+    overflow: hidden;
+    box-shadow: inset 10px 0 16px #fff8, inset -8px 0 14px #0001;
+  }
+  .rim {
+    position: absolute; top: -10px; left: -10px; right: -10px; height: 18px;
+    border: 6px solid var(--wood);
+    border-radius: 14px;
+    background: #c9a36a;
+    z-index: 3;
+  }
+  .oil {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    border-radius: 0 0 22px 22px;
+    overflow: hidden;
+  }
+  #oilA { background: linear-gradient(180deg, var(--oil-a), var(--oil-a-deep)); }
+  #oilB { background: linear-gradient(180deg, var(--oil-b), var(--oil-b-deep)); }
+  .wave {
+    position: absolute; left: -20%; top: -10px; width: 140%; height: 18px;
+    background: radial-gradient(circle at 10px 12px, #fff6 7px, #0000 8px);
+    background-size: 28px 18px;
+    animation: wave 1.1s linear infinite;
+    opacity: .55;
+  }
+  @keyframes wave { to { transform: translateX(28px); } }
+  .amount {
+    position: absolute; left: 50%; transform: translateX(-50%);
+    font-size: 22px; font-weight: 800; color: #fff;
+    text-shadow: 0 2px 6px #0006;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 4;
+  }
+
+  .guide {
+    position: absolute;
+    left: 118px; width: 624px;
+    border-top: 2px dashed #c0392b88;
+    z-index: 3;
+    opacity: 0;
+    transition: opacity .4s, bottom .6s;
+    pointer-events: none;
+  }
+  .guide.show { opacity: 1; }
+  .guide span {
+    position: absolute; right: 16px; top: -26px;
+    font-size: 14px; color: #c0392b; font-weight: 700; white-space: nowrap;
+  }
+
+  .chunk {
+    position: absolute;
+    width: 118px;
+    height: 40px;
+    left: 300px;
+    border-radius: 12px;
+    color: #fff;
+    font-weight: 800;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-shadow: 0 1px 3px #0005;
+    opacity: 0;
+    z-index: 5;
+    pointer-events: none;
+    box-shadow: 0 4px 10px #0003;
+  }
+  .chunk.show { opacity: 1; transition: opacity .35s, transform .35s; }
+  .chunk.fly {
+    transition: left 1.2s cubic-bezier(.35,.1,.25,1), bottom 1.2s cubic-bezier(.2,1.5,.3,1);
+  }
+  .guide {
+    width: auto;
+    right: 118px;
+  }
+
+  .jug {
+    position: absolute;
+    width: 92px; height: 92px;
+    z-index: 7;
+    opacity: 0;
+    pointer-events: none;
+    filter: drop-shadow(0 5px 8px #0004);
+  }
+  .jug.show { opacity: 1; transition: opacity .25s; }
+  .jug-pot {
+    position: absolute; left: 12px; top: 16px;
+    width: 58px; height: 62px;
+    background: #efe6d6;
+    border: 4px solid #7a5a36;
+    border-radius: 10px 10px 16px 16px;
+    overflow: hidden;
+  }
+  .jug-oil {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 0;
+    transition: height .45s ease;
+  }
+  .jug-label {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 800; color: #5a3d1c;
+  }
+  .jug-handle {
+    position: absolute; right: 4px; top: 22px;
+    width: 18px; height: 28px;
+    border: 4px solid #7a5a36;
+    border-left: none;
+    border-radius: 0 12px 12px 0;
+  }
+  .jug-spout {
+    position: absolute; left: 0; top: 16px;
+    width: 16px; height: 10px;
+    background: #7a5a36;
+    border-radius: 4px 0 0 8px;
+  }
+  .drop {
+    position: absolute;
+    width: 16px; height: 20px;
+    border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+    z-index: 7;
+    pointer-events: none;
+    opacity: 0;
+  }
+  .drop.go { animation: drip .7s ease-in forwards; }
+  @keyframes drip {
+    0%   { opacity: 1; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(70px) scale(.6); }
+  }
+
+  .layers {
+    position: absolute; left: 124px; width: 136px;
+    display: flex; flex-direction: column-reverse;
+    z-index: 5;
+    pointer-events: none;
+  }
+  .layers .layer {
+    height: 0;
+    border-top: 2px dashed #fff9;
+    color: #fff;
+    font-weight: 800;
+    font-size: 15px;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0;
+    transform: scaleX(.4);
+    text-shadow: 0 1px 3px #0006;
+  }
+  .layers .layer.show {
+    opacity: 1;
+    transform: scaleX(1);
+    transition: opacity .35s, transform .45s cubic-bezier(.2,1.4,.3,1);
+  }
+
+  .spark {
+    position: absolute; left: 50%; top: 210px; transform: translateX(-50%);
+    font-size: 28px; font-weight: 800; color: #c0392b;
+    opacity: 0; z-index: 7; pointer-events: none; white-space: nowrap;
+    text-shadow: 0 2px 0 #fff;
+  }
+  .spark.pop { animation: pop 1.6s ease-out forwards; }
+  @keyframes pop {
+    0% { opacity: 0; transform: translateX(-50%) scale(.6) translateY(10px); }
+    20% { opacity: 1; transform: translateX(-50%) scale(1.12) translateY(0); }
+    80% { opacity: 1; }
+    100% { opacity: 0; transform: translateX(-50%) scale(1) translateY(-18px); }
+  }
+
+  .controls {
+    margin-top: 14px;
+    display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+  }
+  button {
+    font-size: 17px; font-weight: 800;
+    padding: 10px 22px; border: none; border-radius: 999px;
+    cursor: pointer; box-shadow: 0 3px 8px #0002;
+  }
+  button:active { transform: scale(.96); }
+  button:disabled { opacity: .4; cursor: not-allowed; }
+  #playBtn { background: #e0662c; color: #fff; }
+  #nextBtn { background: #2c6fb3; color: #fff; }
+  #prevBtn, #replayBtn { background: #eef2f6; color: #445; }
+  .dots { margin-top: 10px; display: flex; gap: 7px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: #c5ced6; }
+  .dot.on { background: #2c6fb3; }
+  .hint { margin-top: 8px; font-size: 13px; color: #6a7a88; }
+</style>
+</head>
+<body>
+
+<h1>倒油问题：看油流过去</h1>
+<div class="problem">
+  有甲、乙两桶油。若从甲桶倒入乙桶 <b>15千克</b>，则两桶油质量相等；
+  若从乙桶倒入甲桶 <b>48千克</b>，则甲桶油是乙桶油重量的 <b>4倍</b>。
+  甲桶原有油 <b>？</b> 千克。
+</div>
+
+<div class="stage-wrap">
+  <div class="stage" id="stage">
+    <div class="speech" id="speech"><span class="tag">开始</span>两桶都有油。甲看起来比乙多一点点。我们先<b>看油怎么倒</b>，再找秘密。</div>
+    <div class="guide" id="guide"><span></span></div>
+    <div class="chunk" id="chunkStay"></div>
+    <div class="chunk" id="chunkMove"></div>
+    <div class="layers" id="layers"></div>
+    <div class="spark" id="spark"></div>
+
+    <div class="barrel" id="barrelA">
+      <div class="name">甲桶</div>
+      <div class="rim"></div>
+      <div class="jar">
+        <div class="oil" id="oilA"><div class="wave"></div></div>
+      </div>
+    </div>
+    <div class="amount" id="amtA">?</div>
+    <div class="barrel" id="barrelB">
+      <div class="name">乙桶</div>
+      <div class="rim"></div>
+      <div class="jar">
+        <div class="oil" id="oilB"><div class="wave"></div></div>
+      </div>
+    </div>
+    <div class="amount" id="amtB">?</div>
+
+    <div class="jug" id="jug">
+      <div class="jug-handle"></div>
+      <div class="jug-spout"></div>
+      <div class="jug-pot">
+        <div class="jug-oil" id="jugOil"></div>
+        <div class="jug-label" id="jugLabel">15</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="controls">
+  <button id="playBtn">▶ 自动播放整段动画</button>
+  <button id="prevBtn">← 上一段</button>
+  <button id="replayBtn">重播这一段</button>
+  <button id="nextBtn">下一段 →</button>
+</div>
+<div class="dots" id="dots"></div>
+<div class="hint">建议先点「自动播放」看完整动画片，再一段一段回看。</div>
+
+<script>
+const SCALE = 1.42;
+const TABLE = 86;
+const JAR_H = 270;
+const A_LEFT = 118;
+function bLeft() { return Math.max(stage.clientWidth - 118 - 148, 360); }
+const oilA = document.getElementById('oilA');
+const oilB = document.getElementById('oilB');
+const amtA = document.getElementById('amtA');
+const amtB = document.getElementById('amtB');
+const barrelA = document.getElementById('barrelA');
+const barrelB = document.getElementById('barrelB');
+const speech = document.getElementById('speech');
+const guide = document.getElementById('guide');
+const chunkStay = document.getElementById('chunkStay');
+const chunkMove = document.getElementById('chunkMove');
+const layers = document.getElementById('layers');
+const spark = document.getElementById('spark');
+const jug = document.getElementById('jug');
+const jugOil = document.getElementById('jugOil');
+const jugLabel = document.getElementById('jugLabel');
+const stage = document.getElementById('stage');
+let jugX = 0, jugY = 0, jugTilt = 0;
+
+let kgA = 120, kgB = 90;
+let showNum = false;
+let token = 0;
+let autoPlaying = false;
+
+function sleep(ms) {
+  return new Promise(r => setTimeout(r, ms));
+}
+function cancelled(id) { return id !== token; }
+function ease(t) { return t < .5 ? 2*t*t : 1 - Math.pow(-2*t+2, 2)/2; }
+function lerp(a, b, t) { return a + (b - a) * t; }
+
+function oilBottom(kg) { return TABLE + kg * SCALE; }
+function setOilInstant(a, b) {
+  kgA = a; kgB = b;
+  oilA.style.height = (a * SCALE) + 'px';
+  oilB.style.height = (b * SCALE) + 'px';
+  const place = (el, kg, left) => {
+    el.textContent = showNum ? kg.toFixed(0) + '千克' : (kg ? '?' : '?');
+    el.style.left = (left + 74) + 'px';
+    el.style.bottom = (TABLE + Math.max(kg * SCALE - 28, 18)) + 'px';
+  };
+  place(amtA, a, A_LEFT);
+  place(amtB, b, bLeft());
+}
+
+async function tweenOil(a1, b1, ms, id) {
+  const a0 = kgA, b0 = kgB;
+  const t0 = performance.now();
+  return new Promise(resolve => {
+    function frame(now) {
+      if (cancelled(id)) return resolve();
+      const t = Math.min(1, (now - t0) / ms);
+      setOilInstant(lerp(a0, a1, ease(t)), lerp(b0, b1, ease(t)));
+      if (t < 1) requestAnimationFrame(frame); else resolve();
+    }
+    requestAnimationFrame(frame);
+  });
+}
+
+function say(tag, html) {
+  speech.innerHTML = '<span class="tag">' + tag + '</span>' + html;
+}
+function pop(text) {
+  spark.textContent = text;
+  spark.classList.remove('pop');
+  void spark.offsetWidth;
+  spark.classList.add('pop');
+}
+function hideChunks() {
+  chunkStay.className = 'chunk';
+  chunkMove.className = 'chunk';
+  chunkStay.style.cssText = '';
+  chunkMove.style.cssText = '';
+}
+function hideGuide() { guide.classList.remove('show'); }
+function showGuide(kg, text) {
+  guide.style.bottom = oilBottom(kg) + 'px';
+  guide.querySelector('span').textContent = text;
+  guide.classList.add('show');
+}
+function hideLayers() { layers.innerHTML = ''; }
+function hideJug() {
+  jug.classList.remove('show');
+  jugOil.style.height = '0';
+  jug.style.transform = 'rotate(0deg)';
+  jugTilt = 0;
+}
+
+function placeJug(x, y, tilt) {
+  jugX = x; jugY = y; jugTilt = tilt;
+  jug.style.left = x + 'px';
+  jug.style.bottom = y + 'px';
+  jug.style.transform = 'rotate(' + tilt + 'deg)';
+}
+
+async function moveJug(x1, y1, tilt, ms, id) {
+  const x0 = jugX, y0 = jugY, t0ang = jugTilt;
+  const t0 = performance.now();
+  return new Promise(resolve => {
+    function frame(now) {
+      if (cancelled(id)) return resolve();
+      const t = Math.min(1, (now - t0) / ms);
+      const e = ease(t);
+      const lift = Math.sin(Math.PI * e) * 70;
+      placeJug(lerp(x0, x1, e), lerp(y0, y1, e) + lift, lerp(t0ang, tilt, e));
+      if (t < 1) requestAnimationFrame(frame); else resolve();
+    }
+    requestAnimationFrame(frame);
+  });
+}
+
+function dripFromJug(color, id) {
+  const d = document.createElement('div');
+  d.className = 'drop go';
+  d.style.background = color;
+  d.style.left = (jugX - 6) + 'px';
+  d.style.bottom = (jugY + 28) + 'px';
+  stage.appendChild(d);
+  setTimeout(() => d.remove(), 750);
+}
+
+async function pour(fromA, amount, id) {
+  const color = fromA ? '#f4a025' : '#3ea0e8';
+  const srcLeft = fromA ? A_LEFT : bLeft();
+  const dstLeft = fromA ? bLeft() : A_LEFT;
+  const srcKg = fromA ? kgA : kgB;
+  const nextA = fromA ? kgA - amount : kgA + amount;
+  const nextB = fromA ? kgB + amount : kgB - amount;
+
+  jugLabel.textContent = amount + '千克';
+  jugOil.style.background = color;
+  jugOil.style.height = '0';
+  placeJug(srcLeft + 36, oilBottom(srcKg) + 8, 0);
+  jug.classList.add('show');
+  await sleep(350);
+  if (cancelled(id)) return;
+
+  jugOil.style.height = '78%';
+  await tweenOil(fromA ? kgA - amount : kgA, fromA ? kgB : kgB - amount, 700, id);
+  if (cancelled(id)) return;
+  await sleep(550);
+  if (cancelled(id)) return;
+
+  await moveJug(dstLeft + 28, oilBottom(fromA ? kgB : kgA) + 28, fromA ? -32 : 32, 1400, id);
+  if (cancelled(id)) return;
+  await sleep(250);
+
+  for (let i = 0; i < 8; i++) {
+    if (cancelled(id)) return;
+    dripFromJug(color, id);
+    await sleep(120);
+  }
+  jugOil.style.height = '0';
+  await tweenOil(nextA, nextB, 800, id);
+  if (cancelled(id)) return;
+  await sleep(400);
+  hideJug();
+}
+
+function resetVisuals() {
+  hideChunks();
+  hideGuide();
+  hideLayers();
+  hideJug();
+  document.querySelectorAll('.drop').forEach(el => el.remove());
+  barrelA.classList.remove('tilt-right', 'tilt-left');
+  barrelB.classList.remove('tilt-right', 'tilt-left');
+  spark.classList.remove('pop');
+}
+
+const scenes = [
+  {
+    title: '原来的样子',
+    async play(id) {
+      showNum = false;
+      resetVisuals();
+      setOilInstant(120, 90);
+      say('原来', '两个桶里都有油，但<b>先不看数字</b>。仔细看：甲桶的油面，比乙桶<b>高一截</b>。');
+      await sleep(700);
+      if (cancelled(id)) return;
+      showGuide(90, '乙的油面到这儿');
+    }
+  },
+  {
+    title: '甲倒给乙 15 千克',
+    async play(id) {
+      showNum = false;
+      resetVisuals();
+      setOilInstant(120, 90);
+      say('线索一', '甲桶往乙桶<b>倒 15 千克</b>。看！油真的从甲流到乙，两桶慢慢变成一样高。');
+      await pour(true, 15, id);
+      if (cancelled(id)) return;
+      showGuide(105, '现在一样高了');
+      pop('两桶相等！');
+    }
+  },
+  {
+    title: '秘密：为什么差是 15×2',
+    async play(id) {
+      showNum = false;
+      resetVisuals();
+      setOilInstant(120, 90);
+      say('倒回去看', '把油倒回去。甲比乙多出来的那一截，其实是<b>两块 15 千克</b>。');
+      await sleep(500);
+      if (cancelled(id)) return;
+      showGuide(90, '乙的油面');
+
+      chunkStay.textContent = '留下的 15';
+      chunkMove.textContent = '送给乙的 15';
+      chunkStay.style.bottom = oilBottom(90) + 6 + 'px';
+      chunkStay.style.background = '#e0662c';
+      chunkMove.style.bottom = oilBottom(90) + 56 + 'px';
+      chunkMove.style.background = '#f4a025';
+      chunkStay.classList.add('show');
+      chunkMove.classList.add('show');
+      await sleep(1400);
+      if (cancelled(id)) return;
+
+      say('移多补少', '上面那块<b>飞去补给乙</b>，下面那块<b>留给甲自己</b>。倒走 1 块，两边各变 1 块，差距少了 <b>2 块</b>。');
+      chunkMove.classList.add('fly');
+      chunkMove.style.left = (bLeft() - 132) + 'px';
+      chunkMove.style.bottom = oilBottom(90) + 6 + 'px';
+      await sleep(1150);
+      if (cancelled(id)) return;
+      await tweenOil(105, 105, 700, id);
+      hideGuide();
+      hideChunks();
+      showGuide(105, '变成一样多');
+      pop('甲 − 乙 = 15 × 2 = 30');
+    }
+  },
+  {
+    title: '乙倒给甲 48 千克',
+    async play(id) {
+      showNum = false;
+      resetVisuals();
+      setOilInstant(120, 90);
+      say('线索二', '这次反过来：乙往甲<b>倒 48 千克</b>。甲会涨得很高，乙会变得很少。');
+      await sleep(400);
+      if (cancelled(id)) return;
+      await pour(false, 48, id);
+      if (cancelled(id)) return;
+      pop('现在甲是乙的 4 倍！');
+      say('差距变大', '原来甲只比乙多 30。乙又送出 48、甲又收入 48，差距再拉大<b>两个 48</b>：30 + 48×2 = <b>126</b>。');
+    }
+  },
+  {
+    title: '把甲拆成 4 份',
+    async play(id) {
+      showNum = false;
+      resetVisuals();
+      setOilInstant(168, 42);
+      say('差倍', '把乙现在的油看成 <b>1 份</b>。甲刚好能拆成<b>同样高的 4 份</b>。看它们一层一层亮起来。');
+      showGuide(42, '1 份这么高');
+      layers.style.bottom = TABLE + 'px';
+      layers.style.height = (168 * SCALE) + 'px';
+      for (let i = 0; i < 4; i++) {
+        const el = document.createElement('div');
+        el.className = 'layer';
+        el.style.height = (42 * SCALE) + 'px';
+        el.style.background = i === 0 ? '#f4a02566' : '#e0662c88';
+        el.textContent = (i + 1) + ' 份';
+        layers.appendChild(el);
+        await sleep(280);
+        if (cancelled(id)) return;
+        el.classList.add('show');
+      }
+      await sleep(600);
+      if (cancelled(id)) return;
+      say('求出 1 份', '甲比乙多 <b>3 份</b>，这 3 份就是 126 千克。所以 1 份 = 126 ÷ 3 = <b>42 千克</b>。乙现在有 42 千克。');
+      pop('3 份 = 126 → 1 份 = 42');
+    }
+  },
+  {
+    title: '把 48 还给乙',
+    async play(id) {
+      showNum = false;
+      resetVisuals();
+      setOilInstant(168, 42);
+      say('倒推', '乙现在只剩 42，是因为它刚才送走了 48。把 48 <b>倒回去</b>，就是原来的乙。');
+      await pour(true, 48, id);
+      if (cancelled(id)) return;
+      showNum = true;
+      setOilInstant(120, 90);
+      pop('乙原来 90，甲原来 120');
+      say('答案', '乙原来 = 42 + 48 = <b>90</b>。甲比乙多 30，所以甲原来 = 90 + 30 = <b>120 千克</b>。');
+    }
+  },
+  {
+    title: '验算两遍',
+    async play(id) {
+      showNum = true;
+      resetVisuals();
+      setOilInstant(120, 90);
+      say('验算 ①', '甲倒 15 给乙：120−15=105，90+15=105。看它们会不会对齐。');
+      await sleep(500);
+      if (cancelled(id)) return;
+      await pour(true, 15, id);
+      if (cancelled(id)) return;
+      pop('105 = 105 ✓');
+      await sleep(900);
+      if (cancelled(id)) return;
+      setOilInstant(120, 90);
+      say('验算 ②', '乙倒 48 给甲：120+48=168，90−48=42。168 是不是 42 的 4 倍？');
+      await pour(false, 48, id);
+      if (cancelled(id)) return;
+      pop('42 × 4 = 168 ✓');
+      say('完成', '两条线索都对上了！<b>甲桶原有油 120 千克。</b>可以再点自动播放复习一遍。');
+    }
+  }
+];
+
+let cur = 0;
+const dotsBox = document.getElementById('dots');
+scenes.forEach(() => {
+  const d = document.createElement('div');
+  d.className = 'dot';
+  dotsBox.appendChild(d);
+});
+
+function paintDots() {
+  [...dotsBox.children].forEach((d, i) => d.classList.toggle('on', i === cur));
+  document.getElementById('prevBtn').disabled = cur === 0 || autoPlaying;
+  document.getElementById('nextBtn').disabled = cur === scenes.length - 1 || autoPlaying;
+  document.getElementById('replayBtn').disabled = autoPlaying;
+  document.getElementById('playBtn').disabled = false;
+}
+
+async function runScene(i) {
+  cur = i;
+  paintDots();
+  const id = ++token;
+  await scenes[i].play(id);
+}
+
+async function playAll() {
+  if (autoPlaying) {
+    autoPlaying = false;
+    token++;
+    document.getElementById('playBtn').textContent = '▶ 自动播放整段动画';
+    paintDots();
+    return;
+  }
+  autoPlaying = true;
+  document.getElementById('playBtn').textContent = '❚❚ 停止';
+  for (let i = 0; i < scenes.length; i++) {
+    if (!autoPlaying) break;
+    await runScene(i);
+    if (!autoPlaying) break;
+    await sleep(900);
+  }
+  autoPlaying = false;
+  document.getElementById('playBtn').textContent = '▶ 自动播放整段动画';
+  paintDots();
+}
+
+document.getElementById('playBtn').onclick = playAll;
+document.getElementById('nextBtn').onclick = () => { if (cur < scenes.length - 1) runScene(cur + 1); };
+document.getElementById('prevBtn').onclick = () => { if (cur > 0) runScene(cur - 1); };
+document.getElementById('replayBtn').onclick = () => runScene(cur);
+
+runScene(0);
+</script>
+</body>
+</html>
