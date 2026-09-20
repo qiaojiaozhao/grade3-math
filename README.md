@@ -63,7 +63,7 @@ Markdown。只映射 `docs/`，根目录的 README、AGENTS.md、`模板/` 就�
 | | 负责什么 | 地址 |
 | --- | --- | --- |
 | **GitHub Pages** | 跑 `demos/` 里的互动动画 | <https://qiaojiaozhao.github.io/grade3-math/> |
-| **GitBook** | 知识站本身：目录、讲解、搜索 | 待发布后填 |
+| **GitBook** | 知识站本身：目录、讲解、搜索 | <https://smileyes.gitbook.io/smileyes-docs> |
 
 之所以分两条线：GitBook 页面里不能直接运行仓库中的 HTML，动画必须另外托管，
 所以 `docs/` 里的例题页用绝对地址链到 GitHub Pages 上的动画。
@@ -87,3 +87,14 @@ Markdown。只映射 `docs/`，根目录的 README、AGENTS.md、`模板/` 就�
 
 方向这一栏要看清楚小字再点，别只看 **Swap direction** 这个按钮名——它只是「反过来」的意思，
 具体当前是哪个方向，以那行小字为准。反了会用 GitBook 的内容覆盖仓库。
+
+### 哪些东西不归仓库管
+
+站点上这两处改了仓库也不会生效，只能在 GitBook 后台改：
+
+| 想改什么 | 去哪改 |
+| --- | --- |
+| 发布页顶部显示的站名 | Site settings → General → **Site title** |
+| 地址里的 `/smileyes-docs` 这段 | Settings → **Domain and URL** |
+
+`gitbook-docs.yaml` 里的 `site.title` 只影响后台里显示的名字，不影响线上。改完 slug 记得回来更新上面那张表里的地址。

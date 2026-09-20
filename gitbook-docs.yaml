@@ -5,6 +5,10 @@
 # 只映射 docs/ 一个目录：站点上只会出现 docs/SUMMARY.md 里列出的页面。
 # 根目录的 README.md、AGENTS.md、模板/ 都是给维护者看的，不进站点，
 # 也不会被 Git Sync 反向改写。
+#
+# 注意 site.title 只是后台里显示的名字。**发布出去的页面顶部那个站名不归它管**，
+# 那个在 Site settings → General → Site title；地址里的 slug 在 Domain settings。
+# 改这里不会改线上，别白改。
 $schema: https://api.gitbook.com/gitbook-docs.yaml
 
 site:
