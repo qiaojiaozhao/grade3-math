@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>联欢会握手 · 动态演示</title>
-<meta name="description" content="先用手从 7 点到 10：减完是空档，两头的人还在。这道题从 7 点到男生，女生少 6 个，再用和差收口。">
+<meta name="description" content="最后一个女生是第「女生人数」个，所以少握了「女生人数 − 1」个。男生 −（女生 − 1）= 7，挪一下就多 6。">
 <link rel="stylesheet" href="lib/anim.css">
 <link rel="stylesheet" href="lib/bars.css">
 <style>
@@ -22,187 +22,64 @@
   }
   .scene-box.gone { display: none; }
 
-  .pair {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-  .card {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    min-height: 86px;
-    padding: 10px 16px;
+  .sheet {
     background: #fff;
     border-radius: 16px;
     box-shadow: 0 3px 12px #0001;
+    padding: 18px 28px 16px;
   }
-  .who {
-    flex: none;
-    width: 92px;
-    font-size: 15px;
-    font-weight: 800;
-    color: var(--girl-deep);
-    line-height: 1.3;
-  }
-  .hands {
-    flex: 1;
+  .eq {
     display: flex;
-    align-items: flex-end;
-    gap: 8px;
-    min-height: 58px;
-  }
-  .n {
-    flex: none;
-    min-width: 48px;
-    text-align: center;
-    font-size: 26px;
-    font-weight: 800;
-    color: #1f5f9e;
-  }
-  .n.hot { color: #e0662c; }
-  .n.ghost { opacity: .3; }
-
-  .person {
-    display: flex;
-    flex-direction: column;
     align-items: center;
-    width: 34px;
-    animation: breathe 2.6s ease-in-out infinite;
-  }
-  .person:nth-child(2) { animation-delay: .2s; }
-  .person:nth-child(3) { animation-delay: .4s; }
-  .person:nth-child(4) { animation-delay: .15s; }
-  .person:nth-child(5) { animation-delay: .35s; }
-  .person:nth-child(6) { animation-delay: .5s; }
-  .person:nth-child(7) { animation-delay: .25s; }
-  @keyframes breathe {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-2px); }
-  }
-  .head {
-    width: 20px; height: 20px;
-    border-radius: 50%;
-    z-index: 1;
-  }
-  .body {
-    width: 16px; height: 20px;
-    margin-top: -3px;
-    border-radius: 7px 7px 5px 5px;
-  }
-  .person.boy .head {
-    background: radial-gradient(circle at 32% 28%, #8ec6f5, var(--boy) 60%, var(--boy-deep));
-  }
-  .person.boy .body { background: var(--boy-deep); }
-  .person.girl .head {
-    background: radial-gradient(circle at 32% 28%, #f7b3c4, var(--girl) 60%, var(--girl-deep));
-  }
-  .person.girl .body { background: var(--girl-deep); }
-  .person.ghost { opacity: .22; animation: none; }
-  .person.on {
-    animation: none;
-    filter: drop-shadow(0 0 0 3px #e0662c55);
-    transform: scale(1.12);
-  }
-  .person .badge {
-    margin-top: 4px;
-    font-size: 14px;
-    font-weight: 800;
-    color: var(--girl-deep);
-    line-height: 1;
-  }
-
-  .more {
-    align-self: center;
-    color: #8aa0b3;
-    font-weight: 800;
-    font-size: 16px;
-    padding-bottom: 10px;
-  }
-
-  .stepper {
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    gap: 0;
-    padding-top: 112px;
-  }
-  .step {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 72px;
-  }
-  .step .person { width: 44px; animation: none; }
-  .step .head { width: 26px; height: 26px; }
-  .step .body { width: 20px; height: 24px; }
-  .step .badge {
-    margin-top: 8px;
+    min-height: 46px;
     font-size: 22px;
     font-weight: 800;
-    color: #1f5f9e;
-    min-height: 26px;
-  }
-  .step.lit .badge { color: #e0662c; transform: scale(1.15); }
-  .step.lit .person { transform: scale(1.08); }
-  .step.dots {
-    width: 54px;
-    padding-bottom: 28px;
-    font-size: 22px;
-    font-weight: 800;
-    color: #8aa0b3;
-    letter-spacing: 2px;
-  }
-
-  .bridge {
-    width: 56px;
-    align-self: center;
-    margin-bottom: 36px;
-    text-align: center;
-  }
-  .bridge .line {
-    height: 4px;
-    background: #d7e0e8;
-    border-radius: 2px;
-  }
-  .bridge .lab {
-    margin-top: 6px;
-    font-size: 13px;
-    font-weight: 800;
-    color: #c05621;
+    color: #3a4a58;
     opacity: 0;
+    transform: translateY(6px);
+    transition: opacity .3s, transform .3s, background .3s;
+    padding: 4px 10px;
+    border-radius: 10px;
   }
-  .bridge.show .line { background: #e0a010; }
-  .bridge.show .lab { opacity: 1; }
+  .eq.on {
+    opacity: 1;
+    transform: none;
+  }
+  .eq.hot {
+    background: #fff6d8;
+    color: #8a5a10;
+  }
+  .eq b { color: #e0662c; }
+  .eq .dim { color: #8aa0b3; font-weight: 800; }
+
+  .brace-box {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 8px;
+    opacity: 0;
+    transition: opacity .35s;
+  }
+  .brace-box.on { opacity: 1; }
+  .brace {
+    font-size: 72px;
+    line-height: 0.8;
+    color: #2c6fb3;
+    font-weight: 400;
+    padding-bottom: 8px;
+  }
+  .brace-eqs { display: flex; flex-direction: column; gap: 4px; }
+  .brace-eqs .eq { min-height: 40px; }
 
   .note {
-    margin-top: 22px;
+    margin-top: 18px;
     text-align: center;
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 800;
     color: #8a5a10;
-    min-height: 32px;
+    min-height: 28px;
   }
   .note b { color: #e0662c; }
-
-  .answer {
-    position: absolute;
-    left: 50%; bottom: 20px;
-    transform: translateX(-50%);
-    min-width: 280px;
-    text-align: center;
-    padding: 12px 24px;
-    background: #e8f6ee;
-    border: 2px solid #2f7a5b;
-    border-radius: 16px;
-    font-size: 26px;
-    font-weight: 800;
-    color: #1f5a3d;
-    box-shadow: 0 6px 16px #2f7a5b33;
-    opacity: 0;
-    pointer-events: none;
-  }
-  .answer.show { opacity: 1; }
 
   .bar-box {
     position: absolute;
@@ -212,70 +89,29 @@
     transition: opacity .3s;
   }
   .bar-box.show { opacity: 1; }
-
-  .diff-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  .diff-row .person { width: 24px; animation: none; }
-  .diff-row .head { width: 16px; height: 16px; }
-  .diff-row .body { width: 12px; height: 14px; margin-top: -2px; }
-  .diff-row .hands { gap: 5px; align-items: center; }
-  .diff-row { min-height: 64px; padding: 8px 12px; }
-  .diff-row .who { width: 78px; font-size: 14px; }
-  .split {
-    width: 14px;
-    text-align: center;
-    font-weight: 800;
-    color: #8aa0b3;
-    font-size: 18px;
-  }
 </style>
 </head>
 <body>
 
-<h1>联欢会握手：点过去，头和尾都要点</h1>
+<h1>联欢会握手：最后一个是第几个，少握几个减 1</h1>
 <div class="problem">
-  50 人联欢。第一个女生和<b>全部男生</b>握手，下一个少 1 个，最后那个只握了 <b>7</b> 个。男生多少人？
+  50 人联欢。第 1 个女生和<b>全部男生</b>握手，第 2 个少 1 个，最后那个只握了 <b>7</b> 个。男生多少人？
 </div>
 
 <div class="stage-wrap">
   <div class="stage" id="stage">
-    <div class="scene-box" id="boxHands">
-      <div class="pair">
-        <div class="card" id="cardFirst">
-          <div class="who">第 1 个<br>女生</div>
-          <div class="hands" id="handsFirst"></div>
-          <div class="n ghost" id="nFirst">?</div>
-        </div>
-        <div class="card" id="cardLast">
-          <div class="who">最后 1 个<br>女生</div>
-          <div class="hands" id="handsLast"></div>
-          <div class="n" id="nLast">7</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="scene-box gone" id="boxCount">
-      <div class="stepper" id="stepper"></div>
+    <div class="scene-box" id="boxSheet">
+      <div class="sheet" id="sheet"></div>
       <div class="note" id="note"></div>
     </div>
-
-    <div class="scene-box gone" id="boxDiff">
-      <div class="diff-list" id="diffList"></div>
-      <div class="note" id="noteDiff"></div>
-    </div>
-
     <div class="bar-box" id="barBox"></div>
-    <div class="answer" id="answer">男生 28 人</div>
   </div>
 </div>
 
 <script src="lib/anim.js"></script>
 <script src="lib/bars.js"></script>
 <script>
-const { sleep, cancelled, say, pop } = Anim;
+const { sleep, cancelled, say } = Anim;
 
 const bars = Bars.create({
   stage: document.getElementById('barBox'),
@@ -288,203 +124,119 @@ const bars = Bars.create({
   padding: 170,
 });
 
-function person(kind, badge, extra) {
-  const el = document.createElement('div');
-  el.className = 'person ' + kind + (extra ? ' ' + extra : '');
-  el.innerHTML = '<div class="head"></div><div class="body"></div>' +
-    (badge != null ? '<div class="badge">' + badge + '</div>' : '');
-  return el;
+function show(which) {
+  document.getElementById('boxSheet').classList.toggle('gone', which !== 'sheet');
+  document.getElementById('barBox').classList.toggle('show', which === 'bars');
 }
 
-function fillBoys(box, n, ghosts) {
-  box.innerHTML = '';
-  for (let i = 0; i < n; i++) box.appendChild(person('boy'));
-  if (ghosts) {
-    const more = document.createElement('span');
-    more.className = 'more';
-    more.textContent = '还有';
-    box.appendChild(more);
-    for (let i = 0; i < ghosts; i++) box.appendChild(person('boy', null, 'ghost'));
-  }
-}
-
-function addStep(box, lab) {
-  const step = document.createElement('div');
-  step.className = 'step';
-  const kind = lab === '男生' ? 'boy' : 'girl';
-  step.appendChild(person(kind, lab));
-  box.appendChild(step);
-}
-
-function addBridge(box) {
-  const br = document.createElement('div');
-  br.className = 'bridge';
-  br.innerHTML = '<div class="line"></div><div class="lab">空档</div>';
-  box.appendChild(br);
-}
-
-function buildMini() {
-  const box = document.getElementById('stepper');
-  box.innerHTML = '';
-  ['7', '8', '9', '10'].forEach((lab, i) => {
-    if (i) addBridge(box);
-    addStep(box, lab);
+function paintSheet(rows, hot) {
+  const sheet = document.getElementById('sheet');
+  sheet.innerHTML = '';
+  rows.forEach((html, i) => {
+    const el = document.createElement('div');
+    el.className = 'eq on' + (i === hot ? ' hot' : '');
+    el.innerHTML = html;
+    sheet.appendChild(el);
   });
-}
-
-function buildReal() {
-  const box = document.getElementById('stepper');
-  box.innerHTML = '';
-  ['7', '8', '9'].forEach((lab, i) => {
-    if (i) addBridge(box);
-    addStep(box, lab);
-  });
-  const dots = document.createElement('div');
-  dots.className = 'step dots';
-  dots.textContent = '···';
-  box.appendChild(dots);
-  addStep(box, '男生');
-}
-
-function show(id) {
-  document.getElementById('boxHands').classList.toggle('gone', id !== 'hands');
-  document.getElementById('boxCount').classList.toggle('gone', id !== 'count');
-  document.getElementById('boxDiff').classList.toggle('gone', id !== 'diff');
-  document.getElementById('barBox').classList.toggle('show', id === 'bars');
-}
-
-function fillRow(box, kind, n) {
-  for (let i = 0; i < n; i++) box.appendChild(person(kind));
-}
-
-function makeDiffRow(label, girls, boys) {
-  const row = document.createElement('div');
-  row.className = 'card diff-row';
-  const who = document.createElement('div');
-  who.className = 'who';
-  who.textContent = label;
-  const hands = document.createElement('div');
-  hands.className = 'hands';
-  fillRow(hands, 'girl', girls);
-  const split = document.createElement('span');
-  split.className = 'split';
-  split.textContent = '|';
-  hands.appendChild(split);
-  fillRow(hands, 'boy', boys);
-  const n = document.createElement('div');
-  n.className = 'n hot';
-  n.textContent = '多 6';
-  row.appendChild(who);
-  row.appendChild(hands);
-  row.appendChild(n);
-  return row;
 }
 
 function resetVisuals() {
-  fillBoys(document.getElementById('handsFirst'), 7, 4);
-  fillBoys(document.getElementById('handsLast'), 7, 0);
-  document.getElementById('nFirst').textContent = '?';
-  document.getElementById('nFirst').className = 'n ghost';
-  document.getElementById('nLast').textContent = '7';
-  document.getElementById('nLast').className = 'n';
-  document.getElementById('cardFirst').style.display = '';
-  document.getElementById('cardFirst').style.opacity = '1';
+  document.getElementById('sheet').innerHTML = '';
   document.getElementById('note').textContent = '';
-  document.getElementById('diffList').innerHTML = '';
-  document.getElementById('noteDiff').textContent = '';
-  document.getElementById('answer').classList.remove('show');
-  show('hands');
+  show('sheet');
   bars.reset();
   bars.set([0, 0]);
 }
 
+const ROW1 = '第 <b>1</b> 个女生 → 全部男生';
+const ROW2 = '第 <b>2</b> 个女生 → 全部男生 − 1';
+const ROW3 = '第 <b>3</b> 个女生 → 全部男生 − 2';
+const DOTS = '<span class="dim">……</span>';
+const LAST = '最后（第 <b>女生人数</b> 个）→ 男生 −（女生 − 1）= <b>7</b>';
+
 Anim.run([
   {
-    title: '她只握了 7 个',
+    title: '一个比一个少 1',
     async play(id) {
-      document.getElementById('cardFirst').style.display = 'none';
-      fillBoys(document.getElementById('handsFirst'), 0, 0);
-      say('先看', '最后到的女生，只跟 <b>7</b> 个男生握过手。先别说男生就是 7 个。');
+      paintSheet([ROW1], 0);
+      say('第 1 个', '第 1 个女生和<b>全部男生</b>握过手。');
+      await sleep(700);
+      if (cancelled(id)) return;
+      paintSheet([ROW1, ROW2], 1);
+      say('第 2 个', '第 2 个女生少握 <b>1</b> 个。');
+      await sleep(700);
+      if (cancelled(id)) return;
+      paintSheet([ROW1, ROW2, ROW3], 2);
+      say('第 3 个', '第 3 个少握 <b>2</b> 个。每往后一个，就再少 1。');
+      await sleep(600);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '最后一个是第几个',
+    async play(id) {
+      paintSheet([ROW1, ROW2, ROW3, DOTS, LAST], 4);
+      document.getElementById('note').innerHTML = '有几个女生，最后那个就是第几个';
+      say('第几个', '最后那个女生，就是第 <b>女生人数</b> 个。第几个，就比第 1 个少握「几个 − 1」。');
+      await sleep(900);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '写成一句话',
+    async play(id) {
+      paintSheet([
+        LAST,
+        '也就是：男生 −（女生 − 1）= <b>7</b>',
+      ], 1);
+      document.getElementById('note').innerHTML = '少握的个数 = 女生人数 − 1';
+      say('式子', '第 1 个握「男生」这么多。最后少握了（女生 − 1）个，剩下 <b>7</b> 个。');
       await sleep(800);
       if (cancelled(id)) return;
     }
   },
   {
-    title: '前面的握得更多',
+    title: '挪一下，多 6',
     async play(id) {
-      say('还有人', '第一个女生跟<b>全部男生</b>握过。所以男生比这 7 个多，多出来的还没数。');
-      await sleep(700);
-      if (cancelled(id)) return;
-      pop('7 不是全部');
-    }
-  },
-  {
-    title: '先拿小数一遍',
-    async play(id) {
-      show('count');
-      buildMini();
-      say('用手点', '先不管 50。假如从 7 握到 10，我们<b>一个一个点</b>。');
-      const steps = [...document.querySelectorAll('#stepper .step')];
-      for (let i = 0; i < steps.length; i++) {
-        steps.forEach((s) => s.classList.remove('lit'));
-        steps[i].classList.add('lit');
-        document.getElementById('note').innerHTML = '点到 <b>' + (i + 1) + '</b> 个人';
-        await sleep(420);
-        if (cancelled(id)) return;
-      }
-    }
-  },
-  {
-    title: '减完是空档',
-    async play(id) {
-      show('count');
-      buildMini();
-      document.getElementById('note').innerHTML = '10 − 7 = <b>3</b>，是中间 3 段空档';
-      say('空档', '10 减 7 得到 3——那是中间的<b>空档</b>。两头的人还站着，所以再加 1。');
-      await sleep(500);
-      if (cancelled(id)) return;
-      document.querySelectorAll('#stepper .bridge').forEach((g) => g.classList.add('show'));
-      await sleep(500);
-      if (cancelled(id)) return;
-      document.getElementById('note').innerHTML = '3 段空档 + 两头 = <b>4</b> 个人';
-    }
-  },
-  {
-    title: '为什么少 6 个',
-    async play(id) {
-      show('diff');
-      const list = document.getElementById('diffList');
-      const note = document.getElementById('noteDiff');
-      list.innerHTML = '';
-      note.innerHTML = '1 个女生，7 个男生：7 − 1 = <b>6</b>';
-      list.appendChild(makeDiffRow('最后', 1, 7));
-      say('已经多 6', '先只看最后那个女生：<b>1 个女生、7 个男生</b>，男生已经多 6 个。');
+      paintSheet([
+        '男生 −（女生 − 1）= 7',
+        '男生 − 女生 + 1 = 7',
+        '男生 − 女生 = <b>6</b>',
+      ], 2);
+      document.getElementById('note').innerHTML = '括号拆开，+1 挪到右边：7 − 1 = 6';
+      say('多 6', '括号拆开：男生 − 女生 + 1 = 7。把 +1 挪过去，男生比女生<b>多 6</b>。');
       await sleep(900);
       if (cancelled(id)) return;
-
-      list.appendChild(makeDiffRow('再早一个', 2, 8));
-      note.innerHTML = '女生 +1，男生也 +1，还是 <b>多 6</b>';
-      say('还是 6', '往前加一个女生，她多握 1 个手，男生变成 8。2 和 8，还是多 6。');
-      await sleep(900);
-      if (cancelled(id)) return;
-
-      list.appendChild(makeDiffRow('再早一个', 3, 9));
-      note.innerHTML = '再加还是多 6。一直到第一人，<b>男生总比女生多 6</b>';
-      say('一直多 6', '每往前一个女生，男生也多 1 个。多出来的 6 <b>不会变</b>。');
-      await sleep(700);
+    }
+  },
+  {
+    title: '再加上一共 50',
+    async play(id) {
+      const sheet = document.getElementById('sheet');
+      sheet.innerHTML =
+        '<div class="brace-box on">' +
+          '<div class="brace">{</div>' +
+          '<div class="brace-eqs">' +
+            '<div class="eq on hot">男生 − 女生 = <b>6</b></div>' +
+            '<div class="eq on">男生 + 女生 = <b>50</b></div>' +
+          '</div>' +
+        '</div>';
+      document.getElementById('note').innerHTML = '差 6，和 50，就是和差';
+      say('两句话', '男生比女生多 6，两人加起来 50。这就是已经会的<b>和差</b>。');
+      await sleep(800);
       if (cancelled(id)) return;
     }
   },
   {
-    title: '一共 50，多 6',
+    title: '和差收口',
     async play(id) {
       show('bars');
       bars.set([28, 22]);
-      say('和差', '一共 <b>50</b> 人，男生比女生多 6。把多的 6 拿掉，剩下两份一样长。');
+      say('和差', '一共 <b>50</b>，多 6。把多的 6 拿掉，剩下两份一样长。');
       await sleep(500);
       if (cancelled(id)) return;
       bars.diff(0, 1, '多 6');
-      await sleep(600);
+      await sleep(500);
       if (cancelled(id)) return;
       bars.showNumbers(true);
     }
@@ -496,7 +248,7 @@ Anim.run([
       bars.set([28, 22]);
       bars.showNumbers(true);
       bars.diff(0, 1, '多 6');
-      say('答案', '男生 <b>28</b> 人。从 28 点到 7，点了 22 个女生。28 + 22 = 50。');
+      say('答案', '男生 <b>28</b> 人，女生 22 人。（50 + 6）÷ 2 = 28。');
       await sleep(400);
       if (cancelled(id)) return;
     }

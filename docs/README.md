@@ -117,7 +117,7 @@ layout:
     <tr>
       <td><i class="fa-handshake"></i></td>
       <td><strong>联欢会握手</strong></td>
-      <td>植树。1 个女生对 7 个男生已经多 6，这 6 一直不变</td>
+      <td>植树。最后一个是第几个，少握几个减 1，再和差</td>
       <td><a href="题目/联欢会握手.md">联欢会握手</a></td>
     </tr>
   </tbody>
