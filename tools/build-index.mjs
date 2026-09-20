@@ -71,7 +71,7 @@ const MOTIFS = [
     mark: '图形代表数',
     ink: '#0f766e',
     paper: '#e6f7f4',
-    demo: [],
+    demo: ['图形'],
   },
   {
     file: '盈亏问题.md',

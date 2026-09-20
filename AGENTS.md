@@ -93,6 +93,8 @@ npm run check    # 查所有内部链接
 
 ### 8. 提交发布
 
+做完就推，不用再问。
+
 ```
 git add -A && git commit -m "加一课：<知识点名>" && git push
 ```

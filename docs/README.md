@@ -102,6 +102,12 @@ layout:
       <td>假设法。8 只鸡一只只添上脚，尺子每次只走 2 格</td>
       <td><a href="题目/鸡兔同笼.md">鸡兔同笼</a></td>
     </tr>
+    <tr>
+      <td><i class="fa-puzzle-piece"></i></td>
+      <td><strong>图形算式</strong></td>
+      <td>图形推理。两个算式摆一起划掉，剩下的 ○ + △ = 22 就是钥匙</td>
+      <td><a href="题目/图形算式.md">图形算式</a></td>
+    </tr>
   </tbody>
 </table>
 
