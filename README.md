@@ -26,41 +26,34 @@
 
 - [倒油问题：看油流过去](demos/倒油问题-移多补少与差倍.html)
 
-## 想再加一课
-
-复制 [模板/新课模板.md](模板/新课模板.md)，填好题面和思路，放进 `题目/`，再把新页面加进 [SUMMARY.md](SUMMARY.md) 的目录里就行。动画（如果有）放进 `demos/`。
-
 ---
 
 ## 发布：怎么把它变成网站
 
-这个仓库同时供两处使用，同一套内容，两条发布线：
+同一套内容，两条发布线：
 
-- **GitHub Pages** 负责跑 `demos/` 里的互动动画（GitBook 不能直接运行仓库里的 HTML）。
-- **GitBook** 负责知识站本身：目录、讲解、搜索。
+- **GitBook** 负责知识站本身：目录、讲解、搜索。**已经上线**：
+  <https://zhaos-organization-4.gitbook.io/san-nian-ji-ao-shu-kan-de-dong-de-zhi-shi-zhan/>
+- **GitHub Pages** 负责跑 `demos/` 里的互动动画（GitBook 页面里不能直接运行仓库中的 HTML）。**还没建**。
+
+下面三步做完，就变成「改仓库 → 自动同步到网站」。
 
 ### 第一步：推到 GitHub
 
-在 GitHub 上新建一个仓库（公开），然后在本目录执行：
+在 GitHub 上新建一个**公开**仓库（公开才有免费的 Pages），**不要**勾选 Add a README——本地已经有了，勾了会冲突。然后在本目录执行：
 
 ```bash
 git add -A
-git commit -m "三年级奥数知识站：移多补少与差倍"
+git commit -m "补充发布说明"
 git remote add origin https://github.com/<你的账号>/<仓库名>.git
 git push -u origin main
 ```
 
 ### 第二步：开启 GitHub Pages
 
-仓库页面 → **Settings** → **Pages** → Source 选 **Deploy from a branch**，分支选 `main`、目录选 `/ (root)`，保存。
+仓库页面 → **Settings** → **Pages** → Source 选 **Deploy from a branch**，分支选 `main`、目录选 **`/ (root)`**，保存。
 
-等一两分钟，站点地址就是：
-
-```
-https://<你的账号>.github.io/<仓库名>/
-```
-
-打开它能看到动画目录页。单个动画的地址形如：
+等一两分钟，站点地址就是 `https://<你的账号>.github.io/<仓库名>/`，打开能看到动画目录页。单个动画的地址形如：
 
 ```
 https://<你的账号>.github.io/<仓库名>/demos/倒油问题-移多补少与差倍.html
@@ -68,32 +61,26 @@ https://<你的账号>.github.io/<仓库名>/demos/倒油问题-移多补少与�
 
 仓库里已经放了 `.nojekyll`，GitHub 不会拿 Jekyll 去处理这些文件，HTML 会原样提供。
 
-### 第三步：同步到 GitBook
+拿到地址后，把 GitBook 上「倒油问题」页里那段「动画要在本地打开」的提示换成这个真链接。
 
-1. 打开 [gitbook.com](https://www.gitbook.com) 登录，新建一个 Space。
-2. 在 Space 右上角 **Configure** → 选 **GitHub Sync**，授权 GitBook 访问你的 GitHub。
-3. 选中刚才那个仓库和 `main` 分支。
-4. 初次同步方向选 **GitHub → GitBook**（把仓库内容导入 GitBook）。
+### 第三步：接上 Git Sync
 
-   > 方向别选反了。选成 GitBook → GitHub 会用空 Space 覆盖掉仓库内容。
+> **方向别选反。** 现在 GitBook 上的内容比仓库里的 Markdown 更新、更完整（用了步骤器、提示框、卡片），而且线上页面地址已经定下来了。所以初次同步要选 **GitBook → GitHub**，让 GitBook 把内容写进仓库。选反了会用仓库里的旧稿覆盖线上内容，页面地址也会跟着变。
 
-5. 根目录保持仓库根即可，仓库里的 `.gitbook.yaml` 已经指明了首页和目录文件。
-6. 同步完成后点 **Publish**，就得到知识站的公开网址。
+1. 打开 [GitBook 站点后台](https://app.gitbook.com/o/1LnHUumneylpRhnARYHW/sites/site_rh5ao)，左侧点 **Git Sync**。
+2. **Connect GitHub**，授权 GitBook 访问你的 GitHub 账号。如果列表里找不到仓库，去 GitBook 的 GitHub App 设置里把该仓库加进可访问范围。
+3. **Source repository** 选刚才的仓库，分支选 `main`。
+4. **初次同步方向**保持 **GitBook → GitHub**。界面上的 *Swap direction* 是反向，别点。
+5. **Content mapping** 里把空间映射到 `/docs`，不要映射仓库根目录——根目录留给 GitHub Pages 的 `index.html`、`demos/`、`.nojekyll`，两边互不干扰。
+6. 点 **Sync**。同步完成后仓库里会多出 `docs/` 目录，里面是 GitBook 导出的规范 Markdown。
 
-### 第四步：把动画链接换成公开地址
+同步之后就是双向的：在 GitBook 里合并一个 change request 会自动提交到 GitHub；往 GitHub 推提交也会自动同步回 GitBook。
 
-例题页里的动画链接现在写的是相对路径，本地双击能用，但同步到 GitBook 之后点不开。把 [题目/倒油问题.md](题目/倒油问题.md) 里这一行：
+`docs/` 出现之后，根目录下现在这几个早期草稿就没用了，可以删掉，避免同一份内容有两处：`知识点/`、`题目/`、`模板/`、`SUMMARY.md`。`.gitbook.yaml` 也可以删——Git Sync 会在 `docs/` 下自己生成配置。
 
-```markdown
-[打开互动动画：看油流过去](../demos/倒油问题-移多补少与差倍.html)
-```
+## 想再加一课
 
-换成第二步得到的 Pages 地址：
+接上 Git Sync 之后，两种改法都行，改完都会自动同步：
 
-```markdown
-[打开互动动画：看油流过去](https://<你的账号>.github.io/<仓库名>/demos/倒油问题-移多补少与差倍.html)
-```
-
-> 地址里有中文，别自己敲。直接在 Pages 首页上右键那张动画卡片「复制链接」，粘过来最稳妥。
-
-改完提交推送，GitBook 会自动同步。
+- **在 GitBook 网页上写**：新建页面，写完合并 change request。
+- **在本地写**：在 `docs/` 下加 Markdown，提交推送。动画（如果有）放进根目录的 `demos/`，链接用第二步那个 Pages 地址。
