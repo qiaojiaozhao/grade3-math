@@ -73,6 +73,15 @@ const MOTIFS = [
     paper: '#e6f7f4',
     demo: [],
   },
+  {
+    file: '盈亏问题.md',
+    name: '盈亏',
+    slug: 'zhi-shi-dian/ying-kui-wen-ti',
+    mark: '一多一少',
+    ink: '#be123c',
+    paper: '#ffe4e6',
+    demo: [],
+  },
 ];
 
 const PROBLEM_SLUG = {
@@ -81,6 +90,7 @@ const PROBLEM_SLUG = {
   '甲乙两堆书.md': 'li-ti/jia-yi-liang-dui-shu',
   '图形算式.md': 'li-ti/tu-xing-suan-shi',
   '鸡兔同笼.md': 'li-ti/ji-tu-tong-long',
+  '分苹果.md': 'li-ti/fen-ping-guo',
 };
 
 const readDir = (d) =>
@@ -403,7 +413,7 @@ const html = `<!DOCTYPE html>
   </div>
 
   <div class="sec">
-    <h2>六种母题</h2>
+    <h2>母题一览</h2>
     <p>点卡片看骨架，点下面的小标签看例题或动画。</p>
   </div>
   <div class="map">

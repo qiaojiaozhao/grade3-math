@@ -1,5 +1,5 @@
 ---
-description: 三年级浅奥六种母题。先认出是哪一类，再看骨架，最后换一身衣服自己讲。
+description: 三年级浅奥母题地图。先认出是哪一类，再看骨架，最后换一身衣服自己讲。
 icon: map
 layout:
   width: wide
@@ -15,7 +15,7 @@ layout:
 陪孩子用的顺序：打开这张地图 → 让他猜是哪道母题 → 点进去看口诀和画面 → 做例题 → 合上页面，让他自己换一道「换了衣服」的题讲给你听。
 {% endhint %}
 
-## 六种母题
+## 母题一览
 
 <table data-view="cards">
   <thead>
@@ -62,6 +62,12 @@ layout:
       <td><strong>图形推理</strong></td>
       <td>图形代表数。两个算式摆一起，划掉一样多的</td>
       <td><a href="知识点/简单推理.md">简单推理</a></td>
+    </tr>
+    <tr>
+      <td><i class="fa-scale-unbalanced"></i></td>
+      <td><strong>盈亏</strong></td>
+      <td>两种分法，一多一少。多了加少了，除以两次分的差</td>
+      <td><a href="知识点/盈亏问题.md">盈亏</a></td>
     </tr>
   </tbody>
 </table>
