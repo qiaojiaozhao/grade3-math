@@ -224,6 +224,46 @@
     75%  { opacity: 1; }
     100% { opacity: 0; transform: translateY(-34px) scale(1); }
   }
+
+  /* ---------- 竖版 1080×1920 ---------- */
+  /* anim.css 里 portrait 会把舞台拉满整个画幅，但这道题的东西是按 500px 高的
+     坐标定的：旁白钉在顶、小鸡站在桌沿。舞台一拉高，中间就空出一大片。
+     所以这里不让舞台吃掉剩余高度，改成给它一个够用的高度、整块垂直居中，
+     再把小鸡和脚数尺放大一倍——竖版看的是手机，小了根本数不清腿。 */
+  body.portrait { justify-content: center; }
+  body.portrait h1 { font-size: 44px; margin-bottom: 18px; }
+  body.portrait .problem { font-size: 27px; line-height: 1.7; padding: 20px 26px; }
+  body.portrait .speech { font-size: 29px; min-height: 130px; padding: 20px 26px; }
+  body.portrait .speech .tag { font-size: 21px; padding: 2px 12px; }
+  body.portrait .spark { font-size: 52px; }
+  body.portrait .stage-wrap { flex: none; }
+  body.portrait .stage {
+    height: 1290px;
+    --table-edge: 250px;
+    --table-face: 214px;
+  }
+
+  body.portrait .meter-wrap { left: 56px; right: 56px; top: 330px; }
+  body.portrait .meter { height: 52px; }
+  body.portrait .meter-num { top: -50px; font-size: 30px; }
+  body.portrait .meter-num b { font-size: 36px; }
+  body.portrait .swap-badge { top: -50px; font-size: 26px; }
+  body.portrait .meter-gap { border-radius: 6px; }
+  body.portrait .meter-gap span { top: -40px; font-size: 24px; }
+  body.portrait .meter-target { width: 5px; top: -12px; bottom: -12px; }
+  body.portrait .meter-target span { bottom: -38px; font-size: 22px; }
+
+  /* 小鸡放大三成半。不能再大：8 只要在 1080 宽里排开还不互相压住，
+     一只顶多 112 宽（8×112 + 7×16 的间距刚好吃满）。腿要一根根数清楚，
+     跟着一起加粗加长。 */
+  body.portrait .animal { width: 112px; height: 200px; bottom: 182px; }
+  body.portrait .animal .art { height: 158px; bottom: 30px; }
+  body.portrait .animal .art-bun { left: -8px; right: -8px; height: 168px; }
+  body.portrait .animal .legs { height: 35px; gap: 12px; }
+  body.portrait .animal .leg { width: 11px; height: 35px; border-radius: 4px; }
+  body.portrait .animal .qmark { bottom: 84px; font-size: 40px; }
+  body.portrait .animal .tick { bottom: -36px; font-size: 22px; }
+  body.portrait .plus2 { font-size: 32px; }
 </style>
 </head>
 <body>
@@ -284,7 +324,9 @@ for (let i = 0; i < N; i++) {
 
 function layout() {
   const W = stage.clientWidth;
-  const AW = 84, PAD = 46;
+  // 宽度从元素上量，别写死：竖版里小鸡放大了一倍，写死会算出重叠的间距
+  const AW = animals[0].offsetWidth || 84;
+  const PAD = Math.round(AW * 0.55);
   const step = (W - PAD * 2 - AW) / (N - 1);
   animals.forEach((el, i) => { el.style.left = (PAD + step * i) + 'px'; });
 }
