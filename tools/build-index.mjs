@@ -100,6 +100,15 @@ const MOTIFS = [
     paper: '#fce7f3',
     demo: ['桃子'],
   },
+  {
+    file: '过火车问题.md',
+    name: '过火车',
+    slug: 'zhi-shi-dian/guo-huo-che-wen-ti',
+    mark: '车头进车尾出',
+    ink: '#9a3412',
+    paper: '#ffedd5',
+    demo: ['过桥'],
+  },
 ];
 
 const PROBLEM_SLUG = {
@@ -111,6 +120,7 @@ const PROBLEM_SLUG = {
   '分苹果.md': 'li-ti/fen-ping-guo',
   '联欢会握手.md': 'li-ti/lian-huan-hui-wo-shou',
   '一筐桃子.md': 'li-ti/yi-kuang-tao-zi',
+  '过桥.md': 'li-ti/guo-qiao',
 };
 
 const readDir = (d) =>

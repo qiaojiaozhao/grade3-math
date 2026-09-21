@@ -81,6 +81,12 @@ layout:
       <td>从最后剩下的倒回去。多的先还，再翻倍</td>
       <td><a href="知识点/还原问题.md">还原</a></td>
     </tr>
+    <tr>
+      <td><i class="fa-train"></i></td>
+      <td><strong>过火车</strong></td>
+      <td>过完才算过。车头进、车尾出，两段路加在一起</td>
+      <td><a href="知识点/过火车问题.md">过火车</a></td>
+    </tr>
   </tbody>
 </table>
 
@@ -131,6 +137,12 @@ layout:
       <td><strong>一筐桃子</strong></td>
       <td>还原。最后剩 10 不是半筐，先还 1 个再翻倍</td>
       <td><a href="题目/一筐桃子.md">一筐桃子</a></td>
+    </tr>
+    <tr>
+      <td><i class="fa-train"></i></td>
+      <td><strong>过桥</strong></td>
+      <td>过火车。车头出桥还没完，车身和桥要加在一起</td>
+      <td><a href="题目/过桥.md">过桥</a></td>
     </tr>
   </tbody>
 </table>

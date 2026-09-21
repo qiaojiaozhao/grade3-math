@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>过桥 · 动态演示</title>
+<meta name="description" content="车头出桥还没过完。车尾也离开，走过的路才是车身加桥。180 + 120，再除以 15，要 20 秒。">
+<link rel="stylesheet" href="lib/anim.css?v=portrait">
+<style>
+  html, body { background: #07080a; }
+
+  :root {
+    --car-w: 36px;
+    --eng-w: 56px;
+    --gap: 3px;
+    --car-h: 34px;
+    --eng-h: 42px;
+  }
+  body.portrait {
+    --car-w: 44px;
+    --eng-w: 68px;
+    --gap: 4px;
+    --car-h: 42px;
+    --eng-h: 52px;
+  }
+
+  .yard {
+    position: absolute;
+    inset: 132px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 18px;
+  }
+  body.portrait .yard { inset: 168px 28px 36px; gap: 22px; }
+
+  .compare {
+    display: none;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .compare.on { display: flex; }
+  .card {
+    background: #1c1f26;
+    border: 1px solid #2a2e36;
+    border-radius: 18px;
+    padding: 14px 16px 16px;
+  }
+  .clabel {
+    text-align: center;
+    font-size: 16px;
+    font-weight: 800;
+    color: #e8c27a;
+    margin-bottom: 10px;
+  }
+  body.portrait .clabel { font-size: 20px; }
+  .row {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: var(--gap);
+    min-height: 56px;
+  }
+  #trainPreview { flex-direction: row-reverse; }
+
+  .track-wrap {
+    display: none;
+    background: #1c1f26;
+    border: 1px solid #2a2e36;
+    border-radius: 22px;
+    padding: 28px 12px 18px;
+  }
+  .track-wrap.on { display: block; }
+  .track {
+    position: relative;
+    height: 110px;
+  }
+  body.portrait .track { height: 140px; }
+  .rail {
+    position: absolute;
+    left: 0; right: 0; bottom: 22px;
+    height: 4px;
+    background: #5a616e;
+    border-radius: 2px;
+  }
+  .rail::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; top: 8px;
+    height: 3px;
+    background: #3a404c;
+  }
+
+  .pole {
+    display: none;
+    position: absolute;
+    bottom: 26px;
+    width: 8px;
+    height: 72px;
+    margin-left: -4px;
+    background: linear-gradient(#d9dde6, #8b93a1);
+    border-radius: 3px 3px 1px 1px;
+    z-index: 3;
+  }
+  .pole.on { display: block; }
+  .pole::before {
+    content: '';
+    position: absolute;
+    top: -6px; left: -7px;
+    width: 22px; height: 10px;
+    background: #cfd5de;
+    border-radius: 2px;
+  }
+
+  .bridge {
+    display: none;
+    position: absolute;
+    bottom: 6px;
+    height: 52px;
+    z-index: 1;
+  }
+  body.portrait .bridge { height: 64px; bottom: 4px; }
+  .bridge.on { display: flex; }
+  .slabs {
+    display: flex;
+    gap: var(--gap);
+    height: 100%;
+    align-items: flex-end;
+  }
+  .slab {
+    width: var(--car-w);
+    height: 70%;
+    background: #4a6aa0;
+    border: 2px solid #8eb0e8;
+    border-radius: 6px 6px 4px 4px;
+    box-sizing: border-box;
+    box-shadow: 0 4px 0 #2a3d5c;
+  }
+  .blabel {
+    position: absolute;
+    top: -22px;
+    left: 0; right: 0;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 800;
+    color: #8ec6f5;
+  }
+  body.portrait .blabel { font-size: 18px; top: -26px; }
+
+  .train {
+    position: absolute;
+    bottom: 28px;
+    left: 0;
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: flex-end;
+    gap: var(--gap);
+    z-index: 2;
+    will-change: transform;
+  }
+  .engine {
+    width: var(--eng-w);
+    height: var(--eng-h);
+    background: linear-gradient(180deg, #e25a4a, #9c2b22);
+    border-radius: 8px 20px 8px 8px;
+    position: relative;
+    flex: none;
+  }
+  .engine::before {
+    content: '';
+    position: absolute;
+    top: -14px; right: 14px;
+    width: 12px; height: 16px;
+    background: #5c6573;
+    border-radius: 3px 3px 0 0;
+  }
+  .engine::after {
+    content: '';
+    position: absolute;
+    top: 10px; right: 10px;
+    width: 16px; height: 14px;
+    background: #8ec6f5;
+    border-radius: 3px;
+  }
+  .car {
+    width: var(--car-w);
+    height: var(--car-h);
+    background: linear-gradient(180deg, #f0d48a, #c4922e);
+    border: 2px solid #8a6a3e;
+    border-radius: 6px;
+    box-sizing: border-box;
+    flex: none;
+    position: relative;
+  }
+  .car::after, .engine .wheel, .car .wheel {
+    content: '';
+  }
+  .wheel {
+    position: absolute;
+    bottom: -9px;
+    width: 12px; height: 12px;
+    background: #2a2e36;
+    border: 2px solid #8b93a1;
+    border-radius: 50%;
+  }
+  .engine .wheel.a { left: 8px; }
+  .engine .wheel.b { right: 10px; }
+  .car .wheel.a { left: 4px; }
+  .car .wheel.b { right: 4px; }
+
+  .ruler {
+    display: none;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 0;
+    min-height: 52px;
+  }
+  .ruler.on { display: flex; }
+  .seg {
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 800;
+    color: #1a1208;
+  }
+  body.portrait .seg { height: 34px; font-size: 18px; }
+  .seg.train-seg {
+    width: calc(var(--eng-w) + 6 * var(--car-w) + 6 * var(--gap));
+    background: #e8c27a;
+  }
+  .seg.bridge-seg {
+    width: calc(4 * var(--car-w) + 3 * var(--gap));
+    background: #6f82a6;
+    color: #eaf2ff;
+  }
+
+  .count {
+    min-height: 40px;
+    text-align: center;
+    font-size: 28px;
+    font-weight: 800;
+    color: #ffb347;
+  }
+  .count b { color: #ff8a3d; }
+  body.portrait .count { font-size: 34px; min-height: 48px; }
+  .count.pop { animation: numpop .45s cubic-bezier(.2, 1.6, .3, 1); }
+  @keyframes numpop {
+    0% { transform: scale(.6); }
+    55% { transform: scale(1.16); }
+    100% { transform: scale(1); }
+  }
+</style>
+</head>
+<body class="theme-dark">
+
+<h1>过桥：车头进，车尾出</h1>
+<div class="problem">
+  火车长 <b>180</b> 米，每秒走 <b>15</b> 米，过一座 <b>120</b> 米的桥。从车头上桥到车尾离开，要几秒？
+</div>
+
+<div class="stage-wrap">
+  <div class="stage" id="stage">
+    <div class="yard">
+      <div class="compare" id="compare">
+        <div class="card">
+          <div class="clabel" id="labelTrain">火车</div>
+          <div class="row" id="trainPreview"></div>
+        </div>
+        <div class="card">
+          <div class="clabel" id="labelBridge">桥</div>
+          <div class="row" id="bridgePreview"></div>
+        </div>
+      </div>
+
+      <div class="track-wrap" id="trackWrap">
+        <div class="track" id="track">
+          <div class="rail"></div>
+          <div class="pole" id="pole"></div>
+          <div class="bridge" id="bridge">
+            <div class="blabel">桥</div>
+            <div class="slabs" id="slabs"></div>
+          </div>
+          <div class="train" id="train"></div>
+        </div>
+      </div>
+
+      <div class="ruler" id="ruler">
+        <div class="seg train-seg" id="segTrain">车身</div>
+        <div class="seg bridge-seg" id="segBridge">桥</div>
+      </div>
+      <div class="count" id="count"></div>
+    </div>
+  </div>
+</div>
+
+<script src="lib/anim.js"></script>
+<script>
+const { sleep, cancelled, tween, lerp, say, pop } = Anim;
+
+const compare = document.getElementById('compare');
+const trackWrap = document.getElementById('trackWrap');
+const track = document.getElementById('track');
+const pole = document.getElementById('pole');
+const bridge = document.getElementById('bridge');
+const slabs = document.getElementById('slabs');
+const train = document.getElementById('train');
+const ruler = document.getElementById('ruler');
+const countEl = document.getElementById('count');
+const trainPreview = document.getElementById('trainPreview');
+const bridgePreview = document.getElementById('bridgePreview');
+
+function carEl() {
+  const el = document.createElement('div');
+  el.className = 'car';
+  el.innerHTML = '<i class="wheel a"></i><i class="wheel b"></i>';
+  return el;
+}
+
+function engineEl() {
+  const el = document.createElement('div');
+  el.className = 'engine';
+  el.innerHTML = '<i class="wheel a"></i><i class="wheel b"></i>';
+  return el;
+}
+
+function buildTrain(box) {
+  box.innerHTML = '';
+  box.appendChild(engineEl());
+  for (let i = 0; i < 6; i++) box.appendChild(carEl());
+}
+
+function buildSlabs() {
+  slabs.innerHTML = '';
+  for (let i = 0; i < 4; i++) {
+    const s = document.createElement('div');
+    s.className = 'slab';
+    slabs.appendChild(s);
+  }
+}
+
+function setX(px) {
+  train.style.transform = 'translateX(' + px + 'px)';
+}
+
+function setCount(html) {
+  countEl.innerHTML = html;
+  countEl.classList.remove('pop');
+  void countEl.offsetWidth;
+  countEl.classList.add('pop');
+}
+
+function measure() {
+  const tw = track.clientWidth;
+  const trainW = train.offsetWidth;
+  const bridgeW = bridge.offsetWidth;
+  const bridgeLeft = (tw - bridgeW) / 2;
+  const poleX = Math.round(tw * 0.48);
+  return {
+    trainW,
+    bridgeW,
+    bridgeLeft,
+    poleX,
+    poleStart: poleX - trainW,
+    poleEnd: poleX,
+    bridgeStart: bridgeLeft - trainW,
+    headOut: bridgeLeft + bridgeW - trainW,
+    bridgeEnd: bridgeLeft + bridgeW,
+  };
+}
+
+function placeBridge(m) {
+  bridge.style.left = m.bridgeLeft + 'px';
+}
+
+function placePole(m) {
+  pole.style.left = m.poleX + 'px';
+}
+
+function showCompare(on) {
+  compare.classList.toggle('on', on);
+}
+function showTrack(on) {
+  trackWrap.classList.toggle('on', on);
+}
+function showPole(on) {
+  pole.classList.toggle('on', on);
+}
+function showBridge(on) {
+  bridge.classList.toggle('on', on);
+}
+function showRuler(on) {
+  ruler.classList.toggle('on', on);
+}
+
+function resetVisuals() {
+  showCompare(false);
+  showTrack(false);
+  showPole(false);
+  showBridge(false);
+  showRuler(false);
+  trainPreview.innerHTML = '';
+  bridgePreview.innerHTML = '';
+  train.innerHTML = '';
+  slabs.innerHTML = '';
+  countEl.textContent = '';
+  countEl.classList.remove('pop');
+  setX(0);
+  document.getElementById('labelTrain').textContent = '火车';
+  document.getElementById('labelBridge').textContent = '桥';
+  document.getElementById('segTrain').textContent = '车身';
+  document.getElementById('segBridge').textContent = '桥';
+}
+
+async function slide(from, to, ms, id) {
+  await tween(ms, id, (p) => setX(lerp(from, to, p)));
+}
+
+Anim.run([
+  {
+    title: '先看谁长',
+    async play(id) {
+      showCompare(true);
+      buildTrain(trainPreview);
+      for (let i = 0; i < 4; i++) {
+        const s = document.createElement('div');
+        s.className = 'slab';
+        bridgePreview.appendChild(s);
+      }
+      say('先看', '先<b>不看数字</b>。火车一节一节，桥一块一块，谁更长？');
+      await sleep(800);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '过电线杆',
+    async play(id) {
+      showTrack(true);
+      showPole(true);
+      buildTrain(train);
+      buildSlabs();
+      const m = measure();
+      placePole(m);
+      setX(m.poleStart);
+      say('对照', '先看过<b>电线杆</b>。杆没有厚度，车头到、车尾过，只走了车身。');
+      await sleep(400);
+      if (cancelled(id)) return;
+      await slide(m.poleStart, m.poleEnd, 1400, id);
+      if (cancelled(id)) return;
+      pop('只走车身');
+      await sleep(400);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '车头刚进桥',
+    async play(id) {
+      showTrack(true);
+      showBridge(true);
+      buildTrain(train);
+      buildSlabs();
+      const m = measure();
+      placeBridge(m);
+      setX(m.bridgeStart);
+      say('上桥', '现在过桥。车头刚进桥口——<b>过完了吗？</b>没有，后面还有一长串。');
+      await sleep(700);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '车头出桥还没完',
+    async play(id) {
+      showTrack(true);
+      showBridge(true);
+      buildTrain(train);
+      buildSlabs();
+      const m = measure();
+      placeBridge(m);
+      setX(m.bridgeStart);
+      say('卡住', '车头走出桥，整列火车还压在桥上。');
+      await sleep(300);
+      if (cancelled(id)) return;
+      await slide(m.bridgeStart, m.headOut, 1200, id);
+      if (cancelled(id)) return;
+      pop('还没过完');
+      await sleep(500);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '车尾也离开',
+    async play(id) {
+      showTrack(true);
+      showBridge(true);
+      buildTrain(train);
+      buildSlabs();
+      const m = measure();
+      placeBridge(m);
+      setX(m.headOut);
+      say('过完', '一直走到<b>车尾也离开</b>。多走的这一截，正好是车身那么长。');
+      await sleep(300);
+      if (cancelled(id)) return;
+      await slide(m.headOut, m.bridgeEnd, 1100, id);
+      if (cancelled(id)) return;
+      showRuler(true);
+      pop('车身 + 桥');
+      await sleep(500);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '两段加起来',
+    async play(id) {
+      showTrack(true);
+      showBridge(true);
+      showRuler(true);
+      buildTrain(train);
+      buildSlabs();
+      const m = measure();
+      placeBridge(m);
+      setX(m.bridgeEnd);
+      document.getElementById('segTrain').textContent = '车身 180';
+      document.getElementById('segBridge').textContent = '桥 120';
+      say('相加', '走过的路是两段加在一起。');
+      await sleep(500);
+      if (cancelled(id)) return;
+      setCount('180 + 120 = <b>300</b> 米');
+      await sleep(700);
+      if (cancelled(id)) return;
+      setCount('300 ÷ 15 = <b>20</b> 秒');
+      pop('20 秒');
+      await sleep(500);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '要 20 秒',
+    async play(id) {
+      showTrack(true);
+      showBridge(true);
+      showRuler(true);
+      buildTrain(train);
+      buildSlabs();
+      const m = measure();
+      placeBridge(m);
+      setX(m.bridgeEnd);
+      document.getElementById('segTrain').textContent = '车身 180';
+      document.getElementById('segBridge').textContent = '桥 120';
+      setCount('要 <b>20</b> 秒');
+      say('答案', '从车头上桥到车尾离开，要 <b>20</b> 秒。过电线杆只算车身，过桥要把车身和桥加起来。');
+      await sleep(700);
+      if (cancelled(id)) return;
+    }
+  },
+], { reset: resetVisuals });
+</script>
+</body>
+</html>
