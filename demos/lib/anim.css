@@ -147,3 +147,51 @@ h1 {
 .dot.on { background: var(--brand); }
 
 .hint { margin-top: 8px; font-size: 13px; color: var(--ink-soft); }
+
+/* 深色皮肤。页面 <body class="theme-dark"> 才生效，其他动画不受影响。 */
+body.theme-dark {
+  --ink: #e8eaed;
+  --ink-soft: #8b93a0;
+  --brand: #6ea8ff;
+  --accent: #ff8a3d;
+  background: radial-gradient(ellipse at 50% 0%, #1c1e24 0%, #0c0d10 58%, #07080a 100%);
+  color: var(--ink);
+}
+body.theme-dark h1 { color: #f4f6f8; }
+body.theme-dark .problem {
+  background: #16181c;
+  box-shadow: 0 3px 16px #0008;
+  border: 1px solid #2a2e36;
+}
+body.theme-dark .stage-wrap {
+  background: #101216;
+  box-shadow: 0 12px 36px #000a;
+  border: 1px solid #2a2e36;
+}
+body.theme-dark .stage {
+  background: linear-gradient(180deg, #1a1d23 0%, #101216 100%);
+}
+body.theme-dark .stage.has-table {
+  background:
+    linear-gradient(#0000 0 calc(100% - var(--table-edge)),
+                    #3d3228 calc(100% - var(--table-edge)) calc(100% - var(--table-face)),
+                    #2a221c calc(100% - var(--table-face))),
+    linear-gradient(180deg, #1a1d23 0%, #101216 100%);
+}
+body.theme-dark .speech {
+  background: #1c1f26;
+  color: var(--ink);
+  box-shadow: 0 4px 18px #0007;
+  border-left-color: var(--brand);
+}
+body.theme-dark .spark {
+  color: #ffb347;
+  text-shadow: 0 2px 0 #000, 0 0 16px #ff8a3d55;
+}
+body.theme-dark #prevBtn,
+body.theme-dark #replayBtn {
+  background: #2a2e36;
+  color: #d4d8e0;
+}
+body.theme-dark .dot { background: #3a4048; }
+body.theme-dark .hint { color: var(--ink-soft); }

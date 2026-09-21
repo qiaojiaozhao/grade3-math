@@ -14,8 +14,23 @@
     --oil-a-deep: #d97a0b;
     --oil-b: #3ea0e8;
     --oil-b-deep: #1b74c4;
-    --wood: #8b6946;
+    --wood: #c4a06a;
   }
+  body.theme-dark .barrel .name { color: #f0e6d4; }
+  body.theme-dark .jar {
+    background: linear-gradient(90deg, #ffffff14, #ffffff08 40%, #0006);
+    box-shadow: inset 10px 0 16px #fff2, inset -8px 0 14px #0008;
+  }
+  body.theme-dark .rim { background: #8a6a3e; border-color: var(--wood); }
+  body.theme-dark .guide { border-top-color: #ff8a3d99; }
+  body.theme-dark .guide span { color: #ffb347; }
+  body.theme-dark .jug-pot {
+    background: #2a241c;
+    border-color: #c4a06a;
+  }
+  body.theme-dark .jug-label { color: #f0e6d4; }
+  body.theme-dark .jug-handle { border-color: #c4a06a; }
+  body.theme-dark .jug-spout { background: #c4a06a; }
 
   .barrel {
     position: absolute;
@@ -192,7 +207,7 @@
   }
 </style>
 </head>
-<body>
+<body class="theme-dark">
 
 <h1>倒油问题：看油流过去</h1>
 <div class="problem">
