@@ -5,7 +5,7 @@
  *
  * 做法是开一个真实的 Chromium 播一遍并录屏，所以补间动画是连续的，
  * 不是截图拼起来的幻灯片。录制时会隐藏播放按钮和底部提示 —— 视频里点不了，
- * 留着只会分散注意力，而且省出的高度正好让画面塞进 1280×800。
+ * 留着只会分散注意力。默认竖版 1080×1920，对齐微信视频号 9:16。
  */
 import fs from 'node:fs';
 import os from 'node:os';
@@ -27,13 +27,13 @@ if (!fs.existsSync(htmlPath)) {
   process.exit(1);
 }
 
-const W = parseInt(process.argv[3] || '1280', 10);
-const H = parseInt(process.argv[4] || '800', 10);
+const W = parseInt(process.argv[3] || '1080', 10);
+const H = parseInt(process.argv[4] || '1920', 10);
 const outPath = htmlPath.replace(/\.html$/, '.mp4');
 
-const HIDE_CONTROLS = `
-  .controls { display: none !important; }
-  .hint { display: none !important; }
+const RECORD_CHROME = `
+  html, body { background: #07080a !important; }
+  .controls, .dots, .hint { display: none !important; }
 `;
 
 const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'anim-rec-'));
@@ -45,13 +45,18 @@ try {
     recordVideo: { dir: tmpDir, size: { width: W, height: H } },
   });
   const page = await context.newPage();
+  await page.addInitScript(() => {
+    const apply = () => document.body && document.body.classList.add('portrait');
+    document.addEventListener('DOMContentLoaded', apply);
+  });
 
   const errors = [];
   page.on('pageerror', (e) => errors.push(String(e)));
 
   await page.goto('file://' + htmlPath);
   await page.waitForFunction(() => typeof Anim !== 'undefined', null, { timeout: 15000 });
-  await page.addStyleTag({ content: HIDE_CONTROLS });
+  await page.evaluate(() => document.body.classList.add('portrait'));
+  await page.addStyleTag({ content: RECORD_CHROME });
 
   const overflow = await page.evaluate(
     () => document.documentElement.scrollHeight - document.documentElement.clientHeight

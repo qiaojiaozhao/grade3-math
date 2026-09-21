@@ -50,7 +50,8 @@ for (const dir of ['demos', '模板']) {
     const text = fs.readFileSync(file, 'utf8');
     for (const m of text.matchAll(/(?:src|href)="((?!https?:|#|data:)[^"]+)"/g)) {
       checked++;
-      const target = path.resolve(path.dirname(file), m[1]);
+      const raw = m[1].split(/[?#]/)[0];
+      const target = path.resolve(path.dirname(file), raw);
       if (!fs.existsSync(target)) {
         broken++;
         console.error(`  ✗ ${path.relative(ROOT, file)} -> ${m[1]}`);

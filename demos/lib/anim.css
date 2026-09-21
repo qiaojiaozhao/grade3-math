@@ -195,3 +195,54 @@ body.theme-dark #replayBtn {
 }
 body.theme-dark .dot { background: #3a4048; }
 body.theme-dark .hint { color: var(--ink-soft); }
+body.theme-dark .bar-name { color: #f0e6d4; }
+body.theme-dark .bar-guide { border-top-color: #ff8a3d99; }
+body.theme-dark .bar-guide span { color: #ffb347; }
+body.theme-dark .bar-diff { border-color: #ff8a3d; }
+body.theme-dark .bar-diff span {
+  background: #1c1f26;
+  color: #ffb347;
+}
+
+/* 竖版：视频号 1080×1920。录制 / 质检脚本会给 body 加上 portrait。
+   上下留出安全区，关键数字别贴顶或贴底。 */
+body.portrait {
+  padding: 64px 0 120px;
+  height: 100vh;
+  min-height: 100vh;
+  overflow: hidden;
+  justify-content: flex-start;
+}
+body.portrait h1 {
+  font-size: 30px;
+  line-height: 1.35;
+  padding: 0 36px;
+  margin-bottom: 10px;
+}
+body.portrait .problem {
+  width: calc(100% - 72px);
+  max-width: none;
+  margin: 0 36px 16px;
+  font-size: 20px;
+  line-height: 1.65;
+  padding: 14px 20px;
+}
+body.portrait .stage-wrap {
+  width: 100%;
+  max-width: none;
+  flex: 1;
+  min-height: 0;
+  border-radius: 28px 28px 0 0;
+}
+body.portrait .stage {
+  height: 100%;
+}
+body.portrait .speech {
+  font-size: 22px;
+  min-height: 104px;
+  padding: 14px 20px;
+}
+body.portrait .spark {
+  top: 46%;
+  font-size: 36px;
+}

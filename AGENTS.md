@@ -185,8 +185,9 @@ npm run cutout -- ~/生成的图.png demos/assets/鸡.png
 
 ### 尺寸
 
-画幅按 1280×800 设计，舞台 `--stage-h` 默认 500px。条形高度用「最大的量 × scale ≤ 290」定，
-再高就会顶到旁白气泡。`npm run shoot` 会把这类问题报出来。
+新动画默认黑底：`<body class="theme-dark">`。视频按微信视频号竖版 **1080×1920（9:16）** 录，
+`npm run shoot` / `npm run record` 都是这个画幅。上下留安全区，关键数字别贴顶或贴底。
+条形高度用「最大的量 × scale」能进舞台、不顶旁白。`npm run shoot` 会报出来。
 
 ## 目录
 

@@ -27,8 +27,8 @@ if (!fs.existsSync(htmlPath)) {
   process.exit(1);
 }
 
-const W = parseInt(process.argv[3] || '1280', 10);
-const H = parseInt(process.argv[4] || '800', 10);
+const W = parseInt(process.argv[3] || '1080', 10);
+const H = parseInt(process.argv[4] || '1920', 10);
 const outDir = path.join(ROOT, '.shots', path.basename(htmlPath, '.html'));
 
 fs.rmSync(outDir, { recursive: true, force: true });
@@ -36,13 +36,18 @@ fs.mkdirSync(outDir, { recursive: true });
 
 const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: W, height: H } });
+await page.addInitScript(() => {
+  const apply = () => document.body && document.body.classList.add('portrait');
+  document.addEventListener('DOMContentLoaded', apply);
+});
 
 const errors = [];
 page.on('pageerror', (e) => errors.push(String(e)));
 
 await page.goto('file://' + htmlPath);
 await page.waitForFunction(() => typeof Anim !== 'undefined', null, { timeout: 15000 });
-await page.addStyleTag({ content: '.controls{display:none!important}.hint{display:none!important}' });
+await page.evaluate(() => document.body.classList.add('portrait'));
+await page.addStyleTag({ content: '.controls,.dots,.hint{display:none!important}' });
 
 const layout = await page.evaluate(() => ({
   overflow: document.documentElement.scrollHeight - document.documentElement.clientHeight,
