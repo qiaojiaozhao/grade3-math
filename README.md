@@ -17,7 +17,8 @@
 | 例题 | `模板/例题模板.md` | `docs/题目/<名字>.md` |
 | 动画 | `模板/动画模板.html` | `demos/<例题名>-<知识点>.html` |
 
-写完把新页面加进 `docs/SUMMARY.md`，再跑一次 `npm run index` 和 `npm run check`。
+三个文件可以用 `npm run new -- <母题名> <例题名>` 一次从模板建好。
+写完把新页面加进 `docs/SUMMARY.md`，再跑 `npm run ship -- demos/x.html`（质检、录制、重建首页、查链接一次做完）。
 
 ## 目录结构
 
@@ -52,7 +53,9 @@ Markdown。只映射 `docs/`，根目录的 README、AGENTS.md、`模板/` 就�
 
 | 命令 | 做什么 |
 | --- | --- |
-| `npm run shoot -- demos/x.html` | 逐幕截图质检：查超框、查旁白挡字、查报错 |
+| `npm run new -- <母题名> <例题名>` | 从模板建好母题页、例题页、动画页 |
+| `npm run ship -- demos/x.html` | 质检 + 录制并行跑，再重建首页、查链接 |
+| `npm run shoot -- demos/x.html` | 逐幕截图质检：查超框、查旁白挡字、查报错，并出 `sheet.png` 总览图 |
 | `npm run record -- demos/x.html` | 录成 mp4，存在 html 旁边 |
 | `npm run index` | 重新生成首页 `index.html` |
 | `npm run check` | 查所有内部链接有没有断 |

@@ -119,6 +119,31 @@ for (let i = 0; i < layout.scenes; i++) {
   }
 }
 
+// 把所有幕拼成一张总览图。看一张比逐张点开快得多，也更容易发现前后幕不连贯。
+const COLS = 4;
+const TILE_W = Math.floor(1080 / COLS);
+const TILE_H = Math.round((TILE_W * H) / W);
+const rows = Math.ceil(layout.scenes / COLS);
+// setContent 出来的页面是空白源，读不到 file://，所以把图内嵌成 data URL
+const tiles = Array.from({ length: layout.scenes }, (_, i) => {
+  const b64 = fs.readFileSync(path.join(outDir, `scene${i + 1}.png`)).toString('base64');
+  return `
+  <figure>
+    <img src="data:image/png;base64,${b64}">
+    <figcaption>第 ${i + 1} 幕</figcaption>
+  </figure>`;
+}).join('');
+const sheet = await browser.newPage({ viewport: { width: TILE_W * COLS, height: (TILE_H + 28) * rows } });
+await sheet.setContent(`<!DOCTYPE html><meta charset="UTF-8"><style>
+  body { margin: 0; background: #111; display: grid; grid-template-columns: repeat(${COLS}, ${TILE_W}px); }
+  figure { margin: 0; width: ${TILE_W}px; }
+  img { display: block; width: ${TILE_W}px; height: ${TILE_H}px; object-fit: contain; }
+  figcaption { height: 28px; line-height: 28px; text-align: center; color: #ddd; font: 700 14px sans-serif; }
+</style>${tiles}`);
+await sheet.waitForFunction(() => [...document.images].every((im) => im.complete));
+const sheetPath = path.join(outDir, 'sheet.png');
+await sheet.screenshot({ path: sheetPath });
+
 await browser.close();
 
 if (errors.length) {
@@ -126,7 +151,7 @@ if (errors.length) {
   console.error('页面报错:\n  ' + errors.join('\n  '));
 }
 
-console.log(`截图在 ${path.relative(ROOT, outDir)}/`);
+console.log(`截图在 ${path.relative(ROOT, outDir)}/，总览图 ${path.relative(ROOT, sheetPath)}`);
 if (problems) {
   console.error(`\n✗ 有 ${problems} 处问题要处理`);
   process.exit(1);

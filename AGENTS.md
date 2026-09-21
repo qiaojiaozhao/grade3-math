@@ -33,7 +33,15 @@ npm run pdf -- ~/Downloads/讲义.pdf
 这个站按**浅奥母题**组织，不按教材章节。先问：这是新骨头，还是旧骨头换了衣服？
 
 - 旧骨头：打开对应母题页，在「换一身衣服」里加一题，例题页末尾也加一条。别新建母题。
-- 新骨头：从 `模板/知识点模板.md` 复制到 `docs/知识点/<母题名>.md`，再挂进 `docs/SUMMARY.md`、`docs/认出母题.md` 和 `docs/大纲.md`（把那一行从「建议下一层」挪到「已经写成课的」）。
+- 新骨头：一条命令把三个文件从模板建好，名字和互相之间的链接已填上：
+
+  ```
+  npm run new -- <母题名> <例题名>
+  ```
+
+  它会生成 `docs/知识点/<母题名>.md`、`docs/题目/<例题名>.md`、`demos/<例题名>-<母题名>.html`，
+  已存在的不覆盖（母题已存在就是旧骨头，它会提醒你）。然后再挂进 `docs/SUMMARY.md`、
+  `docs/认出母题.md` 和 `docs/大纲.md`（把那一行从「建议下一层」挪到「已经写成课的」）。
 
 口诀这一条格外重要，它会被首页卡片抓去当摘要，必须能独立看懂：
 
@@ -42,7 +50,7 @@ npm run pdf -- ~/Downloads/讲义.pdf
 
 ### 3. 写例题页
 
-从 `模板/例题模板.md` 复制到 `docs/题目/<例题名>.md`。
+`npm run new` 已经建好 `docs/题目/<例题名>.md`，把里面的【方括号】填掉。
 
 例题页里指向动画的链接要用 **GitHub Pages 的绝对地址**
 （`https://qiaojiaozhao.github.io/grade3-math/demos/<文件名>`），不能用 `../demos/`。
@@ -52,35 +60,30 @@ npm run pdf -- ~/Downloads/讲义.pdf
 
 ### 4. 做动画
 
-从 `模板/动画模板.html` 复制到 `demos/<例题名>-<知识点>.html`，把两处 `../demos/` 改成 `lib/`。
-引擎用法见下面「动画怎么写」。
+`npm run new` 已经建好 `demos/<例题名>-<母题名>.html`（`lib/` 路径已改好）。引擎用法见下面「动画怎么写」。
 
 不是每道题都需要动画。**动画的唯一职责是消掉第 1 步那个卡点**，如果讲解里一张 ASCII 图就够了，
 就别做动画——做了也是负担。
 
-### 5. 质检
+### 5. 质检 + 录视频 + 更新目录：一条命令
 
 ```
-npm run shoot -- demos/<你的文件>.html
+npm run ship -- demos/<你的文件>.html
 ```
 
-逐幕截图，自动报三类问题：页面超出画幅、旁白气泡压住标签、JS 报错。
-**必须全绿再往下走**，而且要把截图真的看一遍——工具只能查排版，查不出「这一幕没讲清楚」。
+它把下面四步串起来，质检和录制并行跑，20 秒左右出结果：
 
-### 6. 录视频
+- `shoot` 逐幕截图，自动报三类问题：页面超出画幅、旁白气泡压住标签、JS 报错。
+  截图落在 `.shots/<动画名>/`，**先看 `sheet.png` 总览图**，一张就能看完所有幕。
+- `record` 录成 mp4，放在 html 旁边，1080×1920 竖版。改过动画就重录，别让视频和网页对不上。
+- `index` 重新生成 GitHub Pages 落地页。
+- `check` 查所有内部链接。
 
-```
-npm run record -- demos/<你的文件>.html
-```
+任何一步失败都会非零退出，**必须全绿再往下走**，而且要把 `sheet.png` 真的看一遍——
+工具只能查排版，查不出「这一幕没讲清楚」。只想质检不录视频加 `--no-record`；
+四步也都能单独跑：`npm run shoot / record / index / check`。
 
-mp4 会生成在 html 旁边，方便直接发微信或投屏。改过动画就重录，别让视频和网页对不上。
-
-### 7. 更新目录
-
-```
-npm run index    # 重新生成 GitHub Pages 落地页
-npm run check    # 查所有内部链接
-```
+### 6. 目录里的手写部分
 
 落地页是母题地图。新母题还要在 `tools/build-index.mjs` 的 `MOTIFS` 里加一行（名字、GitBook 路径、配色、挂哪段动画），再跑 `npm run index`。
 
@@ -91,7 +94,7 @@ npm run check    # 查所有内部链接
 - `docs/认出母题.md` —— 「题目给了什么 → 哪道母题」那张表
 - `docs/大纲.md` —— 三年级浅奥总目，已有的和还没写的
 
-### 8. 提交发布
+### 7. 提交发布
 
 做完就推，不用再问。
 
@@ -215,7 +218,9 @@ index.html       GitHub Pages 落地页，由 npm run index 生成，别手改
 | 命令 | 做什么 |
 | --- | --- |
 | `npm run setup` | 装依赖和 Chromium，新机器跑一次 |
-| `npm run shoot -- <html>` | 逐幕截图质检动画 |
+| `npm run new -- <母题> <例题>` | 从模板建好母题页、例题页、动画页 |
+| `npm run ship -- <html> [--no-record]` | 质检 + 录制并行，再重建首页、查链接 |
+| `npm run shoot -- <html>` | 逐幕截图质检动画，并出 `sheet.png` 总览图 |
 | `npm run record -- <html>` | 录成 mp4 |
 | `npm run index` | 重新生成首页 |
 | `npm run check` | 查所有内部链接 |
@@ -227,3 +232,9 @@ index.html       GitHub Pages 落地页，由 npm run index 生成，别手改
 ## 改引擎的时候
 
 `demos/lib/` 是所有动画共用的。改完必须把**每个**动画都跑一遍 `npm run shoot`，确认没有回归。
+六个动画可以并行跑（每个各开一个 Chromium），四十多秒全部跑完：
+
+```
+for f in demos/*.html; do node tools/shoot.mjs "$f" > "/tmp/shoot-$(basename "$f" .html).log" 2>&1 & done; wait
+tail -n 2 /tmp/shoot-*.log
+```

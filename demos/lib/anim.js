@@ -150,6 +150,14 @@ const Anim = (function () {
     scenes = sceneList;
     opts = options || {};
     mount();
+    // 录制脚本会先设 window.ANIM_HOLD，让页面停在第一幕之前，
+    // 否则第一幕会先自动播一遍、再被 playAll 重播一遍，视频开头就多出几秒。
+    if (window.ANIM_HOLD) {
+      cur = 0;
+      paintDots();
+      if (opts.reset) opts.reset();
+      return;
+    }
     runScene(0);
   }
 

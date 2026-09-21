@@ -44,8 +44,11 @@ try {
     viewport: { width: W, height: H },
     recordVideo: { dir: tmpDir, size: { width: W, height: H } },
   });
+  // 录像从页面建立那一刻开始，记下时间，最后把开头的空白裁掉
+  const tPage = Date.now();
   const page = await context.newPage();
   await page.addInitScript(() => {
+    window.ANIM_HOLD = true; // 别自动播第一幕，等 playAll 统一从头开始
     const apply = () => document.body && document.body.classList.add('portrait');
     document.addEventListener('DOMContentLoaded', apply);
   });
@@ -65,10 +68,12 @@ try {
     console.warn(`⚠️  页面比画幅高 ${overflow}px，底部会被切掉。建议加高: npm run record -- ${input} ${W} ${H + overflow}`);
   }
 
-  // 第一幕在载入时会自动播一遍，等它演完再从头录，否则开头会重复
-  await page.waitForTimeout(2500);
+  // 页面已经被 ANIM_HOLD 停在第一幕之前，只等图片和字体就位
+  await page.waitForTimeout(400);
 
   const t0 = Date.now();
+  // 从建页到点火这段是空白舞台，裁掉；留 0.3s 余量，宁多留一点也别切掉动画开头
+  const leadSec = Math.max(0, (t0 - tPage) / 1000 - 0.3);
   // 不能 return 这个 Promise —— evaluate 会一直等到整段播完才返回，
   // 后面就没机会观察播放状态了。这里只管点火。
   await page.evaluate(() => { Anim.playAll(); });
@@ -94,6 +99,7 @@ try {
 
   execFileSync('ffmpeg', [
     '-y', '-v', 'error',
+    '-ss', leadSec.toFixed(2),
     '-i', path.join(tmpDir, webm),
     // 录课是高频动作，优先出片速度；veryfast 对屏幕动画体积影响很小。
     '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '20',
