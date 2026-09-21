@@ -95,7 +95,8 @@ try {
   execFileSync('ffmpeg', [
     '-y', '-v', 'error',
     '-i', path.join(tmpDir, webm),
-    '-c:v', 'libx264', '-preset', 'slow', '-crf', '20',
+    // 录课是高频动作，优先出片速度；veryfast 对屏幕动画体积影响很小。
+    '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '20',
     '-pix_fmt', 'yuv420p', '-r', '30',
     '-movflags', '+faststart',
     outPath,

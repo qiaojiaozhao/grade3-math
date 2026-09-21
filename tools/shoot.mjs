@@ -29,6 +29,9 @@ if (!fs.existsSync(htmlPath)) {
 
 const W = parseInt(process.argv[3] || '1080', 10);
 const H = parseInt(process.argv[4] || '1920', 10);
+// Anim.goto 会等这一幕的 play 跑完才返回，这里只留一点余量给 CSS 弹跳收尾。
+// 个别动画如果还要更稳，可以临时传第四个参数：npm run shoot -- <html> 1080 1920 900
+const SETTLE_MS = parseInt(process.argv[5] || '300', 10);
 const outDir = path.join(ROOT, '.shots', path.basename(htmlPath, '.html'));
 
 fs.rmSync(outDir, { recursive: true, force: true });
@@ -63,7 +66,7 @@ console.log(`${path.basename(htmlPath)}  ${W}×${H}  共 ${layout.scenes} 幕`);
 
 for (let i = 0; i < layout.scenes; i++) {
   await page.evaluate((n) => Anim.goto(n), i);
-  await page.waitForTimeout(900); // 等这一幕的头几个动作演完再拍
+  await page.waitForTimeout(SETTLE_MS); // goto 已等完整幕，这里只等 CSS 收尾
 
   // 旁白气泡是绝对定位的，文字一多就会往下长，压住舞台里的标签。
   // 不要写死选择器 —— 每个动画的元素都不一样，写死等于只检查了某一个动画。
