@@ -91,6 +91,15 @@ const MOTIFS = [
     paper: '#e8f6ee',
     demo: ['握手'],
   },
+  {
+    file: '还原问题.md',
+    name: '还原',
+    slug: 'zhi-shi-dian/huan-yuan-wen-ti',
+    mark: '从结果倒回去',
+    ink: '#be185d',
+    paper: '#fce7f3',
+    demo: ['桃子'],
+  },
 ];
 
 const PROBLEM_SLUG = {
@@ -101,6 +110,7 @@ const PROBLEM_SLUG = {
   '鸡兔同笼.md': 'li-ti/ji-tu-tong-long',
   '分苹果.md': 'li-ti/fen-ping-guo',
   '联欢会握手.md': 'li-ti/lian-huan-hui-wo-shou',
+  '一筐桃子.md': 'li-ti/yi-kuang-tao-zi',
 };
 
 const readDir = (d) =>

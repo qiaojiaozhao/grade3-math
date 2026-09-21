@@ -75,6 +75,12 @@ layout:
       <td>从一头数到另一头。点过去，头和尾都要点</td>
       <td><a href="知识点/植树问题.md">植树</a></td>
     </tr>
+    <tr>
+      <td><i class="fa-rotate-left"></i></td>
+      <td><strong>还原</strong></td>
+      <td>从最后剩下的倒回去。多的先还，再翻倍</td>
+      <td><a href="知识点/还原问题.md">还原</a></td>
+    </tr>
   </tbody>
 </table>
 
@@ -119,6 +125,12 @@ layout:
       <td><strong>联欢会握手</strong></td>
       <td>两种想法。选走舞伴剩 6 个没舞伴，或最后一个是第几个</td>
       <td><a href="题目/联欢会握手.md">联欢会握手</a></td>
+    </tr>
+    <tr>
+      <td><i class="fa-apple-whole"></i></td>
+      <td><strong>一筐桃子</strong></td>
+      <td>还原。最后剩 10 不是半筐，先还 1 个再翻倍</td>
+      <td><a href="题目/一筐桃子.md">一筐桃子</a></td>
     </tr>
   </tbody>
 </table>

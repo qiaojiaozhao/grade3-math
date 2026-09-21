@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>一筐桃子 · 动态演示</title>
+<meta name="description" content="最后剩 10 个不是半筐。先把多卖的 1 个还回去，再翻倍。倒两次，原来 46 个。">
+<link rel="stylesheet" href="lib/anim.css?v=portrait">
+<style>
+  html, body { background: #07080a; }
+
+  .yard {
+    position: absolute;
+    left: 24px; right: 24px;
+    top: 140px; bottom: 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 18px;
+  }
+  body.portrait .yard { top: 176px; bottom: 40px; }
+
+  .piles {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 28px;
+    width: 100%;
+  }
+  .pile {
+    flex: 1;
+    max-width: 420px;
+    min-height: 200px;
+    padding: 16px 14px 18px;
+    background: #1c1f26;
+    border: 1px solid #2a2e36;
+    border-radius: 22px;
+    display: none;
+  }
+  .pile.on { display: block; }
+  .pile.wide { max-width: 640px; flex: 1.2; }
+  .plabel {
+    text-align: center;
+    font-size: 16px;
+    font-weight: 800;
+    color: #e8c27a;
+    margin-bottom: 10px;
+    min-height: 22px;
+  }
+  body.portrait .plabel { font-size: 20px; }
+  .peaches {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+  }
+  body.portrait .peaches { gap: 10px; }
+
+  .peach {
+    width: 44px; height: 44px;
+    flex: none;
+  }
+  .peach img { display: block; width: 44px; height: 44px; }
+  body.portrait .peach { width: 52px; height: 52px; }
+  body.portrait .peach img { width: 52px; height: 52px; }
+  .peach.ghost {
+    border: 3px dashed #ff8a3d;
+    border-radius: 50%;
+    box-sizing: border-box;
+  }
+  .peach.ghost img { display: none; }
+  .peach.in {
+    animation: popin .45s cubic-bezier(.2, 1.6, .3, 1);
+  }
+  @keyframes popin {
+    0% { transform: scale(.2); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .count {
+    font-size: 28px;
+    font-weight: 800;
+    color: #ffb347;
+    min-height: 36px;
+    text-align: center;
+  }
+  .count b { color: #ff8a3d; }
+  body.portrait .count { font-size: 34px; }
+  .count.pop { animation: numpop .45s cubic-bezier(.2, 1.6, .3, 1); }
+  @keyframes numpop {
+    0% { transform: scale(.6); }
+    55% { transform: scale(1.16); }
+    100% { transform: scale(1); }
+  }
+</style>
+</head>
+<body class="theme-dark">
+
+<h1>一筐桃子：先还 1 个，再翻倍</h1>
+<div class="problem">
+  第一次卖掉<b>一半还多 1 个</b>，第二次又卖掉剩下的<b>一半还多 1 个</b>，最后剩 <b>10</b> 个。原来有多少个？
+</div>
+
+<div class="stage-wrap">
+  <div class="stage" id="stage">
+    <div class="yard">
+      <div class="piles">
+        <div class="pile" id="pileA">
+          <div class="plabel" id="labelA"></div>
+          <div class="peaches" id="dotsA"></div>
+        </div>
+        <div class="pile" id="pileB">
+          <div class="plabel" id="labelB"></div>
+          <div class="peaches" id="dotsB"></div>
+        </div>
+      </div>
+      <div class="count" id="count"></div>
+    </div>
+  </div>
+</div>
+
+<script src="lib/anim.js"></script>
+<script>
+const { sleep, cancelled, say, pop } = Anim;
+
+const pileA = document.getElementById('pileA');
+const pileB = document.getElementById('pileB');
+const dotsA = document.getElementById('dotsA');
+const dotsB = document.getElementById('dotsB');
+const labelA = document.getElementById('labelA');
+const labelB = document.getElementById('labelB');
+const countEl = document.getElementById('count');
+
+function peach(kind) {
+  const el = document.createElement('div');
+  el.className = 'peach' + (kind ? ' ' + kind : '');
+  if (kind !== 'ghost') {
+    const img = document.createElement('img');
+    img.src = 'assets/peach.png';
+    img.alt = '';
+    el.appendChild(img);
+  }
+  return el;
+}
+
+function fill(box, n, extra) {
+  box.innerHTML = '';
+  for (let i = 0; i < n; i++) box.appendChild(peach(extra));
+}
+
+function showA(on, wide) {
+  pileA.classList.toggle('on', on);
+  pileA.classList.toggle('wide', !!wide);
+}
+function showB(on) {
+  pileB.classList.toggle('on', on);
+}
+
+function setCount(html) {
+  countEl.innerHTML = html;
+  countEl.classList.remove('pop');
+  void countEl.offsetWidth;
+  countEl.classList.add('pop');
+}
+
+function resetVisuals() {
+  showA(false, false);
+  showB(false);
+  dotsA.innerHTML = '';
+  dotsB.innerHTML = '';
+  labelA.textContent = '';
+  labelB.textContent = '';
+  countEl.textContent = '';
+  countEl.classList.remove('pop');
+}
+
+async function dropIn(box, id) {
+  const el = peach('in');
+  box.appendChild(el);
+  await sleep(400);
+  if (cancelled(id)) return;
+  el.classList.remove('in');
+}
+
+Anim.run([
+  {
+    title: '最后剩这些',
+    async play(id) {
+      showA(true, true);
+      labelA.textContent = '筐里还剩';
+      fill(dotsA, 10);
+      say('最后', '先<b>不看原来</b>。卖了两次，筐里只剩这些。');
+      await sleep(800);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '10 不是半筐',
+    async play(id) {
+      showA(true, true);
+      labelA.textContent = '半筐少 1';
+      fill(dotsA, 10);
+      dotsA.appendChild(peach('ghost'));
+      say('卡住', '卖掉的是一半<b>还多 1</b>。这 10 个不是半筐，旁边空着 1 个位置。');
+      await sleep(700);
+      if (cancelled(id)) return;
+      pop('少了 1 个');
+      await sleep(500);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '先还 1 个',
+    async play(id) {
+      showA(true, true);
+      labelA.textContent = '先把多卖的还回来';
+      fill(dotsA, 10);
+      say('先还', '把多卖的 <b>1</b> 个放回去。');
+      await sleep(400);
+      if (cancelled(id)) return;
+      await dropIn(dotsA, id);
+      if (cancelled(id)) return;
+      labelA.textContent = '这才是半筐';
+      setCount('10 + 1 = <b>11</b>');
+      pop('先还 1 个');
+      await sleep(500);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '再翻倍',
+    async play(id) {
+      showA(true, false);
+      showB(true);
+      labelA.textContent = '半筐 11';
+      labelB.textContent = '另外一半';
+      fill(dotsA, 11);
+      fill(dotsB, 11);
+      dotsB.querySelectorAll('.peach').forEach((el) => el.classList.add('in'));
+      say('翻倍', '11 个是半筐，再摆出<b>同样的 11 个</b>。第二次卖之前就是 22。');
+      await sleep(500);
+      if (cancelled(id)) return;
+      setCount('11 × 2 = <b>22</b>');
+      pop('再翻倍');
+      await sleep(500);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '再还 1 个',
+    async play(id) {
+      showA(true, true);
+      labelA.textContent = '第二次卖之前';
+      fill(dotsA, 22);
+      say('再倒一次', '第一次也是一半还多 1。从 22 再还 <b>1</b> 个。');
+      await sleep(400);
+      if (cancelled(id)) return;
+      await dropIn(dotsA, id);
+      if (cancelled(id)) return;
+      labelA.textContent = '原来的半筐';
+      setCount('22 + 1 = <b>23</b>');
+      pop('再还 1 个');
+      await sleep(500);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '再翻倍',
+    async play(id) {
+      showA(true, false);
+      showB(true);
+      labelA.textContent = '半筐 23';
+      labelB.textContent = '另外一半';
+      fill(dotsA, 23);
+      fill(dotsB, 23);
+      dotsB.querySelectorAll('.peach').forEach((el) => el.classList.add('in'));
+      say('原来', '23 对上另外 23。原来整筐是 <b>46</b> 个。');
+      await sleep(500);
+      if (cancelled(id)) return;
+      setCount('23 × 2 = <b>46</b>');
+      pop('原来 46 个');
+      await sleep(500);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '原来 46 个',
+    async play(id) {
+      showA(true, true);
+      labelA.textContent = '原来整筐';
+      fill(dotsA, 46);
+      setCount('原来 <b>46</b> 个');
+      say('答案', '原来 <b>46</b> 个。正着验：46 卖掉 24 剩 22，再卖掉 12 剩 10。');
+      await sleep(700);
+      if (cancelled(id)) return;
+    }
+  },
+], { reset: resetVisuals });
+</script>
+</body>
+</html>
