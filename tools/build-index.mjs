@@ -71,7 +71,7 @@ const MOTIFS = [
     mark: '图形代表数',
     ink: '#0f766e',
     paper: '#e6f7f4',
-    demo: ['图形'],
+    demo: ['图形', '三种'],
   },
   {
     file: '盈亏问题.md',
@@ -116,6 +116,7 @@ const PROBLEM_SLUG = {
   '兄弟分糖.md': 'li-ti/xiong-di-fen-tang',
   '甲乙两堆书.md': 'li-ti/jia-yi-liang-dui-shu',
   '图形算式.md': 'li-ti/tu-xing-suan-shi',
+  '三种图形.md': 'li-ti/san-zhong-tu-xing',
   '鸡兔同笼.md': 'li-ti/ji-tu-tong-long',
   '分苹果.md': 'li-ti/fen-ping-guo',
   '联欢会握手.md': 'li-ti/lian-huan-hui-wo-shou',

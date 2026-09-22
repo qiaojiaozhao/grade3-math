@@ -127,6 +127,12 @@ layout:
       <td><a href="题目/图形算式.md">图形算式</a></td>
     </tr>
     <tr>
+      <td><i class="fa-shapes"></i></td>
+      <td><strong>三种图形</strong></td>
+      <td>图形推理。三串一样长，先换成同一种再求</td>
+      <td><a href="题目/三种图形.md">三种图形</a></td>
+    </tr>
+    <tr>
       <td><i class="fa-handshake"></i></td>
       <td><strong>联欢会握手</strong></td>
       <td>两种想法。选走舞伴剩 6 个没舞伴，或最后一个是第几个</td>

@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>三种图形 · 动态演示</title>
+<meta name="description" content="两圆 = 三方 = 四三角，是同一捆。把第三式换成同一种，求出方块 20，再求出另外两个。">
+<link rel="stylesheet" href="lib/anim.css?v=portrait">
+<style>
+  html, body { background: #07080a; }
+
+  :root {
+    --circ: #f4a025;
+    --circ-deep: #d48410;
+    --sq: #3ea0e8;
+    --sq-deep: #1b74c4;
+    --tri: #5ecf8a;
+    --tri-deep: #2f9a5a;
+  }
+
+  .board {
+    position: absolute;
+    left: 20px; right: 20px;
+    top: 136px; bottom: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 12px;
+  }
+  body.portrait .board { top: 168px; bottom: 36px; gap: 16px; }
+
+  .eq {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 64px;
+    padding: 8px 12px;
+    background: #1c1f26;
+    border: 1px solid #2a2e36;
+    border-radius: 16px;
+    transition: opacity .35s, transform .35s, border-color .35s;
+  }
+  body.portrait .eq { min-height: 84px; padding: 12px 16px; border-radius: 20px; }
+  .eq.dim { opacity: .28; }
+  .eq.hot {
+    border-color: #ff8a3d88;
+    box-shadow: 0 0 0 1px #ff8a3d44;
+  }
+
+  .eq-no {
+    flex: none;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: #2a3340;
+    color: #8ec6f5;
+    font-weight: 800;
+    font-size: 14px;
+    display: grid; place-items: center;
+  }
+  body.portrait .eq-no { width: 36px; height: 36px; font-size: 18px; }
+
+  .side {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 44px;
+    padding: 4px 6px;
+    border-radius: 12px;
+    transition: background .35s, outline .35s;
+  }
+  body.portrait .side { gap: 8px; min-height: 56px; }
+  .side.bundle {
+    outline: 2px dashed #ff8a3d;
+    outline-offset: 2px;
+    background: #2a2218;
+  }
+  .eq-eq {
+    flex: none;
+    font-size: 22px;
+    font-weight: 800;
+    color: #6b7585;
+  }
+  body.portrait .eq-eq { font-size: 28px; }
+  .eq-num {
+    flex: none;
+    min-width: 44px;
+    text-align: center;
+    font-size: 24px;
+    font-weight: 800;
+    color: #ffb347;
+  }
+  body.portrait .eq-num { font-size: 32px; min-width: 56px; }
+
+  .token {
+    width: 34px; height: 34px;
+    display: grid; place-items: center;
+    animation: breathe 2.6s ease-in-out infinite;
+    transition: opacity .35s, transform .35s;
+  }
+  body.portrait .token { width: 44px; height: 44px; }
+  .token:nth-child(2) { animation-delay: .15s; }
+  .token:nth-child(3) { animation-delay: .3s; }
+  .token:nth-child(4) { animation-delay: .2s; }
+  @keyframes breathe {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-2px); }
+  }
+
+  .circ {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 32% 28%, #ffd27a, var(--circ) 55%, var(--circ-deep));
+    box-shadow: 0 2px 0 var(--circ-deep);
+  }
+  body.portrait .circ { width: 32px; height: 32px; }
+  .sq {
+    width: 22px; height: 22px;
+    border-radius: 5px;
+    background: linear-gradient(145deg, #8ec6f5, var(--sq) 55%, var(--sq-deep));
+    box-shadow: 0 2px 0 var(--sq-deep);
+  }
+  body.portrait .sq { width: 30px; height: 30px; border-radius: 7px; }
+  .tri {
+    width: 0; height: 0;
+    border-left: 13px solid transparent;
+    border-right: 13px solid transparent;
+    border-bottom: 23px solid var(--tri);
+    filter: drop-shadow(0 2px 0 var(--tri-deep));
+  }
+  body.portrait .tri {
+    border-left-width: 17px;
+    border-right-width: 17px;
+    border-bottom-width: 30px;
+  }
+
+  .chain {
+    display: none;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 800;
+    color: #e8c27a;
+    min-height: 24px;
+  }
+  .chain.on { display: block; }
+  body.portrait .chain { font-size: 18px; min-height: 28px; }
+
+  .key {
+    display: none;
+    text-align: center;
+    font-size: 26px;
+    font-weight: 800;
+    color: #ffb347;
+    min-height: 36px;
+  }
+  .key.on { display: block; }
+  body.portrait .key { font-size: 34px; min-height: 44px; }
+  .key b { color: #ff8a3d; }
+  .key.pop { animation: bump .45s cubic-bezier(.2, 1.6, .3, 1); }
+  @keyframes bump {
+    0% { transform: scale(.85); }
+    55% { transform: scale(1.12); }
+    100% { transform: scale(1); }
+  }
+</style>
+</head>
+<body class="theme-dark">
+
+<h1>三种图形：三串一样长，先换成同一种</h1>
+<div class="problem">
+  ① ○○ = □□□
+  &nbsp;&nbsp;
+  ② □□□ = △△△△
+  &nbsp;&nbsp;
+  ③ ○ + □ + △△ = <b>80</b>
+</div>
+
+<div class="stage-wrap">
+  <div class="stage" id="stage">
+    <div class="board">
+      <div class="eq" id="eq1">
+        <span class="eq-no">①</span>
+        <div class="side" id="l1"></div>
+        <span class="eq-eq">=</span>
+        <div class="side" id="r1"></div>
+      </div>
+      <div class="eq" id="eq2">
+        <span class="eq-no">②</span>
+        <div class="side" id="l2"></div>
+        <span class="eq-eq">=</span>
+        <div class="side" id="r2"></div>
+      </div>
+      <div class="eq" id="eq3">
+        <span class="eq-no">③</span>
+        <div class="side" id="l3" style="flex:1.4"></div>
+        <span class="eq-eq">=</span>
+        <span class="eq-num" id="num3">80</span>
+      </div>
+      <div class="chain" id="chain"></div>
+      <div class="key" id="key"></div>
+    </div>
+  </div>
+</div>
+
+<script src="lib/anim.js"></script>
+<script>
+const { sleep, cancelled, say, pop } = Anim;
+
+const eq1 = document.getElementById('eq1');
+const eq2 = document.getElementById('eq2');
+const eq3 = document.getElementById('eq3');
+const chain = document.getElementById('chain');
+const keyEl = document.getElementById('key');
+
+function token(kind) {
+  const el = document.createElement('div');
+  el.className = 'token';
+  const i = document.createElement('i');
+  i.className = kind === 'o' ? 'circ' : kind === 's' ? 'sq' : 'tri';
+  el.appendChild(i);
+  return el;
+}
+
+function fill(box, kinds) {
+  box.innerHTML = '';
+  kinds.forEach((k) => box.appendChild(token(k)));
+}
+
+function setKey(html) {
+  keyEl.innerHTML = html;
+  keyEl.classList.add('on');
+  keyEl.classList.remove('pop');
+  void keyEl.offsetWidth;
+  keyEl.classList.add('pop');
+}
+
+function clearKey() {
+  keyEl.className = 'key';
+  keyEl.textContent = '';
+}
+
+function markBundle(ids, on) {
+  ids.forEach((id) => document.getElementById(id).classList.toggle('bundle', on));
+}
+
+function resetVisuals() {
+  [eq1, eq2, eq3].forEach((el) => { el.className = 'eq'; });
+  fill(document.getElementById('l1'), ['o', 'o']);
+  fill(document.getElementById('r1'), ['s', 's', 's']);
+  fill(document.getElementById('l2'), ['s', 's', 's']);
+  fill(document.getElementById('r2'), ['t', 't', 't', 't']);
+  fill(document.getElementById('l3'), ['o', 's', 't', 't']);
+  document.getElementById('num3').textContent = '80';
+  markBundle(['l1', 'r1', 'l2', 'r2'], false);
+  chain.className = 'chain';
+  chain.textContent = '';
+  clearKey();
+}
+
+Anim.run([
+  {
+    title: '三种记号',
+    async play(id) {
+      say('先看', '先<b>不猜数字</b>。圆、方块、三角三种记号，三个算式。');
+      await sleep(800);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '三串一样长',
+    async play(id) {
+      eq1.classList.add('hot');
+      markBundle(['l1', 'r1'], true);
+      say('①', '两圆等于三方。');
+      await sleep(600);
+      if (cancelled(id)) return;
+      eq2.classList.add('hot');
+      markBundle(['l2', 'r2'], true);
+      say('②', '三方又等于四三角。');
+      await sleep(500);
+      if (cancelled(id)) return;
+      chain.classList.add('on');
+      chain.textContent = '两圆 = 三方 = 四三角';
+      pop('三串一样长');
+      await sleep(600);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '一圆 = 两三角',
+    async play(id) {
+      eq3.classList.add('dim');
+      markBundle(['l1', 'r1', 'l2', 'r2'], true);
+      chain.classList.add('on');
+      chain.textContent = '两圆 = 四三角';
+      say('换', '两圆等于四三角，所以<b>一个圆等于两个三角</b>。');
+      await sleep(500);
+      if (cancelled(id)) return;
+      setKey('○ = △ + △');
+      await sleep(600);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '③里换掉圆',
+    async play(id) {
+      eq1.classList.add('dim');
+      eq2.classList.add('dim');
+      eq3.classList.remove('dim');
+      eq3.classList.add('hot');
+      markBundle(['l1', 'r1', 'l2', 'r2'], false);
+      chain.className = 'chain';
+      fill(document.getElementById('l3'), ['t', 't', 's', 't', 't']);
+      say('代换', '把③里的圆换成两个三角。现在是：一方块 + 四三角。');
+      await sleep(400);
+      if (cancelled(id)) return;
+      setKey('□ + 4 × △ = <b>80</b>');
+      pop('圆换成三角');
+      await sleep(600);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '四三角换成三方',
+    async play(id) {
+      eq1.classList.add('dim');
+      eq2.classList.remove('dim');
+      eq2.classList.add('hot');
+      eq3.classList.add('hot');
+      fill(document.getElementById('l3'), ['s', 's', 's', 's']);
+      say('再换', '四三角等于三方块。再换一次：变成<b>四个方块</b>。');
+      await sleep(400);
+      if (cancelled(id)) return;
+      setKey('□ + □ + □ + □ = <b>80</b>');
+      await sleep(500);
+      if (cancelled(id)) return;
+      setKey('4 × □ = 80　□ = <b>20</b>');
+      pop('方块 20');
+      await sleep(600);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '这一捆是 60',
+    async play(id) {
+      eq1.classList.remove('dim');
+      eq2.classList.remove('dim');
+      eq3.classList.add('dim');
+      markBundle(['l1', 'r1', 'l2', 'r2'], true);
+      chain.classList.add('on');
+      chain.textContent = '这一捆 = 3 × 20 = 60';
+      say('一捆', '三方块是一捆，一共 60。四三角也是 60，两圆也是 60。');
+      await sleep(400);
+      if (cancelled(id)) return;
+      setKey('△ = 60 ÷ 4 = <b>15</b>　○ = 60 ÷ 2 = <b>30</b>');
+      pop('三角 15，圆 30');
+      await sleep(600);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '△15 □20 ○30',
+    async play(id) {
+      [eq1, eq2, eq3].forEach((el) => { el.className = 'eq'; });
+      markBundle(['l1', 'r1', 'l2', 'r2'], false);
+      fill(document.getElementById('l3'), ['o', 's', 't', 't']);
+      chain.classList.add('on');
+      chain.textContent = '验：30+20+15+15=80';
+      setKey('△ = <b>15</b>　□ = <b>20</b>　○ = <b>30</b>');
+      say('答案', '三角 <b>15</b>，方块 <b>20</b>，圆 <b>30</b>。三串一样长，先换成同一种。');
+      await sleep(700);
+      if (cancelled(id)) return;
+    }
+  },
+], { reset: resetVisuals });
+</script>
+</body>
+</html>
