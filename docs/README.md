@@ -87,6 +87,12 @@ layout:
       <td>过完才算过。车头进、车尾出，两段路加在一起</td>
       <td><a href="知识点/过火车问题.md">过火车</a></td>
     </tr>
+    <tr>
+      <td><i class="fa-gift"></i></td>
+      <td><strong>买赠</strong></td>
+      <td>送的那瓶也有人喝。5 加 1 才是一组</td>
+      <td><a href="知识点/买赠问题.md">买赠</a></td>
+    </tr>
   </tbody>
 </table>
 
@@ -149,6 +155,12 @@ layout:
       <td><strong>过桥</strong></td>
       <td>过火车。车头出桥还没完，车身和桥要加在一起</td>
       <td><a href="题目/过桥.md">过桥</a></td>
+    </tr>
+    <tr>
+      <td><i class="fa-gift"></i></td>
+      <td><strong>买五送一</strong></td>
+      <td>买赠。送的那瓶也要喝，6 人一组，30 人买 25 瓶</td>
+      <td><a href="题目/买五送一.md">买五送一</a></td>
     </tr>
   </tbody>
 </table>

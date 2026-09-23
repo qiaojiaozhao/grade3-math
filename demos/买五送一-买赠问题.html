@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>买五送一 · 动态演示</title>
+<meta name="description" content="送的那瓶也要喝。买 5 送 1 是 6 人一组，30 人正好 5 组，每组买 5 瓶，一共 25 瓶。">
+<link rel="stylesheet" href="lib/anim.css?v=portrait">
+<style>
+  html, body { background: #07080a; }
+
+  :root {
+    --pay: #f4a025;
+    --pay-deep: #d48410;
+    --gift: #5ecf8a;
+    --gift-deep: #2f9a5a;
+  }
+
+  .yard {
+    position: absolute;
+    inset: 132px 18px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 14px;
+  }
+  body.portrait .yard { inset: 168px 24px 36px; gap: 18px; }
+
+  .card {
+    display: none;
+    background: #1c1f26;
+    border: 1px solid #2a2e36;
+    border-radius: 18px;
+    padding: 12px 12px 14px;
+  }
+  .card.on { display: block; }
+  body.portrait .card { border-radius: 22px; padding: 16px 14px 18px; }
+
+  .clabel {
+    text-align: center;
+    font-size: 15px;
+    font-weight: 800;
+    color: #e8c27a;
+    margin-bottom: 10px;
+    min-height: 20px;
+  }
+  body.portrait .clabel { font-size: 18px; }
+
+  .grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px 10px;
+  }
+  body.portrait .grid { gap: 10px 12px; }
+
+  .group {
+    display: flex;
+    gap: 4px;
+    padding: 6px;
+    border-radius: 12px;
+    background: #161920;
+    outline: 2px dashed transparent;
+    outline-offset: 1px;
+    transition: outline-color .35s, background .35s;
+  }
+  .group.on {
+    outline-color: #ff8a3d;
+    background: #2a2218;
+  }
+  body.portrait .group { gap: 6px; padding: 8px; border-radius: 14px; }
+
+  .bot {
+    width: 22px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  body.portrait .bot { width: 28px; }
+  .cap {
+    width: 10px; height: 6px;
+    border-radius: 2px 2px 0 0;
+    background: #8b93a1;
+  }
+  body.portrait .cap { width: 12px; height: 7px; }
+  .body {
+    width: 16px; height: 26px;
+    border-radius: 3px 3px 6px 6px;
+    background: linear-gradient(180deg, #ffd27a, var(--pay) 55%, var(--pay-deep));
+    box-shadow: 0 2px 0 #0004;
+  }
+  body.portrait .body { width: 20px; height: 32px; }
+  .bot.gift .body {
+    background: linear-gradient(180deg, #b6f0c8, var(--gift) 55%, var(--gift-deep));
+  }
+  .bot.ghost .body {
+    background: none;
+    border: 2px dashed #ff8a3d;
+    box-shadow: none;
+  }
+  .bot.ghost .cap { background: transparent; border: 2px dashed #ff8a3d; }
+
+  .legend {
+    display: none;
+    justify-content: center;
+    gap: 18px;
+    font-size: 14px;
+    font-weight: 800;
+    color: #c8d0dc;
+  }
+  .legend.on { display: flex; }
+  body.portrait .legend { font-size: 17px; gap: 22px; }
+  .legend i {
+    display: inline-block;
+    width: 12px; height: 12px;
+    border-radius: 3px;
+    margin-right: 6px;
+    vertical-align: -1px;
+  }
+  .legend .pay { background: var(--pay); }
+  .legend .free { background: var(--gift); }
+
+  .count {
+    min-height: 36px;
+    text-align: center;
+    font-size: 26px;
+    font-weight: 800;
+    color: #ffb347;
+  }
+  body.portrait .count { font-size: 34px; min-height: 44px; }
+  .count b { color: #ff8a3d; }
+  .count.pop { animation: bump .45s cubic-bezier(.2, 1.6, .3, 1); }
+  @keyframes bump {
+    0% { transform: scale(.75); }
+    55% { transform: scale(1.12); }
+    100% { transform: scale(1); }
+  }
+</style>
+</head>
+<body class="theme-dark">
+
+<h1>买五送一：送的那瓶也要喝</h1>
+<div class="problem">
+  果汁「<b>买五送一</b>」。<b>30</b> 名同学每人一瓶，只需要买几瓶？
+</div>
+
+<div class="stage-wrap">
+  <div class="stage" id="stage">
+    <div class="yard">
+      <div class="card" id="card">
+        <div class="clabel" id="clabel"></div>
+        <div class="grid" id="grid"></div>
+      </div>
+      <div class="legend" id="legend">
+        <span><i class="pay"></i>付钱</span>
+        <span><i class="free"></i>赠的</span>
+      </div>
+      <div class="count" id="count"></div>
+    </div>
+  </div>
+</div>
+
+<script src="lib/anim.js"></script>
+<script>
+const { sleep, cancelled, say, pop } = Anim;
+
+const card = document.getElementById('card');
+const grid = document.getElementById('grid');
+const clabel = document.getElementById('clabel');
+const legend = document.getElementById('legend');
+const countEl = document.getElementById('count');
+
+function bottle(kind) {
+  const el = document.createElement('div');
+  el.className = 'bot' + (kind ? ' ' + kind : '');
+  el.innerHTML = '<i class="cap"></i><i class="body"></i>';
+  return el;
+}
+
+function setCount(html) {
+  countEl.innerHTML = html;
+  countEl.classList.remove('pop');
+  void countEl.offsetWidth;
+  countEl.classList.add('pop');
+}
+
+function oneGroup(gift) {
+  const g = document.createElement('div');
+  g.className = 'group';
+  for (let i = 0; i < 5; i++) g.appendChild(bottle());
+  g.appendChild(bottle(gift ? 'gift' : 'ghost'));
+  return g;
+}
+
+function fiveGroups(mark) {
+  grid.innerHTML = '';
+  for (let i = 0; i < 5; i++) {
+    const g = oneGroup(true);
+    if (mark) g.classList.add('on');
+    grid.appendChild(g);
+  }
+}
+
+function resetVisuals() {
+  card.classList.remove('on');
+  legend.classList.remove('on');
+  grid.innerHTML = '';
+  clabel.textContent = '';
+  countEl.textContent = '';
+  countEl.classList.remove('pop');
+}
+
+Anim.run([
+  {
+    title: '30 个人要喝',
+    async play(id) {
+      card.classList.add('on');
+      clabel.textContent = '每人一瓶';
+      grid.innerHTML = '';
+      for (let i = 0; i < 30; i++) grid.appendChild(bottle());
+      say('先看', '先<b>不看买赠</b>。30 个人，每人要喝到一瓶。');
+      await sleep(800);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '买 5 送 1',
+    async play(id) {
+      card.classList.add('on');
+      legend.classList.add('on');
+      clabel.textContent = '付 5 瓶，白拿 1 瓶';
+      grid.innerHTML = '';
+      const g = oneGroup(true);
+      g.classList.add('on');
+      grid.appendChild(g);
+      say('规矩', '买 5 瓶，店员再塞 1 瓶。这 6 瓶够 6 个人喝。');
+      await sleep(500);
+      if (cancelled(id)) return;
+      pop('6 人一组');
+      await sleep(500);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '不是 5 人一组',
+    async play(id) {
+      card.classList.add('on');
+      legend.classList.add('on');
+      clabel.textContent = '赠的也占一个名额';
+      grid.innerHTML = '';
+      const g = oneGroup(false);
+      g.classList.add('on');
+      grid.appendChild(g);
+      say('卡住', '有人会除以 5。可赠的那瓶<b>也有人喝</b>，空着的这个位置也在 30 里。');
+      await sleep(500);
+      if (cancelled(id)) return;
+      pop('不能 30 ÷ 5');
+      await sleep(500);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '围成 6 人一组',
+    async play(id) {
+      card.classList.add('on');
+      legend.classList.add('on');
+      clabel.textContent = '5 组，每组 6 人';
+      fiveGroups(true);
+      say('分组', '6 个人围一组。30 个人正好 5 组。');
+      await sleep(500);
+      if (cancelled(id)) return;
+      setCount('30 ÷ 6 = <b>5</b> 组');
+      await sleep(600);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '每组只买 5 瓶',
+    async play(id) {
+      card.classList.add('on');
+      legend.classList.add('on');
+      clabel.textContent = '每组付 5 瓶';
+      fiveGroups(true);
+      say('付钱', '每组只买<b>5</b> 瓶，第 6 瓶是送的。');
+      await sleep(400);
+      if (cancelled(id)) return;
+      setCount('5 组 × 5 瓶 = <b>25</b>');
+      pop('买 25 瓶');
+      await sleep(600);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '验：25 + 5 = 30',
+    async play(id) {
+      card.classList.add('on');
+      legend.classList.add('on');
+      clabel.textContent = '买 25，送 5，刚好 30';
+      fiveGroups(true);
+      say('验', '买 25 瓶，每 5 瓶送 1，送 5 瓶。');
+      await sleep(400);
+      if (cancelled(id)) return;
+      setCount('25 + 5 = <b>30</b>');
+      await sleep(600);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '买 25 瓶',
+    async play(id) {
+      card.classList.add('on');
+      legend.classList.add('on');
+      clabel.textContent = '只要买这些付钱的';
+      fiveGroups(true);
+      setCount('只要买 <b>25</b> 瓶');
+      say('答案', '30 人每人一瓶，只要买 <b>25</b> 瓶。送的那瓶也要喝，5 加 1 才是一组。');
+      await sleep(700);
+      if (cancelled(id)) return;
+    }
+  },
+], { reset: resetVisuals });
+</script>
+</body>
+</html>

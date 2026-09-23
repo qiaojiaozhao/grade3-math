@@ -109,6 +109,15 @@ const MOTIFS = [
     paper: '#ffedd5',
     demo: ['过桥'],
   },
+  {
+    file: '买赠问题.md',
+    name: '买赠',
+    slug: 'zhi-shi-dian/mai-zeng-wen-ti',
+    mark: '送的也要喝',
+    ink: '#b45309',
+    paper: '#fff7ed',
+    demo: ['买五'],
+  },
 ];
 
 const PROBLEM_SLUG = {
@@ -122,6 +131,7 @@ const PROBLEM_SLUG = {
   '联欢会握手.md': 'li-ti/lian-huan-hui-wo-shou',
   '一筐桃子.md': 'li-ti/yi-kuang-tao-zi',
   '过桥.md': 'li-ti/guo-qiao',
+  '买五送一.md': 'li-ti/mai-wu-song-yi',
 };
 
 const readDir = (d) =>
