@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>大衣裤子和鞋 · 动态演示</title>
+<meta name="description" content="先把大衣和裤子捆成一包，跟鞋做和差；解开再用差 80 分出两件。大衣 1640，裤子 1560，鞋 1000。">
+<link rel="stylesheet" href="lib/anim.css?v=portrait">
+<style>
+  html, body { background: #07080a; }
+
+  :root {
+    --coat: #e25a4a;
+    --pants: #3ea0e8;
+    --shoe: #e8c27a;
+    --pack: #c0843c;
+  }
+
+  .yard {
+    position: absolute;
+    inset: 128px 16px 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 14px;
+  }
+  body.portrait .yard { inset: 168px 22px 36px; gap: 18px; }
+
+  .row {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 22px;
+    min-height: 260px;
+  }
+  body.portrait .row { gap: 28px; min-height: 340px; }
+
+  .col {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 92px;
+  }
+  .col.on { display: flex; }
+  body.portrait .col { width: 110px; }
+
+  .stack {
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: stretch;
+    width: 72px;
+    min-height: 40px;
+  }
+  body.portrait .stack { width: 88px; }
+
+  .seg {
+    border-radius: 8px;
+    box-shadow: inset 0 1px 0 #fff2;
+  }
+  .seg.coat { background: linear-gradient(180deg, #f08a7a, var(--coat)); }
+  .seg.pants { background: linear-gradient(180deg, #7ec4f5, var(--pants)); }
+  .seg.shoe { background: linear-gradient(180deg, #f6dca0, var(--shoe)); }
+  .seg.cap {
+    background: #ff8a3d;
+    margin-bottom: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 800;
+    color: #1a1208;
+  }
+  body.portrait .seg.cap { font-size: 15px; }
+
+  .pack-box {
+    display: none;
+    padding: 8px 8px 10px;
+    border: 2px dashed #ffb347;
+    border-radius: 16px;
+    background: #2a2218;
+  }
+  .pack-box.on { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .pack-box .stack { width: 76px; }
+  body.portrait .pack-box .stack { width: 92px; }
+
+  .name {
+    font-size: 15px;
+    font-weight: 800;
+    color: #e8c27a;
+    text-align: center;
+    min-height: 20px;
+  }
+  body.portrait .name { font-size: 18px; }
+
+  .count {
+    min-height: 36px;
+    text-align: center;
+    font-size: 24px;
+    font-weight: 800;
+    color: #ffb347;
+  }
+  body.portrait .count { font-size: 32px; min-height: 44px; }
+  .count b { color: #ff8a3d; }
+  .count.pop { animation: bump .45s cubic-bezier(.2, 1.6, .3, 1); }
+  @keyframes bump {
+    0% { transform: scale(.75); }
+    55% { transform: scale(1.12); }
+    100% { transform: scale(1); }
+  }
+</style>
+</head>
+<body class="theme-dark">
+
+<h1>大衣裤子和鞋：先捆成一包</h1>
+<div class="problem">
+  三件共 <b>4200</b> 元。大衣比裤子贵 <b>80</b> 元，大衣和裤子一共比鞋贵 <b>2200</b> 元。各多少钱？
+</div>
+
+<div class="stage-wrap">
+  <div class="stage" id="stage">
+    <div class="yard">
+      <div class="row" id="row">
+        <div class="col" id="colCoat">
+          <div class="stack" id="stCoat"></div>
+          <div class="name" id="nmCoat">大衣</div>
+        </div>
+        <div class="col" id="colPants">
+          <div class="stack" id="stPants"></div>
+          <div class="name" id="nmPants">裤子</div>
+        </div>
+        <div class="pack-box" id="pack">
+          <div class="stack" id="stPack"></div>
+          <div class="name" id="nmPack">大衣 + 裤子</div>
+        </div>
+        <div class="col" id="colShoe">
+          <div class="stack" id="stShoe"></div>
+          <div class="name" id="nmShoe">鞋</div>
+        </div>
+      </div>
+      <div class="count" id="count"></div>
+    </div>
+  </div>
+</div>
+
+<script src="lib/anim.js"></script>
+<script>
+const { sleep, cancelled, say, pop } = Anim;
+
+const PX = 0.07;
+const COAT = 1640;
+const PANTS = 1560;
+const SHOE = 1000;
+const PACK = 3200;
+const CAP = 80;
+
+const colCoat = document.getElementById('colCoat');
+const colPants = document.getElementById('colPants');
+const colShoe = document.getElementById('colShoe');
+const pack = document.getElementById('pack');
+const stCoat = document.getElementById('stCoat');
+const stPants = document.getElementById('stPants');
+const stShoe = document.getElementById('stShoe');
+const stPack = document.getElementById('stPack');
+const countEl = document.getElementById('count');
+
+function block(cls, h, text) {
+  const el = document.createElement('div');
+  el.className = 'seg ' + cls;
+  el.style.height = Math.max(h, 6) + 'px';
+  if (text) el.textContent = text;
+  return el;
+}
+
+function fill(box, parts) {
+  box.innerHTML = '';
+  parts.forEach((p) => box.appendChild(p));
+}
+
+function setCount(html) {
+  countEl.innerHTML = html;
+  countEl.classList.remove('pop');
+  void countEl.offsetWidth;
+  countEl.classList.add('pop');
+}
+
+function showTrio(on) {
+  colCoat.classList.toggle('on', on);
+  colPants.classList.toggle('on', on);
+}
+function showPack(on) {
+  pack.classList.toggle('on', on);
+}
+function showShoe(on) {
+  colShoe.classList.toggle('on', on);
+}
+
+function paintTrio(withCap, withNums) {
+  fill(stCoat, withCap
+    ? [block('coat', PANTS * PX), block('cap', Math.max(CAP * PX, 18), withNums ? '80' : '')]
+    : [block('coat', COAT * PX)]);
+  fill(stPants, [block('pants', PANTS * PX)]);
+  fill(stShoe, [block('shoe', SHOE * PX)]);
+  document.getElementById('nmCoat').textContent = withNums ? '大衣 1640' : '大衣';
+  document.getElementById('nmPants').textContent = withNums ? '裤子 1560' : '裤子';
+  document.getElementById('nmShoe').textContent = withNums ? '鞋 1000' : '鞋';
+}
+
+function paintPack(withNums) {
+  fill(stPack, [
+    block('pants', PANTS * PX),
+    block('coat', COAT * PX),
+  ]);
+  fill(stShoe, [block('shoe', SHOE * PX)]);
+  document.getElementById('nmPack').textContent = withNums ? '一包 3200' : '大衣 + 裤子';
+  document.getElementById('nmShoe').textContent = withNums ? '鞋 1000' : '鞋';
+}
+
+function resetVisuals() {
+  showTrio(false);
+  showPack(false);
+  showShoe(false);
+  [stCoat, stPants, stShoe, stPack].forEach((el) => { el.innerHTML = ''; });
+  countEl.textContent = '';
+  countEl.classList.remove('pop');
+  document.getElementById('nmCoat').textContent = '大衣';
+  document.getElementById('nmPants').textContent = '裤子';
+  document.getElementById('nmShoe').textContent = '鞋';
+  document.getElementById('nmPack').textContent = '大衣 + 裤子';
+}
+
+Anim.run([
+  {
+    title: '三件东西',
+    async play(id) {
+      showTrio(true);
+      showShoe(true);
+      paintTrio(false, false);
+      say('先看', '先<b>不看数字</b>。三件东西，大衣最高，裤子差不多高，鞋矮一截。');
+      await sleep(800);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '先捆成一包',
+    async play(id) {
+      showPack(true);
+      showShoe(true);
+      paintPack(false);
+      say('捆住', '题目说「大衣和裤子一共」。先把这两件<b>捆成一包</b>。');
+      await sleep(400);
+      if (cancelled(id)) return;
+      pop('先捆成一包');
+      await sleep(500);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '一包比鞋高',
+    async play(id) {
+      showPack(true);
+      showShoe(true);
+      paintPack(false);
+      say('卡住', '一包和鞋的和是 4200，一包比鞋高 2200。这就是普通的<b>和差</b>。');
+      await sleep(500);
+      if (cancelled(id)) return;
+      pop('和 4200，差 2200');
+      await sleep(500);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '求出一包和鞋',
+    async play(id) {
+      showPack(true);
+      showShoe(true);
+      paintPack(true);
+      say('和差', '（和 + 差）÷ 2 是大的那份。');
+      await sleep(400);
+      if (cancelled(id)) return;
+      setCount('（4200 + 2200）÷ 2 = <b>3200</b>');
+      await sleep(700);
+      if (cancelled(id)) return;
+      setCount('鞋 = 4200 − 3200 = <b>1000</b>');
+      pop('鞋 1000');
+      await sleep(500);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '解开再比一次',
+    async play(id) {
+      showTrio(true);
+      showShoe(false);
+      paintTrio(true, false);
+      say('解开', '一包是 3200。大衣比裤子多一截 <b>80</b>，再做一次和差。');
+      await sleep(500);
+      if (cancelled(id)) return;
+      pop('和 3200，差 80');
+      await sleep(500);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '大衣和裤子',
+    async play(id) {
+      showTrio(true);
+      showShoe(false);
+      paintTrio(true, true);
+      say('再分', '多出来的 80 给大衣。');
+      await sleep(400);
+      if (cancelled(id)) return;
+      setCount('大衣（3200 + 80）÷ 2 = <b>1640</b>');
+      await sleep(700);
+      if (cancelled(id)) return;
+      setCount('裤子（3200 − 80）÷ 2 = <b>1560</b>');
+      pop('1640 和 1560');
+      await sleep(500);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '1640、1560、1000',
+    async play(id) {
+      showTrio(true);
+      showShoe(true);
+      paintTrio(true, true);
+      setCount('大衣 <b>1640</b>　裤子 <b>1560</b>　鞋 <b>1000</b>');
+      say('答案', '验：1640+1560+1000=<b>4200</b>。三件东西，先捆两件成一包，做两次和差。');
+      await sleep(700);
+      if (cancelled(id)) return;
+    }
+  },
+], { reset: resetVisuals });
+</script>
+</body>
+</html>

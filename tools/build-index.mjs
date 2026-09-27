@@ -26,7 +26,7 @@ const MOTIFS = [
     mark: '和 + 差',
     ink: '#2f7a5b',
     paper: '#e8f6ee',
-    demo: [],
+    demo: ['大衣'],
   },
   {
     file: '和倍问题.md',
@@ -123,6 +123,7 @@ const MOTIFS = [
 const PROBLEM_SLUG = {
   '倒油问题.md': 'li-ti/dao-you-wen-ti',
   '兄弟分糖.md': 'li-ti/xiong-di-fen-tang',
+  '大衣裤子和鞋.md': 'li-ti/da-yi-ku-zi-he-xie',
   '甲乙两堆书.md': 'li-ti/jia-yi-liang-dui-shu',
   '图形算式.md': 'li-ti/tu-xing-suan-shi',
   '三种图形.md': 'li-ti/san-zhong-tu-xing',

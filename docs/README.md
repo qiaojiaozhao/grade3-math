@@ -162,6 +162,12 @@ layout:
       <td>买赠。送的那瓶也要喝，6 人一组，30 人买 25 瓶</td>
       <td><a href="题目/买五送一.md">买五送一</a></td>
     </tr>
+    <tr>
+      <td><i class="fa-shirt"></i></td>
+      <td><strong>大衣裤子和鞋</strong></td>
+      <td>和差。先捆成一包，做两次和差</td>
+      <td><a href="题目/大衣裤子和鞋.md">大衣裤子和鞋</a></td>
+    </tr>
   </tbody>
 </table>
 
