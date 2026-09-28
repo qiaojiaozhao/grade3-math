@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="color-scheme" content="dark">
 <title>大衣裤子和鞋 · 动态演示</title>
-<meta name="description" content="先把大衣和裤子捆成一包，跟鞋做和差；解开再用差 80 分出两件。大衣 1640，裤子 1560，鞋 1000。">
+<meta name="description" content="先把大衣和裤子捆成一包，跟鞋做和差；解开再用差 80 分出两件。大衣 200，裤子 120，鞋 100。">
 <link rel="stylesheet" href="lib/anim.css?v=portrait">
 <style>
   html, body { background: #07080a; }
@@ -115,7 +115,7 @@
 
 <h1>大衣裤子和鞋：先捆成一包</h1>
 <div class="problem">
-  三件共 <b>4200</b> 元。大衣比裤子贵 <b>80</b> 元，大衣和裤子一共比鞋贵 <b>2200</b> 元。各多少钱？
+  三件共 <b>420</b> 元。大衣比裤子贵 <b>80</b> 元，大衣和裤子一共比鞋贵 <b>220</b> 元。各多少钱？
 </div>
 
 <div class="stage-wrap">
@@ -148,11 +148,11 @@
 <script>
 const { sleep, cancelled, say, pop } = Anim;
 
-const PX = 0.07;
-const COAT = 1640;
-const PANTS = 1560;
-const SHOE = 1000;
-const PACK = 3200;
+const PX = 1.2;
+const COAT = 200;
+const PANTS = 120;
+const SHOE = 100;
+const PACK = 320;
 const CAP = 80;
 
 const colCoat = document.getElementById('colCoat');
@@ -202,9 +202,9 @@ function paintTrio(withCap, withNums) {
     : [block('coat', COAT * PX)]);
   fill(stPants, [block('pants', PANTS * PX)]);
   fill(stShoe, [block('shoe', SHOE * PX)]);
-  document.getElementById('nmCoat').textContent = withNums ? '大衣 1640' : '大衣';
-  document.getElementById('nmPants').textContent = withNums ? '裤子 1560' : '裤子';
-  document.getElementById('nmShoe').textContent = withNums ? '鞋 1000' : '鞋';
+  document.getElementById('nmCoat').textContent = withNums ? '大衣 200' : '大衣';
+  document.getElementById('nmPants').textContent = withNums ? '裤子 120' : '裤子';
+  document.getElementById('nmShoe').textContent = withNums ? '鞋 100' : '鞋';
 }
 
 function paintPack(withNums) {
@@ -213,8 +213,8 @@ function paintPack(withNums) {
     block('coat', COAT * PX),
   ]);
   fill(stShoe, [block('shoe', SHOE * PX)]);
-  document.getElementById('nmPack').textContent = withNums ? '一包 3200' : '大衣 + 裤子';
-  document.getElementById('nmShoe').textContent = withNums ? '鞋 1000' : '鞋';
+  document.getElementById('nmPack').textContent = withNums ? '一包 320' : '大衣 + 裤子';
+  document.getElementById('nmShoe').textContent = withNums ? '鞋 100' : '鞋';
 }
 
 function resetVisuals() {
@@ -237,7 +237,7 @@ Anim.run([
       showTrio(true);
       showShoe(true);
       paintTrio(false, false);
-      say('先看', '先<b>不看数字</b>。三件东西，大衣最高，裤子差不多高，鞋矮一截。');
+      say('先看', '先<b>不看数字</b>。大衣高出一截，鞋最矮。');
       await sleep(800);
       if (cancelled(id)) return;
     }
@@ -262,10 +262,10 @@ Anim.run([
       showPack(true);
       showShoe(true);
       paintPack(false);
-      say('卡住', '一包和鞋的和是 4200，一包比鞋高 2200。这就是普通的<b>和差</b>。');
+      say('卡住', '一包和鞋的和是 420，一包比鞋高 220。这就是普通的<b>和差</b>。');
       await sleep(500);
       if (cancelled(id)) return;
-      pop('和 4200，差 2200');
+      pop('和 420，差 220');
       await sleep(500);
       if (cancelled(id)) return;
     }
@@ -279,11 +279,11 @@ Anim.run([
       say('和差', '（和 + 差）÷ 2 是大的那份。');
       await sleep(400);
       if (cancelled(id)) return;
-      setCount('（4200 + 2200）÷ 2 = <b>3200</b>');
+      setCount('（420 + 220）÷ 2 = <b>320</b>');
       await sleep(700);
       if (cancelled(id)) return;
-      setCount('鞋 = 4200 − 3200 = <b>1000</b>');
-      pop('鞋 1000');
+      setCount('鞋 = 420 − 320 = <b>100</b>');
+      pop('鞋 100');
       await sleep(500);
       if (cancelled(id)) return;
     }
@@ -294,10 +294,10 @@ Anim.run([
       showTrio(true);
       showShoe(false);
       paintTrio(true, false);
-      say('解开', '一包是 3200。大衣比裤子多一截 <b>80</b>，再做一次和差。');
+      say('解开', '一包是 320。大衣比裤子多一截 <b>80</b>，再做一次和差。');
       await sleep(500);
       if (cancelled(id)) return;
-      pop('和 3200，差 80');
+      pop('和 320，差 80');
       await sleep(500);
       if (cancelled(id)) return;
     }
@@ -311,23 +311,23 @@ Anim.run([
       say('再分', '多出来的 80 给大衣。');
       await sleep(400);
       if (cancelled(id)) return;
-      setCount('大衣（3200 + 80）÷ 2 = <b>1640</b>');
+      setCount('大衣（320 + 80）÷ 2 = <b>200</b>');
       await sleep(700);
       if (cancelled(id)) return;
-      setCount('裤子（3200 − 80）÷ 2 = <b>1560</b>');
-      pop('1640 和 1560');
+      setCount('裤子（320 − 80）÷ 2 = <b>120</b>');
+      pop('200 和 120');
       await sleep(500);
       if (cancelled(id)) return;
     }
   },
   {
-    title: '1640、1560、1000',
+    title: '200、120、100',
     async play(id) {
       showTrio(true);
       showShoe(true);
       paintTrio(true, true);
-      setCount('大衣 <b>1640</b>　裤子 <b>1560</b>　鞋 <b>1000</b>');
-      say('答案', '验：1640+1560+1000=<b>4200</b>。三件东西，先捆两件成一包，做两次和差。');
+      setCount('大衣 <b>200</b>　裤子 <b>120</b>　鞋 <b>100</b>');
+      say('答案', '验：200+120+100=<b>420</b>。三件东西，先捆两件成一包，做两次和差。');
       await sleep(700);
       if (cancelled(id)) return;
     }
