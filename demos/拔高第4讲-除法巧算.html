@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>第 4 讲 除法巧算 · 动态演示</title>
+<meta name="description" content="6 颗糖分给 2 人，每人 3 颗；糖和人都变 2 倍，每人还是 3 颗。1600 ÷ 25 两边都乘 4，变成 6400 ÷ 100 = 64。">
+<link rel="stylesheet" href="lib/anim.css?v=portrait">
+<style>
+  html, body { background: #07080a; }
+
+  .stage { --k: .74; }
+  body.portrait .stage { --k: 1.55; }
+
+  #board {
+    position: absolute;
+    left: 50%; top: 100px;
+    width: 640px; height: 430px;
+    transform: translateX(-50%) scale(var(--k));
+    transform-origin: top center;
+  }
+  body.portrait #board { top: 320px; }
+
+  .candy {
+    position: absolute;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #fff8 0 20%, var(--c) 21%);
+    box-shadow: 0 0 0 2px #1c1f26;
+    transition: left .7s cubic-bezier(.4, 0, .2, 1), top .7s cubic-bezier(.4, 0, .2, 1);
+  }
+
+  .kid {
+    position: absolute;
+    width: 56px; height: 76px;
+    animation: breathe 2.6s ease-in-out infinite;
+  }
+  .kid::before {
+    content: '';
+    position: absolute;
+    left: 12px; top: 0;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: #f3d2b3;
+    box-shadow: inset 0 6px 0 #4a3526;
+  }
+  .kid::after {
+    content: '';
+    position: absolute;
+    left: 4px; top: 34px;
+    width: 48px; height: 42px;
+    border-radius: 22px 22px 8px 8px;
+    background: var(--shirt);
+  }
+  @keyframes breathe {
+    0%, 100% { transform: translateY(0) scaleY(1); }
+    50% { transform: translateY(-2px) scaleY(1.03); }
+  }
+
+  .box {
+    position: absolute;
+    width: 220px; height: 120px;
+    border-radius: 20px;
+    display: grid; place-items: center;
+    font-size: 38px; font-weight: 900;
+    color: #fff;
+    transition: transform .5s cubic-bezier(.2, 1.6, .3, 1);
+  }
+  .box small { display: block; font-size: 18px; font-weight: 800; text-align: center; opacity: .85; }
+  .box.sweets { background: #c2410c; }
+  .box.people { background: #1d4ed8; }
+  .box.bump { transform: scale(1.12); }
+  .op {
+    position: absolute;
+    font-size: 44px; font-weight: 900; color: #e8eaed;
+  }
+  .times {
+    position: absolute;
+    font-size: 28px; font-weight: 900; color: #ffb347;
+    opacity: 0; transition: opacity .4s;
+  }
+  .times.on { opacity: 1; }
+
+  .lab {
+    position: absolute;
+    font-size: 22px; font-weight: 800;
+    color: #e8c27a;
+    white-space: nowrap;
+  }
+
+  .count {
+    position: absolute;
+    left: 16px; right: 16px;
+    bottom: 22px;
+    text-align: center;
+    font-size: 24px; font-weight: 800;
+    color: #e8eaed;
+    min-height: 36px;
+  }
+  body.portrait .count { bottom: 190px; font-size: 40px; line-height: 1.5; }
+  .count .no { color: #ff6b6b; }
+  .count .ok { color: #5ecf8a; }
+  .count .hi { color: #ffb347; }
+  .count.pop { animation: bump .45s cubic-bezier(.2, 1.6, .3, 1); }
+  @keyframes bump {
+    0% { transform: scale(.82); }
+    55% { transform: scale(1.06); }
+    100% { transform: scale(1); }
+  }
+</style>
+</head>
+<body class="theme-dark">
+
+<h1>第 4 讲 除法巧算：糖和人一起变，每人分到的不变</h1>
+<div class="problem">
+  巧算：<b>1600 ÷ 25</b> = ？
+</div>
+
+<div class="stage-wrap">
+  <div class="stage" id="stage">
+    <div id="board"></div>
+    <div class="count" id="count"></div>
+  </div>
+</div>
+
+<script src="lib/anim.js"></script>
+<script>
+const { sleep, cancelled, say, pop } = Anim;
+
+const board = document.getElementById('board');
+const countEl = document.getElementById('count');
+
+const SHIRTS = ['#3ea0e8', '#5ecf8a', '#c084fc', '#f4a025'];
+const CANDY = ['#ff6b6b', '#ffb347', '#7ec4ff', '#5ecf8a', '#f472b6'];
+const KID_Y = 150;
+const PILE = { x: 250, y: 30, cols: 8 };
+
+function add(cls, x, y, html = '') {
+  const e = document.createElement('div');
+  e.className = cls;
+  e.style.left = x + 'px';
+  e.style.top = y + 'px';
+  e.innerHTML = html;
+  board.append(e);
+  return e;
+}
+
+/** 一堆糖摆在上面，返回每颗糖 */
+function pile(n) {
+  const cols = Math.min(n, PILE.cols);
+  const x0 = 320 - (cols * 22) / 2;
+  return Array.from({ length: n }, (_, i) => {
+    const c = add('candy', x0 + (i % cols) * 22, PILE.y + Math.floor(i / cols) * 22);
+    c.style.setProperty('--c', CANDY[i % CANDY.length]);
+    return c;
+  });
+}
+
+/** n 个小朋友在中间排一排，返回每人脚下放糖的位置 */
+function kids(n) {
+  const gap = 640 / n;
+  return Array.from({ length: n }, (_, i) => {
+    const x = gap * i + gap / 2 - 28;
+    const k = add('kid', x, KID_Y);
+    k.style.setProperty('--shirt', SHIRTS[i % SHIRTS.length]);
+    k.style.animationDelay = `${-i * 0.6}s`;
+    return { x: x + 28, y: KID_Y + 96 };
+  });
+}
+
+/** 一颗一颗发下去：第 i 颗给第 i % 人数 个人，每人脚下 3 颗一排 */
+async function deal(candies, spots, id) {
+  const got = spots.map(() => 0);
+  for (let i = 0; i < candies.length; i++) {
+    const k = i % spots.length;
+    const j = got[k]++;
+    candies[i].style.left = spots[k].x - 33 + (j % 3) * 22 + 'px';
+    candies[i].style.top = spots[k].y + Math.floor(j / 3) * 22 + 'px';
+    await sleep(110);
+    if (cancelled(id)) return;
+  }
+  await sleep(700);
+}
+
+function setCount(html) {
+  countEl.innerHTML = html;
+  countEl.classList.remove('pop');
+  void countEl.offsetWidth;
+  countEl.classList.add('pop');
+}
+
+/** 第 4～6 幕：两个大方块代替 1600 颗糖和 25 个人 */
+function boxes(sweets, people) {
+  const s = add('box sweets', 50, 130, `<div>${sweets}<small>颗糖</small></div>`);
+  add('op', 300, 160, '÷');
+  const p = add('box people', 370, 130, `<div>${people}<small>个人</small></div>`);
+  const ts = [add('times', 130, 272, '× 4'), add('times', 450, 272, '× 4')];
+  return { s, p, ts };
+}
+
+function resetVisuals() {
+  board.innerHTML = '';
+  countEl.innerHTML = '';
+  countEl.classList.remove('pop');
+}
+
+Anim.run([
+  {
+    title: '分糖',
+    async play(id) {
+      say('先看', '除法就是<b>分糖</b>：6 颗糖，平均分给 2 个小朋友。');
+      const c = pile(6);
+      const spots = kids(2);
+      await sleep(900);
+      if (cancelled(id)) return;
+      await deal(c, spots, id);
+      if (cancelled(id)) return;
+      setCount('6 ÷ 2 = 3　每人 <span class="hi">3</span> 颗');
+      await sleep(1200);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '一起变 2 倍',
+    async play(id) {
+      say('商不变', '糖变成 <b>2 倍</b>，人也变成 <b>2 倍</b>：12 颗糖分给 4 个人。');
+      const c = pile(12);
+      const spots = kids(4);
+      await sleep(900);
+      if (cancelled(id)) return;
+      await deal(c, spots, id);
+      if (cancelled(id)) return;
+      setCount('12 ÷ 4 = 3　每人<span class="ok">还是 3 颗</span>');
+      pop('一起变，每人分到的不变');
+      await sleep(1400);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '只变糖',
+    async play(id) {
+      say('小心', '要是<b>只把糖</b>变成 2 倍，人没变呢？12 颗糖还是分给 2 个人。');
+      const c = pile(12);
+      const spots = kids(2);
+      await sleep(900);
+      if (cancelled(id)) return;
+      await deal(c, spots, id);
+      if (cancelled(id)) return;
+      setCount('<span class="no">12 ÷ 2 = 6 ✗</span>　每人分到的变了');
+      await sleep(1400);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '1600 ÷ 25',
+    async play(id) {
+      say('题目', '1600 颗糖分给 25 个人。<b>25 不好除</b>，可它有个好朋友：<b>4</b>。25 × 4 = 100。');
+      boxes(1600, 25);
+      await sleep(1000);
+      if (cancelled(id)) return;
+      setCount('1600 ÷ 25 = ？　把 25 变成 100 就好除了');
+      await sleep(1300);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '两边都乘 4',
+    async play(id) {
+      say('商不变', '人乘 4 变成 100 个，<b>糖也要乘 4</b>，每人分到的才不变。');
+      const { s, p, ts } = boxes(1600, 25);
+      await sleep(900);
+      if (cancelled(id)) return;
+      ts.forEach((t) => t.classList.add('on'));
+      await sleep(700);
+      if (cancelled(id)) return;
+      s.innerHTML = '<div>6400<small>颗糖</small></div>';
+      p.innerHTML = '<div>100<small>个人</small></div>';
+      [s, p].forEach((b) => b.classList.add('bump'));
+      await sleep(400);
+      if (cancelled(id)) return;
+      [s, p].forEach((b) => b.classList.remove('bump'));
+      setCount('(1600 × 4) ÷ (25 × 4) = 6400 ÷ 100');
+      await sleep(1400);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '每人 64 颗',
+    async play(id) {
+      const { s, p, ts } = boxes(1600, 25);
+      ts.forEach((t) => t.classList.add('on'));
+      s.innerHTML = '<div>6400<small>颗糖</small></div>';
+      p.innerHTML = '<div>100<small>个人</small></div>';
+      say('答案', '6400 分给 100 个人，每人 <b>64</b> 颗。所以 1600 ÷ 25 = <b>64</b>。');
+      await sleep(600);
+      if (cancelled(id)) return;
+      setCount('1600 ÷ 25 = 6400 ÷ 100 = <b>64</b> <span class="ok">✓</span>');
+      await sleep(1400);
+      if (cancelled(id)) return;
+    }
+  },
+], { reset: resetVisuals });
+</script>
+</body>
+</html>
