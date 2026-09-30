@@ -70,8 +70,9 @@ console.log(`
 接下来（${created} 个新文件）：
   1. 先做一遍题，写下孩子会在哪一步想错 —— 口诀、动画、「容易错在哪」都对着它写
   2. 填掉三个文件里所有【方括号】，删掉 HTML 注释
-  3. 挂进目录：docs/SUMMARY.md、docs/README.md、docs/认出母题.md、docs/大纲.md
-     新母题还要在 tools/build-index.mjs 的 MOTIFS 加一行
-  4. npm run ship -- demos/${demoName}
-  5. 看 .shots/${path.basename(demoName, '.html')}/sheet.png，全对了就 git add -A && git commit && git push
+  3. 定单元和课序：改 docs/单元/<单元名>.md 的「按这个顺序学」，母题页顶上的位置条和前后两课的一起改
+  4. 挂进目录：docs/SUMMARY.md（放进对应单元的分组）、docs/README.md、docs/认出母题.md、docs/大纲.md
+     新母题还要在 tools/build-index.mjs 的 MOTIFS 加一行（写上 unit），PAGE_SLUG 补两个文件名的拼音
+  5. npm run ship -- demos/${demoName}
+  6. 看 .shots/${path.basename(demoName, '.html')}/sheet.png，全对了就 git add -A && git commit && git push
 `);

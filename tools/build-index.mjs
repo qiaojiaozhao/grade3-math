@@ -2,14 +2,15 @@
 /* 扫描仓库，重新生成 GitHub Pages 的落地页 index.html。
  * 用法: npm run index
  *
- * 落地页是「母题地图」：六张大卡片，口诀和动画挂在对应母题下面。
- * 讲解页链到 GitBook（.md 在 Pages 上会变成下载），动画留在本站。
+ * 落地页是「母题地图」：按六个单元分区，每个单元下面是按课序排的母题卡片，
+ * 口诀和动画挂在对应母题下面。讲解页链到 GitBook（.md 在 Pages 上会变成下载），动画留在本站。
+ * GitBook 网址从 docs/SUMMARY.md 的分组 + PAGE_SLUG 里的拼音算出来。
  *
  * 标题和摘要仍然从文件里读：
  *   - demos/*.html       标题取 <h1>，摘要取 <meta name="description">
  *   - docs/知识点/*.md    口诀取「一句话口诀」那条引用
  *   - docs/题目/*.md      摘要取题面第一句
- * 新母题要在下面 MOTIFS 里加一行，才会出现在地图上。
+ * 新母题要在下面 MOTIFS 里加一行、PAGE_SLUG 里补拼音，才会出现在地图上。
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -18,132 +19,97 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const BOOK = 'https://smileyes.gitbook.io/smileyes-docs';
 
-const MOTIFS = [
-  {
-    file: '和差问题.md',
-    name: '和差',
-    slug: 'zhi-shi-dian/he-cha-wen-ti',
-    mark: '和 + 差',
-    ink: '#2f7a5b',
-    paper: '#e8f6ee',
-    demo: ['大衣'],
-  },
-  {
-    file: '和倍问题.md',
-    name: '和倍',
-    slug: 'zhi-shi-dian/he-bei-wen-ti',
-    mark: '和 + 倍',
-    ink: '#2c6fb3',
-    paper: '#e7f1fb',
-    demo: [],
-  },
-  {
-    file: '差倍问题.md',
-    name: '差倍',
-    slug: 'zhi-shi-dian/cha-bei-wen-ti',
-    mark: '差 + 倍',
-    ink: '#c05621',
-    paper: '#fff1e4',
-    demo: ['倒油'],
-  },
-  {
-    file: '移多补少.md',
-    name: '移多补少',
-    slug: 'zhi-shi-dian/yi-duo-bu-shao',
-    mark: '倒过去就相等',
-    ink: '#8a4ec7',
-    paper: '#f3eaff',
-    demo: ['倒油'],
-  },
-  {
-    file: '年龄问题.md',
-    name: '年龄',
-    slug: 'zhi-shi-dian/nian-ling-wen-ti',
-    mark: '差不变',
-    ink: '#c2410c',
-    paper: '#ffedd5',
-    demo: ['妈妈'],
-  },
-  {
-    file: '假设法.md',
-    name: '鸡兔同笼',
-    slug: 'zhi-shi-dian/jia-she-fa',
-    mark: '两种混在一起',
-    ink: '#b45309',
-    paper: '#fff6d8',
-    demo: ['鸡兔'],
-  },
-  {
-    file: '简单推理.md',
-    name: '图形推理',
-    slug: 'zhi-shi-dian/jian-dan-tui-li',
-    mark: '图形代表数',
-    ink: '#0f766e',
-    paper: '#e6f7f4',
-    demo: ['图形', '三种'],
-  },
-  {
-    file: '盈亏问题.md',
-    name: '盈亏',
-    slug: 'zhi-shi-dian/ying-kui-wen-ti',
-    mark: '一多一少',
-    ink: '#be123c',
-    paper: '#ffe4e6',
-    demo: [],
-  },
-  {
-    file: '植树问题.md',
-    name: '植树',
-    slug: 'zhi-shi-dian/zhi-shu-wen-ti',
-    mark: '两头都算',
-    ink: '#3d8a4a',
-    paper: '#e8f6ee',
-    demo: ['握手'],
-  },
-  {
-    file: '还原问题.md',
-    name: '还原',
-    slug: 'zhi-shi-dian/huan-yuan-wen-ti',
-    mark: '从结果倒回去',
-    ink: '#be185d',
-    paper: '#fce7f3',
-    demo: ['桃子'],
-  },
-  {
-    file: '过火车问题.md',
-    name: '过火车',
-    slug: 'zhi-shi-dian/guo-huo-che-wen-ti',
-    mark: '车头进车尾出',
-    ink: '#9a3412',
-    paper: '#ffedd5',
-    demo: ['过桥'],
-  },
-  {
-    file: '买赠问题.md',
-    name: '买赠',
-    slug: 'zhi-shi-dian/mai-zeng-wen-ti',
-    mark: '送的也要喝',
-    ink: '#b45309',
-    paper: '#fff7ed',
-    demo: ['买五'],
-  },
+// 六个单元，顺序就是学习顺序。name 必须和 docs/SUMMARY.md 里的「## 分组名」一模一样，
+// slug 是 GitBook 给这个分组生成的网址段（分组名的拼音）。todo 是还没写成课、先在地图上占位的母题。
+const UNITS = [
+  { no: '一', name: '画线段图', slug: 'hua-xian-duan-tu', pic: '两根条子比高矮', todo: ['归一'] },
+  { no: '二', name: '倒推与假设', slug: 'dao-tui-yu-jia-she', pic: '从结果倒着走，或先假设全是一种', todo: [] },
+  { no: '三', name: '数清楚', slug: 'shu-qing-chu', pic: '画一条线数点和段，几个一组数有几组', todo: ['周期', '重叠', '枚举'] },
+  { no: '四', name: '巧算', slug: 'qiao-suan', pic: '先看数再动笔，找能凑整的好朋友', todo: ['巧算', '巧填算符', '数字谜'] },
+  { no: '五', name: '图形', slug: 'tu-xing', pic: '按顺序数，凹进去的边推出去', todo: ['数线段数角', '巧求周长', '一笔画'] },
+  { no: '六', name: '推理', slug: 'tui-li', pic: '一样多的可以换，条件多了画表', todo: ['逻辑推理', '奇偶'] },
 ];
 
-const PROBLEM_SLUG = {
-  '倒油问题.md': 'li-ti/dao-you-wen-ti',
-  '兄弟分糖.md': 'li-ti/xiong-di-fen-tang',
-  '大衣裤子和鞋.md': 'li-ti/da-yi-ku-zi-he-xie',
-  '甲乙两堆书.md': 'li-ti/jia-yi-liang-dui-shu',
-  '图形算式.md': 'li-ti/tu-xing-suan-shi',
-  '三种图形.md': 'li-ti/san-zhong-tu-xing',
-  '鸡兔同笼.md': 'li-ti/ji-tu-tong-long',
-  '分苹果.md': 'li-ti/fen-ping-guo',
-  '联欢会握手.md': 'li-ti/lian-huan-hui-wo-shou',
-  '一筐桃子.md': 'li-ti/yi-kuang-tao-zi',
-  '过桥.md': 'li-ti/guo-qiao',
-  '买五送一.md': 'li-ti/mai-wu-song-yi',
-  '妈妈和小明.md': 'li-ti/ma-ma-he-xiao-ming',
+// 已经写成课的母题，按单元里的课序排。demo 是动画文件名里的关键字。
+const MOTIFS = [
+  { unit: '画线段图', file: '和差问题.md', name: '和差', mark: '和 + 差', ink: '#2f7a5b', paper: '#e8f6ee', demo: ['大衣'] },
+  { unit: '画线段图', file: '和倍问题.md', name: '和倍', mark: '和 + 倍', ink: '#2c6fb3', paper: '#e7f1fb', demo: [] },
+  { unit: '画线段图', file: '差倍问题.md', name: '差倍', mark: '差 + 倍', ink: '#c05621', paper: '#fff1e4', demo: ['倒油'] },
+  { unit: '画线段图', file: '移多补少.md', name: '移多补少', mark: '倒过去就相等', ink: '#8a4ec7', paper: '#f3eaff', demo: ['倒油'] },
+  { unit: '画线段图', file: '年龄问题.md', name: '年龄', mark: '差不变', ink: '#c2410c', paper: '#ffedd5', demo: ['妈妈'] },
+  { unit: '倒推与假设', file: '还原问题.md', name: '还原', mark: '从结果倒回去', ink: '#be185d', paper: '#fce7f3', demo: ['桃子'] },
+  { unit: '倒推与假设', file: '假设法.md', name: '鸡兔同笼', mark: '两种混在一起', ink: '#b45309', paper: '#fff6d8', demo: ['鸡兔'] },
+  { unit: '倒推与假设', file: '盈亏问题.md', name: '盈亏', mark: '一多一少', ink: '#be123c', paper: '#ffe4e6', demo: [] },
+  { unit: '数清楚', file: '植树问题.md', name: '植树', mark: '两头都算', ink: '#3d8a4a', paper: '#e8f6ee', demo: ['握手'] },
+  { unit: '数清楚', file: '买赠问题.md', name: '买赠', mark: '送的也要喝', ink: '#b45309', paper: '#fff7ed', demo: ['买五'] },
+  { unit: '数清楚', file: '过火车问题.md', name: '过火车', mark: '车头进车尾出', ink: '#9a3412', paper: '#ffedd5', demo: ['过桥'] },
+  { unit: '推理', file: '简单推理.md', name: '图形推理', mark: '图形代表数', ink: '#0f766e', paper: '#e6f7f4', demo: ['图形', '三种'] },
+];
+
+// GitBook 页面网址 = 分组 slug + 文件名的拼音。新建页面要在这里补一行拼音，漏了会直接报错。
+const PAGE_SLUG = {
+  'README.md': '',
+  '认出母题.md': 'ren-chu-mu-ti',
+  '大纲.md': 'da-gang',
+  '单元/画线段图.md': 'hua-xian-duan-tu',
+  '单元/倒推与假设.md': 'dao-tui-yu-jia-she',
+  '单元/数清楚.md': 'shu-qing-chu',
+  '单元/巧算.md': 'qiao-suan',
+  '单元/图形.md': 'tu-xing',
+  '单元/推理.md': 'tui-li',
+  '知识点/和差问题.md': 'he-cha-wen-ti',
+  '知识点/和倍问题.md': 'he-bei-wen-ti',
+  '知识点/差倍问题.md': 'cha-bei-wen-ti',
+  '知识点/移多补少.md': 'yi-duo-bu-shao',
+  '知识点/年龄问题.md': 'nian-ling-wen-ti',
+  '知识点/还原问题.md': 'huan-yuan-wen-ti',
+  '知识点/假设法.md': 'jia-she-fa',
+  '知识点/盈亏问题.md': 'ying-kui-wen-ti',
+  '知识点/植树问题.md': 'zhi-shu-wen-ti',
+  '知识点/买赠问题.md': 'mai-zeng-wen-ti',
+  '知识点/过火车问题.md': 'guo-huo-che-wen-ti',
+  '知识点/简单推理.md': 'jian-dan-tui-li',
+  '题目/兄弟分糖.md': 'xiong-di-fen-tang',
+  '题目/大衣裤子和鞋.md': 'da-yi-ku-zi-he-xie',
+  '题目/甲乙两堆书.md': 'jia-yi-liang-dui-shu',
+  '题目/倒油问题.md': 'dao-you-wen-ti',
+  '题目/妈妈和小明.md': 'ma-ma-he-xiao-ming',
+  '题目/一筐桃子.md': 'yi-kuang-tao-zi',
+  '题目/鸡兔同笼.md': 'ji-tu-tong-long',
+  '题目/分苹果.md': 'fen-ping-guo',
+  '题目/联欢会握手.md': 'lian-huan-hui-wo-shou',
+  '题目/买五送一.md': 'mai-wu-song-yi',
+  '题目/过桥.md': 'guo-qiao',
+  '题目/图形算式.md': 'tu-xing-suan-shi',
+  '题目/三种图形.md': 'san-zhong-tu-xing',
 };
+
+/** 读 SUMMARY.md，算出每个 docs 页面在 GitBook 上的网址 */
+function bookUrls() {
+  const groupSlug = Object.fromEntries(UNITS.map((u) => [u.name, u.slug]));
+  const urls = {};
+  let group = null;
+  for (const line of fs.readFileSync(path.join(ROOT, 'docs/SUMMARY.md'), 'utf8').split('\n')) {
+    const g = line.match(/^##\s+(.+?)\s*$/);
+    if (g) {
+      group = g[1];
+      if (!(group in groupSlug)) fail(`SUMMARY.md 的分组「${group}」不在 UNITS 里`);
+      continue;
+    }
+    const item = line.match(/^\s*\*\s+\[[^\]]*\]\(([^)]+)\)/);
+    if (!item) continue;
+    const file = decodeURI(item[1]);
+    if (!(file in PAGE_SLUG)) fail(`PAGE_SLUG 里缺 ${file} 的拼音`);
+    const parts = [group && groupSlug[group], PAGE_SLUG[file]].filter(Boolean);
+    urls[file] = parts.length ? `${BOOK}/${parts.join('/')}` : BOOK;
+  }
+  return urls;
+}
+
+function fail(msg) {
+  console.error('✗ ' + msg);
+  process.exit(1);
+}
 
 const readDir = (d) =>
   fs.existsSync(path.join(ROOT, d))
@@ -196,12 +162,13 @@ const animations = readDir('demos')
     };
   });
 
+const pageUrls = bookUrls();
+const urlOf = (file) => pageUrls[file] || fail(`${file} 没挂进 docs/SUMMARY.md`);
+
 const motifs = MOTIFS.map((cfg) => {
   const full = path.join(ROOT, 'docs/知识点', cfg.file);
-  if (!fs.existsSync(full)) {
-    console.error(`✗ MOTIFS 里的 ${cfg.file} 找不到`);
-    process.exit(1);
-  }
+  if (!fs.existsSync(full)) fail(`MOTIFS 里的 ${cfg.file} 找不到`);
+  if (!UNITS.some((u) => u.name === cfg.unit)) fail(`${cfg.file} 的单元「${cfg.unit}」不在 UNITS 里`);
   const text = fs.readFileSync(full, 'utf8');
   const seen = new Set();
   const problems = linkedProblems(text)
@@ -210,7 +177,7 @@ const motifs = MOTIFS.map((cfg) => {
       const pt = fs.readFileSync(path.join(ROOT, 'docs/题目', p.file), 'utf8');
       return {
         title: mdTitle(pt, p.title),
-        href: PROBLEM_SLUG[p.file] ? `${BOOK}/${PROBLEM_SLUG[p.file]}` : `${BOOK}`,
+        href: urlOf(`题目/${p.file}`),
         desc: mdProblem(pt),
       };
     });
@@ -218,11 +185,36 @@ const motifs = MOTIFS.map((cfg) => {
   return {
     ...cfg,
     motto: mdMotto(text),
-    href: `${BOOK}/${cfg.slug}`,
+    href: urlOf(`知识点/${cfg.file}`),
     problems,
     demos,
   };
 });
+
+const units = UNITS.map((u) => ({
+  ...u,
+  href: urlOf(`单元/${u.name}.md`),
+  motifs: motifs.filter((m) => m.unit === u.name),
+}));
+
+// 「先看动画」按单元里的课序排，同一个动画挂在两道母题下只出现一次
+const orderedAnimations = [
+  ...new Set([...motifs.flatMap((m) => m.demos), ...animations]),
+];
+
+const unitSection = (u) => `
+<section class="unit">
+  <a class="unit-head" href="${esc(u.href)}">
+    <span class="unit-no">第${u.no}单元</span>
+    <h3>${esc(u.name)}</h3>
+    <span class="unit-pic">${esc(u.pic)}</span>
+    <span class="unit-go">单元导读 →</span>
+  </a>
+  <div class="map">
+    ${u.motifs.map(tile).join('\n')}
+    ${u.todo.length ? `<div class="tile todo"><div class="tile-main"><div class="tile-mark">还在写</div><p class="motto">${u.todo.map(esc).join('、')}</p></div></div>` : ''}
+  </div>
+</section>`;
 
 const tile = (m) => `
 <article class="tile" style="--ink:${m.ink};--paper:${m.paper}">
@@ -409,6 +401,30 @@ const html = `<!DOCTYPE html>
   .chip.play { background: var(--ink); color: #fff; border-color: var(--ink); }
   .chip.quiet { color: #6b7784; }
 
+  .unit { margin-bottom: 30px; }
+  .unit-head {
+    display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 14px;
+    text-decoration: none; color: inherit;
+    padding: 0 4px 12px;
+  }
+  .unit-no {
+    font-size: 13px; font-weight: 800; letter-spacing: .08em;
+    color: #fff; background: var(--brand);
+    border-radius: 999px; padding: 3px 11px;
+  }
+  .unit-head h3 { font-size: 24px; color: var(--brand); }
+  .unit-pic { font-size: 15px; color: var(--soft); }
+  .unit-go { margin-left: auto; font-size: 14px; font-weight: 800; color: var(--accent); }
+  .unit-head:hover .unit-go { text-decoration: underline; }
+  .tile.todo {
+    --ink: #8a96a3; --paper: #f3f5f7;
+    min-height: 0;
+    border: 2px dashed #cfd6dd;
+    box-shadow: none;
+  }
+  .tile.todo:hover { transform: none; outline-color: transparent; }
+  .tile.todo .motto { color: #7d8b98; }
+
   .how {
     margin-top: 36px;
     background: #fff8ec;
@@ -446,8 +462,8 @@ const html = `<!DOCTYPE html>
       <h1>母题地图</h1>
       <p class="lead">看起来题很多，骨架只有这几种。<b>衣服可以换，骨头不能换。</b>先认出是哪一类，再看动画，再动笔。</p>
       <div class="actions">
-        <a class="btn primary" href="${BOOK}/ren-chu-mu-ti">我这道题是哪一类？</a>
-        <a class="btn ghost" href="${BOOK}/da-gang">三年级还有哪些</a>
+        <a class="btn primary" href="${urlOf('认出母题.md')}">我这道题是哪一类？</a>
+        <a class="btn ghost" href="${urlOf('大纲.md')}">三年级还有哪些</a>
       </div>
     </div>
     <div class="cast" aria-hidden="true">
@@ -461,16 +477,14 @@ const html = `<!DOCTYPE html>
     <p>卡住多半不是不会算，是脑子里没有画面。</p>
   </div>
   <div class="shows">
-    ${animations.map(playCard).join('\n')}
+    ${orderedAnimations.map(playCard).join('\n')}
   </div>
 
   <div class="sec">
-    <h2>母题一览</h2>
-    <p>点卡片看骨架，点下面的小标签看例题或动画。</p>
+    <h2>六个单元，按顺序学</h2>
+    <p>每个单元是一种画法。点单元名看这一单元怎么学，点卡片看母题，点小标签看例题或动画。</p>
   </div>
-  <div class="map">
-    ${motifs.map(tile).join('\n')}
-  </div>
+  ${units.map(unitSection).join('\n')}
 
   <div class="how">
     <b>怎么陪孩子用：</b>让他先猜这是哪道母题 → 有动画就看一遍 → 把口诀念出来 → 合上页面自己写算式 → 再换一身衣服讲给你听。
@@ -485,4 +499,4 @@ const html = `<!DOCTYPE html>
 `;
 
 fs.writeFileSync(path.join(ROOT, 'index.html'), html);
-console.log(`✓ 母题地图已生成：${motifs.length} 道母题、${animations.length} 个动画`);
+console.log(`✓ 母题地图已生成：${units.length} 个单元、${motifs.length} 道母题、${animations.length} 个动画`);

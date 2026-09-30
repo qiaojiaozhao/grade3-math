@@ -150,6 +150,30 @@
   .chip.play { background: var(--ink); color: #fff; border-color: var(--ink); }
   .chip.quiet { color: #6b7784; }
 
+  .unit { margin-bottom: 30px; }
+  .unit-head {
+    display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 14px;
+    text-decoration: none; color: inherit;
+    padding: 0 4px 12px;
+  }
+  .unit-no {
+    font-size: 13px; font-weight: 800; letter-spacing: .08em;
+    color: #fff; background: var(--brand);
+    border-radius: 999px; padding: 3px 11px;
+  }
+  .unit-head h3 { font-size: 24px; color: var(--brand); }
+  .unit-pic { font-size: 15px; color: var(--soft); }
+  .unit-go { margin-left: auto; font-size: 14px; font-weight: 800; color: var(--accent); }
+  .unit-head:hover .unit-go { text-decoration: underline; }
+  .tile.todo {
+    --ink: #8a96a3; --paper: #f3f5f7;
+    min-height: 0;
+    border: 2px dashed #cfd6dd;
+    box-shadow: none;
+  }
+  .tile.todo:hover { transform: none; outline-color: transparent; }
+  .tile.todo .motto { color: #7d8b98; }
+
   .how {
     margin-top: 36px;
     background: #fff8ec;
@@ -215,10 +239,16 @@
   <span>小油壶在两桶之间来回搬油。看甲多出来的那截怎么裂成两块 15，再看甲桶怎么一层层亮成 4 份。</span>
 </a>
 
-<a class="show" href="demos/%E8%BF%87%E6%A1%A5-%E8%BF%87%E7%81%AB%E8%BD%A6%E9%97%AE%E9%A2%98.html">
+<a class="show" href="demos/%E5%A6%88%E5%A6%88%E5%92%8C%E5%B0%8F%E6%98%8E-%E5%B9%B4%E9%BE%84%E9%97%AE%E9%A2%98.html">
   <span class="go">播放</span>
-  <strong>过桥：车头进，车尾出</strong>
-  <span>车头出桥还没过完。车尾也离开，走过的路才是车身加桥。180 + 120，再除以 15，要 20 秒。</span>
+  <strong>妈妈和小明：一起长大，差不变</strong>
+  <span>两个人一起长大，高出的那一截不变。差 28 是 2 份，1 份 14，小明长到 14 岁要 6 年。</span>
+</a>
+
+<a class="show" href="demos/%E4%B8%80%E7%AD%90%E6%A1%83%E5%AD%90-%E8%BF%98%E5%8E%9F%E9%97%AE%E9%A2%98.html">
+  <span class="go">播放</span>
+  <strong>一筐桃子：先还 1 个，再翻倍</strong>
+  <span>最后剩 10 个不是半筐。先把多卖的 1 个还回去，再翻倍。倒两次，原来 46 个。</span>
 </a>
 
 <a class="show" href="demos/%E9%B8%A1%E5%85%94%E5%90%8C%E7%AC%BC-%E5%81%87%E8%AE%BE%E6%B3%95.html">
@@ -239,16 +269,16 @@
   <span>最后一个女生是第「女生人数」个，所以少握了「女生人数 − 1」个。男生 −（女生 − 1）= 7，挪一下就多 6。</span>
 </a>
 
-<a class="show" href="demos/%E5%A6%88%E5%A6%88%E5%92%8C%E5%B0%8F%E6%98%8E-%E5%B9%B4%E9%BE%84%E9%97%AE%E9%A2%98.html">
-  <span class="go">播放</span>
-  <strong>妈妈和小明：一起长大，差不变</strong>
-  <span>两个人一起长大，高出的那一截不变。差 28 是 2 份，1 份 14，小明长到 14 岁要 6 年。</span>
-</a>
-
 <a class="show" href="demos/%E4%B9%B0%E4%BA%94%E9%80%81%E4%B8%80-%E4%B9%B0%E8%B5%A0%E9%97%AE%E9%A2%98.html">
   <span class="go">播放</span>
   <strong>买五送一：送的那瓶也要喝</strong>
   <span>送的那瓶也要喝。买 5 送 1 是 6 人一组，30 人正好 5 组，每组买 5 瓶，一共 25 瓶。</span>
+</a>
+
+<a class="show" href="demos/%E8%BF%87%E6%A1%A5-%E8%BF%87%E7%81%AB%E8%BD%A6%E9%97%AE%E9%A2%98.html">
+  <span class="go">播放</span>
+  <strong>过桥：车头进，车尾出</strong>
+  <span>车头出桥还没过完。车尾也离开，走过的路才是车身加桥。180 + 120，再除以 15，要 20 秒。</span>
 </a>
 
 <a class="show" href="demos/%E4%B8%89%E7%A7%8D%E5%9B%BE%E5%BD%A2-%E7%AE%80%E5%8D%95%E6%8E%A8%E7%90%86.html">
@@ -262,164 +292,230 @@
   <strong>图形算式：划掉一样多的，剩下的就是钥匙</strong>
   <span>两个算式摆一起，划掉一样多的。减完两种都还剩 1 个不是白减——剩下的 ○ + △ = 22 就是钥匙。</span>
 </a>
-
-<a class="show" href="demos/%E4%B8%80%E7%AD%90%E6%A1%83%E5%AD%90-%E8%BF%98%E5%8E%9F%E9%97%AE%E9%A2%98.html">
-  <span class="go">播放</span>
-  <strong>一筐桃子：先还 1 个，再翻倍</strong>
-  <span>最后剩 10 个不是半筐。先把多卖的 1 个还回去，再翻倍。倒两次，原来 46 个。</span>
-</a>
   </div>
 
   <div class="sec">
-    <h2>母题一览</h2>
-    <p>点卡片看骨架，点下面的小标签看例题或动画。</p>
+    <h2>六个单元，按顺序学</h2>
+    <p>每个单元是一种画法。点单元名看这一单元怎么学，点卡片看母题，点小标签看例题或动画。</p>
   </div>
+  
+<section class="unit">
+  <a class="unit-head" href="https://smileyes.gitbook.io/smileyes-docs/hua-xian-duan-tu/hua-xian-duan-tu">
+    <span class="unit-no">第一单元</span>
+    <h3>画线段图</h3>
+    <span class="unit-pic">两根条子比高矮</span>
+    <span class="unit-go">单元导读 →</span>
+  </a>
   <div class="map">
     
 <article class="tile" style="--ink:#2f7a5b;--paper:#e8f6ee">
-  <a class="tile-main" href="https://smileyes.gitbook.io/smileyes-docs/zhi-shi-dian/he-cha-wen-ti">
+  <a class="tile-main" href="https://smileyes.gitbook.io/smileyes-docs/hua-xian-duan-tu/he-cha-wen-ti">
     <div class="tile-mark">和 + 差</div>
     <h3>和差</h3>
     <p class="motto">（和 + 差）÷ 2 = 大数；（和 − 差）÷ 2 = 小数。</p>
   </a>
   <div class="tile-foot">
-    <a class="chip" href="https://smileyes.gitbook.io/smileyes-docs/li-ti/da-yi-ku-zi-he-xie">大衣裤子和鞋</a><a class="chip" href="https://smileyes.gitbook.io/smileyes-docs/li-ti/xiong-di-fen-tang">兄弟分糖</a>
+    <a class="chip" href="https://smileyes.gitbook.io/smileyes-docs/hua-xian-duan-tu/da-yi-ku-zi-he-xie">大衣裤子和鞋</a><a class="chip" href="https://smileyes.gitbook.io/smileyes-docs/hua-xian-duan-tu/xiong-di-fen-tang">兄弟分糖</a>
     <a class="chip play" href="demos/%E5%A4%A7%E8%A1%A3%E8%A3%A4%E5%AD%90%E5%92%8C%E9%9E%8B-%E5%92%8C%E5%B7%AE%E9%97%AE%E9%A2%98.html">看动画</a><a class="chip quiet" href="demos/%E5%A4%A7%E8%A1%A3%E8%A3%A4%E5%AD%90%E5%92%8C%E9%9E%8B-%E5%92%8C%E5%B7%AE%E9%97%AE%E9%A2%98.mp4">mp4</a>
   </div>
 </article>
 
 <article class="tile" style="--ink:#2c6fb3;--paper:#e7f1fb">
-  <a class="tile-main" href="https://smileyes.gitbook.io/smileyes-docs/zhi-shi-dian/he-bei-wen-ti">
+  <a class="tile-main" href="https://smileyes.gitbook.io/smileyes-docs/hua-xian-duan-tu/he-bei-wen-ti">
     <div class="tile-mark">和 + 倍</div>
     <h3>和倍</h3>
     <p class="motto">和 ÷ (倍数 + 1) = 1 份。</p>
   </a>
   <div class="tile-foot">
-    <a class="chip" href="https://smileyes.gitbook.io/smileyes-docs/li-ti/jia-yi-liang-dui-shu">甲乙两堆书</a>
+    <a class="chip" href="https://smileyes.gitbook.io/smileyes-docs/hua-xian-duan-tu/jia-yi-liang-dui-shu">甲乙两堆书</a>
     
   </div>
 </article>
 
 <article class="tile" style="--ink:#c05621;--paper:#fff1e4">
-  <a class="tile-main" href="https://smileyes.gitbook.io/smileyes-docs/zhi-shi-dian/cha-bei-wen-ti">
+  <a class="tile-main" href="https://smileyes.gitbook.io/smileyes-docs/hua-xian-duan-tu/cha-bei-wen-ti">
     <div class="tile-mark">差 + 倍</div>
     <h3>差倍</h3>
     <p class="motto">差 ÷ (倍数 − 1) = 1 份。</p>
   </a>
   <div class="tile-foot">
-    <a class="chip" href="https://smileyes.gitbook.io/smileyes-docs/li-ti/dao-you-wen-ti">倒油问题</a><a class="chip" href="https://smileyes.gitbook.io/smileyes-docs/li-ti/ma-ma-he-xiao-ming">妈妈和小明</a>
+    <a class="chip" href="https://smileyes.gitbook.io/smileyes-docs/hua-xian-duan-tu/dao-you-wen-ti">倒油问题</a><a class="chip" href="https://smileyes.gitbook.io/smileyes-docs/hua-xian-duan-tu/ma-ma-he-xiao-ming">妈妈和小明</a>
     <a class="chip play" href="demos/%E5%80%92%E6%B2%B9%E9%97%AE%E9%A2%98-%E7%A7%BB%E5%A4%9A%E8%A1%A5%E5%B0%91%E4%B8%8E%E5%B7%AE%E5%80%8D.html">看动画</a><a class="chip quiet" href="demos/%E5%80%92%E6%B2%B9%E9%97%AE%E9%A2%98-%E7%A7%BB%E5%A4%9A%E8%A1%A5%E5%B0%91%E4%B8%8E%E5%B7%AE%E5%80%8D.mp4">mp4</a>
   </div>
 </article>
 
 <article class="tile" style="--ink:#8a4ec7;--paper:#f3eaff">
-  <a class="tile-main" href="https://smileyes.gitbook.io/smileyes-docs/zhi-shi-dian/yi-duo-bu-shao">
+  <a class="tile-main" href="https://smileyes.gitbook.io/smileyes-docs/hua-xian-duan-tu/yi-duo-bu-shao">
     <div class="tile-mark">倒过去就相等</div>
     <h3>移多补少</h3>
     <p class="motto">倒过去 1 份，差距缩小 2 份。</p>
   </a>
   <div class="tile-foot">
-    <a class="chip" href="https://smileyes.gitbook.io/smileyes-docs/li-ti/dao-you-wen-ti">倒油问题</a>
+    <a class="chip" href="https://smileyes.gitbook.io/smileyes-docs/hua-xian-duan-tu/dao-you-wen-ti">倒油问题</a>
     <a class="chip play" href="demos/%E5%80%92%E6%B2%B9%E9%97%AE%E9%A2%98-%E7%A7%BB%E5%A4%9A%E8%A1%A5%E5%B0%91%E4%B8%8E%E5%B7%AE%E5%80%8D.html">看动画</a><a class="chip quiet" href="demos/%E5%80%92%E6%B2%B9%E9%97%AE%E9%A2%98-%E7%A7%BB%E5%A4%9A%E8%A1%A5%E5%B0%91%E4%B8%8E%E5%B7%AE%E5%80%8D.mp4">mp4</a>
   </div>
 </article>
 
 <article class="tile" style="--ink:#c2410c;--paper:#ffedd5">
-  <a class="tile-main" href="https://smileyes.gitbook.io/smileyes-docs/zhi-shi-dian/nian-ling-wen-ti">
+  <a class="tile-main" href="https://smileyes.gitbook.io/smileyes-docs/hua-xian-duan-tu/nian-ling-wen-ti">
     <div class="tile-mark">差不变</div>
     <h3>年龄</h3>
     <p class="motto">两个人一起长一岁，高出的那一截不变。</p>
   </a>
   <div class="tile-foot">
-    <a class="chip" href="https://smileyes.gitbook.io/smileyes-docs/li-ti/ma-ma-he-xiao-ming">妈妈和小明</a>
+    <a class="chip" href="https://smileyes.gitbook.io/smileyes-docs/hua-xian-duan-tu/ma-ma-he-xiao-ming">妈妈和小明</a>
     <a class="chip play" href="demos/%E5%A6%88%E5%A6%88%E5%92%8C%E5%B0%8F%E6%98%8E-%E5%B9%B4%E9%BE%84%E9%97%AE%E9%A2%98.html">看动画</a><a class="chip quiet" href="demos/%E5%A6%88%E5%A6%88%E5%92%8C%E5%B0%8F%E6%98%8E-%E5%B9%B4%E9%BE%84%E9%97%AE%E9%A2%98.mp4">mp4</a>
   </div>
 </article>
-
-<article class="tile" style="--ink:#b45309;--paper:#fff6d8">
-  <a class="tile-main" href="https://smileyes.gitbook.io/smileyes-docs/zhi-shi-dian/jia-she-fa">
-    <div class="tile-mark">两种混在一起</div>
-    <h3>鸡兔同笼</h3>
-    <p class="motto">先当全是鸡，少的脚两只两只添，添几次就有几只兔。</p>
-  </a>
-  <div class="tile-foot">
-    <a class="chip" href="https://smileyes.gitbook.io/smileyes-docs/li-ti/ji-tu-tong-long">鸡兔同笼</a>
-    <a class="chip play" href="demos/%E9%B8%A1%E5%85%94%E5%90%8C%E7%AC%BC-%E5%81%87%E8%AE%BE%E6%B3%95.html">看动画</a><a class="chip quiet" href="demos/%E9%B8%A1%E5%85%94%E5%90%8C%E7%AC%BC-%E5%81%87%E8%AE%BE%E6%B3%95.mp4">mp4</a>
+    <div class="tile todo"><div class="tile-main"><div class="tile-mark">还在写</div><p class="motto">归一</p></div></div>
   </div>
-</article>
+</section>
 
-<article class="tile" style="--ink:#0f766e;--paper:#e6f7f4">
-  <a class="tile-main" href="https://smileyes.gitbook.io/smileyes-docs/zhi-shi-dian/jian-dan-tui-li">
-    <div class="tile-mark">图形代表数</div>
-    <h3>图形推理</h3>
-    <p class="motto">两个算式摆一起，划掉一样多的，剩下的就露出来。</p>
+<section class="unit">
+  <a class="unit-head" href="https://smileyes.gitbook.io/smileyes-docs/dao-tui-yu-jia-she/dao-tui-yu-jia-she">
+    <span class="unit-no">第二单元</span>
+    <h3>倒推与假设</h3>
+    <span class="unit-pic">从结果倒着走，或先假设全是一种</span>
+    <span class="unit-go">单元导读 →</span>
   </a>
-  <div class="tile-foot">
-    <a class="chip" href="https://smileyes.gitbook.io/smileyes-docs/li-ti/tu-xing-suan-shi">图形算式</a><a class="chip" href="https://smileyes.gitbook.io/smileyes-docs/li-ti/san-zhong-tu-xing">三种图形</a>
-    <a class="chip play" href="demos/%E4%B8%89%E7%A7%8D%E5%9B%BE%E5%BD%A2-%E7%AE%80%E5%8D%95%E6%8E%A8%E7%90%86.html">看动画</a><a class="chip quiet" href="demos/%E4%B8%89%E7%A7%8D%E5%9B%BE%E5%BD%A2-%E7%AE%80%E5%8D%95%E6%8E%A8%E7%90%86.mp4">mp4</a><a class="chip play" href="demos/%E5%9B%BE%E5%BD%A2%E7%AE%97%E5%BC%8F-%E7%AE%80%E5%8D%95%E6%8E%A8%E7%90%86.html">看动画</a><a class="chip quiet" href="demos/%E5%9B%BE%E5%BD%A2%E7%AE%97%E5%BC%8F-%E7%AE%80%E5%8D%95%E6%8E%A8%E7%90%86.mp4">mp4</a>
-  </div>
-</article>
-
-<article class="tile" style="--ink:#be123c;--paper:#ffe4e6">
-  <a class="tile-main" href="https://smileyes.gitbook.io/smileyes-docs/zhi-shi-dian/ying-kui-wen-ti">
-    <div class="tile-mark">一多一少</div>
-    <h3>盈亏</h3>
-    <p class="motto">多了加少了，除以两次分的差，先求人再求总数。</p>
-  </a>
-  <div class="tile-foot">
-    <a class="chip" href="https://smileyes.gitbook.io/smileyes-docs/li-ti/fen-ping-guo">分苹果</a>
+  <div class="map">
     
-  </div>
-</article>
-
-<article class="tile" style="--ink:#3d8a4a;--paper:#e8f6ee">
-  <a class="tile-main" href="https://smileyes.gitbook.io/smileyes-docs/zhi-shi-dian/zhi-shu-wen-ti">
-    <div class="tile-mark">两头都算</div>
-    <h3>植树</h3>
-    <p class="motto">点过去，头和尾都要点。</p>
-  </a>
-  <div class="tile-foot">
-    <a class="chip" href="https://smileyes.gitbook.io/smileyes-docs/li-ti/lian-huan-hui-wo-shou">联欢会握手</a>
-    <a class="chip play" href="demos/%E8%81%94%E6%AC%A2%E4%BC%9A%E6%8F%A1%E6%89%8B-%E9%80%89%E8%88%9E%E4%BC%B4.html">看动画</a><a class="chip quiet" href="demos/%E8%81%94%E6%AC%A2%E4%BC%9A%E6%8F%A1%E6%89%8B-%E9%80%89%E8%88%9E%E4%BC%B4.mp4">mp4</a><a class="chip play" href="demos/%E8%81%94%E6%AC%A2%E4%BC%9A%E6%8F%A1%E6%89%8B-%E6%A4%8D%E6%A0%91%E9%97%AE%E9%A2%98.html">看动画</a><a class="chip quiet" href="demos/%E8%81%94%E6%AC%A2%E4%BC%9A%E6%8F%A1%E6%89%8B-%E6%A4%8D%E6%A0%91%E9%97%AE%E9%A2%98.mp4">mp4</a>
-  </div>
-</article>
-
 <article class="tile" style="--ink:#be185d;--paper:#fce7f3">
-  <a class="tile-main" href="https://smileyes.gitbook.io/smileyes-docs/zhi-shi-dian/huan-yuan-wen-ti">
+  <a class="tile-main" href="https://smileyes.gitbook.io/smileyes-docs/dao-tui-yu-jia-she/huan-yuan-wen-ti">
     <div class="tile-mark">从结果倒回去</div>
     <h3>还原</h3>
     <p class="motto">从剩下的倒回去：多的先还，再翻倍。</p>
   </a>
   <div class="tile-foot">
-    <a class="chip" href="https://smileyes.gitbook.io/smileyes-docs/li-ti/yi-kuang-tao-zi">一筐桃子</a>
+    <a class="chip" href="https://smileyes.gitbook.io/smileyes-docs/dao-tui-yu-jia-she/yi-kuang-tao-zi">一筐桃子</a>
     <a class="chip play" href="demos/%E4%B8%80%E7%AD%90%E6%A1%83%E5%AD%90-%E8%BF%98%E5%8E%9F%E9%97%AE%E9%A2%98.html">看动画</a><a class="chip quiet" href="demos/%E4%B8%80%E7%AD%90%E6%A1%83%E5%AD%90-%E8%BF%98%E5%8E%9F%E9%97%AE%E9%A2%98.mp4">mp4</a>
   </div>
 </article>
 
-<article class="tile" style="--ink:#9a3412;--paper:#ffedd5">
-  <a class="tile-main" href="https://smileyes.gitbook.io/smileyes-docs/zhi-shi-dian/guo-huo-che-wen-ti">
-    <div class="tile-mark">车头进车尾出</div>
-    <h3>过火车</h3>
-    <p class="motto">车头进、车尾出，两段路加在一起。</p>
+<article class="tile" style="--ink:#b45309;--paper:#fff6d8">
+  <a class="tile-main" href="https://smileyes.gitbook.io/smileyes-docs/dao-tui-yu-jia-she/jia-she-fa">
+    <div class="tile-mark">两种混在一起</div>
+    <h3>鸡兔同笼</h3>
+    <p class="motto">先当全是鸡，少的脚两只两只添，添几次就有几只兔。</p>
   </a>
   <div class="tile-foot">
-    <a class="chip" href="https://smileyes.gitbook.io/smileyes-docs/li-ti/guo-qiao">过桥</a>
-    <a class="chip play" href="demos/%E8%BF%87%E6%A1%A5-%E8%BF%87%E7%81%AB%E8%BD%A6%E9%97%AE%E9%A2%98.html">看动画</a><a class="chip quiet" href="demos/%E8%BF%87%E6%A1%A5-%E8%BF%87%E7%81%AB%E8%BD%A6%E9%97%AE%E9%A2%98.mp4">mp4</a>
+    <a class="chip" href="https://smileyes.gitbook.io/smileyes-docs/dao-tui-yu-jia-she/ji-tu-tong-long">鸡兔同笼</a>
+    <a class="chip play" href="demos/%E9%B8%A1%E5%85%94%E5%90%8C%E7%AC%BC-%E5%81%87%E8%AE%BE%E6%B3%95.html">看动画</a><a class="chip quiet" href="demos/%E9%B8%A1%E5%85%94%E5%90%8C%E7%AC%BC-%E5%81%87%E8%AE%BE%E6%B3%95.mp4">mp4</a>
+  </div>
+</article>
+
+<article class="tile" style="--ink:#be123c;--paper:#ffe4e6">
+  <a class="tile-main" href="https://smileyes.gitbook.io/smileyes-docs/dao-tui-yu-jia-she/ying-kui-wen-ti">
+    <div class="tile-mark">一多一少</div>
+    <h3>盈亏</h3>
+    <p class="motto">多了加少了，除以两次分的差，先求人再求总数。</p>
+  </a>
+  <div class="tile-foot">
+    <a class="chip" href="https://smileyes.gitbook.io/smileyes-docs/dao-tui-yu-jia-she/fen-ping-guo">分苹果</a>
+    
+  </div>
+</article>
+    
+  </div>
+</section>
+
+<section class="unit">
+  <a class="unit-head" href="https://smileyes.gitbook.io/smileyes-docs/shu-qing-chu/shu-qing-chu">
+    <span class="unit-no">第三单元</span>
+    <h3>数清楚</h3>
+    <span class="unit-pic">画一条线数点和段，几个一组数有几组</span>
+    <span class="unit-go">单元导读 →</span>
+  </a>
+  <div class="map">
+    
+<article class="tile" style="--ink:#3d8a4a;--paper:#e8f6ee">
+  <a class="tile-main" href="https://smileyes.gitbook.io/smileyes-docs/shu-qing-chu/zhi-shu-wen-ti">
+    <div class="tile-mark">两头都算</div>
+    <h3>植树</h3>
+    <p class="motto">点过去，头和尾都要点。</p>
+  </a>
+  <div class="tile-foot">
+    <a class="chip" href="https://smileyes.gitbook.io/smileyes-docs/shu-qing-chu/lian-huan-hui-wo-shou">联欢会握手</a>
+    <a class="chip play" href="demos/%E8%81%94%E6%AC%A2%E4%BC%9A%E6%8F%A1%E6%89%8B-%E9%80%89%E8%88%9E%E4%BC%B4.html">看动画</a><a class="chip quiet" href="demos/%E8%81%94%E6%AC%A2%E4%BC%9A%E6%8F%A1%E6%89%8B-%E9%80%89%E8%88%9E%E4%BC%B4.mp4">mp4</a><a class="chip play" href="demos/%E8%81%94%E6%AC%A2%E4%BC%9A%E6%8F%A1%E6%89%8B-%E6%A4%8D%E6%A0%91%E9%97%AE%E9%A2%98.html">看动画</a><a class="chip quiet" href="demos/%E8%81%94%E6%AC%A2%E4%BC%9A%E6%8F%A1%E6%89%8B-%E6%A4%8D%E6%A0%91%E9%97%AE%E9%A2%98.mp4">mp4</a>
   </div>
 </article>
 
 <article class="tile" style="--ink:#b45309;--paper:#fff7ed">
-  <a class="tile-main" href="https://smileyes.gitbook.io/smileyes-docs/zhi-shi-dian/mai-zeng-wen-ti">
+  <a class="tile-main" href="https://smileyes.gitbook.io/smileyes-docs/shu-qing-chu/mai-zeng-wen-ti">
     <div class="tile-mark">送的也要喝</div>
     <h3>买赠</h3>
     <p class="motto">送的那瓶也要喝，5 加 1 才是一组。</p>
   </a>
   <div class="tile-foot">
-    <a class="chip" href="https://smileyes.gitbook.io/smileyes-docs/li-ti/mai-wu-song-yi">买五送一</a>
+    <a class="chip" href="https://smileyes.gitbook.io/smileyes-docs/shu-qing-chu/mai-wu-song-yi">买五送一</a>
     <a class="chip play" href="demos/%E4%B9%B0%E4%BA%94%E9%80%81%E4%B8%80-%E4%B9%B0%E8%B5%A0%E9%97%AE%E9%A2%98.html">看动画</a><a class="chip quiet" href="demos/%E4%B9%B0%E4%BA%94%E9%80%81%E4%B8%80-%E4%B9%B0%E8%B5%A0%E9%97%AE%E9%A2%98.mp4">mp4</a>
   </div>
 </article>
+
+<article class="tile" style="--ink:#9a3412;--paper:#ffedd5">
+  <a class="tile-main" href="https://smileyes.gitbook.io/smileyes-docs/shu-qing-chu/guo-huo-che-wen-ti">
+    <div class="tile-mark">车头进车尾出</div>
+    <h3>过火车</h3>
+    <p class="motto">车头进、车尾出，两段路加在一起。</p>
+  </a>
+  <div class="tile-foot">
+    <a class="chip" href="https://smileyes.gitbook.io/smileyes-docs/shu-qing-chu/guo-qiao">过桥</a>
+    <a class="chip play" href="demos/%E8%BF%87%E6%A1%A5-%E8%BF%87%E7%81%AB%E8%BD%A6%E9%97%AE%E9%A2%98.html">看动画</a><a class="chip quiet" href="demos/%E8%BF%87%E6%A1%A5-%E8%BF%87%E7%81%AB%E8%BD%A6%E9%97%AE%E9%A2%98.mp4">mp4</a>
   </div>
+</article>
+    <div class="tile todo"><div class="tile-main"><div class="tile-mark">还在写</div><p class="motto">周期、重叠、枚举</p></div></div>
+  </div>
+</section>
+
+<section class="unit">
+  <a class="unit-head" href="https://smileyes.gitbook.io/smileyes-docs/qiao-suan/qiao-suan">
+    <span class="unit-no">第四单元</span>
+    <h3>巧算</h3>
+    <span class="unit-pic">先看数再动笔，找能凑整的好朋友</span>
+    <span class="unit-go">单元导读 →</span>
+  </a>
+  <div class="map">
+    
+    <div class="tile todo"><div class="tile-main"><div class="tile-mark">还在写</div><p class="motto">巧算、巧填算符、数字谜</p></div></div>
+  </div>
+</section>
+
+<section class="unit">
+  <a class="unit-head" href="https://smileyes.gitbook.io/smileyes-docs/tu-xing/tu-xing">
+    <span class="unit-no">第五单元</span>
+    <h3>图形</h3>
+    <span class="unit-pic">按顺序数，凹进去的边推出去</span>
+    <span class="unit-go">单元导读 →</span>
+  </a>
+  <div class="map">
+    
+    <div class="tile todo"><div class="tile-main"><div class="tile-mark">还在写</div><p class="motto">数线段数角、巧求周长、一笔画</p></div></div>
+  </div>
+</section>
+
+<section class="unit">
+  <a class="unit-head" href="https://smileyes.gitbook.io/smileyes-docs/tui-li/tui-li">
+    <span class="unit-no">第六单元</span>
+    <h3>推理</h3>
+    <span class="unit-pic">一样多的可以换，条件多了画表</span>
+    <span class="unit-go">单元导读 →</span>
+  </a>
+  <div class="map">
+    
+<article class="tile" style="--ink:#0f766e;--paper:#e6f7f4">
+  <a class="tile-main" href="https://smileyes.gitbook.io/smileyes-docs/tui-li/jian-dan-tui-li">
+    <div class="tile-mark">图形代表数</div>
+    <h3>图形推理</h3>
+    <p class="motto">两个算式摆一起，划掉一样多的，剩下的就露出来。</p>
+  </a>
+  <div class="tile-foot">
+    <a class="chip" href="https://smileyes.gitbook.io/smileyes-docs/tui-li/tu-xing-suan-shi">图形算式</a><a class="chip" href="https://smileyes.gitbook.io/smileyes-docs/tui-li/san-zhong-tu-xing">三种图形</a>
+    <a class="chip play" href="demos/%E4%B8%89%E7%A7%8D%E5%9B%BE%E5%BD%A2-%E7%AE%80%E5%8D%95%E6%8E%A8%E7%90%86.html">看动画</a><a class="chip quiet" href="demos/%E4%B8%89%E7%A7%8D%E5%9B%BE%E5%BD%A2-%E7%AE%80%E5%8D%95%E6%8E%A8%E7%90%86.mp4">mp4</a><a class="chip play" href="demos/%E5%9B%BE%E5%BD%A2%E7%AE%97%E5%BC%8F-%E7%AE%80%E5%8D%95%E6%8E%A8%E7%90%86.html">看动画</a><a class="chip quiet" href="demos/%E5%9B%BE%E5%BD%A2%E7%AE%97%E5%BC%8F-%E7%AE%80%E5%8D%95%E6%8E%A8%E7%90%86.mp4">mp4</a>
+  </div>
+</article>
+    <div class="tile todo"><div class="tile-main"><div class="tile-mark">还在写</div><p class="motto">逻辑推理、奇偶</p></div></div>
+  </div>
+</section>
 
   <div class="how">
     <b>怎么陪孩子用：</b>让他先猜这是哪道母题 → 有动画就看一遍 → 把口诀念出来 → 合上页面自己写算式 → 再换一身衣服讲给你听。
