@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>凑整 · 动态演示</title>
+<meta name="description" content="347 和 253 的末两位凑成 100，先加这一对得 600，再加 158 得 758。别从左边把好朋友拆开。">
+<link rel="stylesheet" href="lib/anim.css?v=portrait">
+<style>
+  html, body { background: #07080a; }
+
+  .stage { --top: 176px; --fs: 36px; --gap: 12px; }
+  body.portrait .stage { --top: 340px; --fs: 72px; --gap: 22px; }
+
+  .ask {
+    position: absolute;
+    left: 50%; top: 108px;
+    transform: translateX(-50%);
+    font-size: 18px; font-weight: 800;
+    color: #e8eaed;
+    white-space: nowrap;
+  }
+  body.portrait .ask { top: 210px; font-size: 34px; }
+  .ask:empty { display: none; }
+
+  #row {
+    position: absolute;
+    left: 16px; right: 16px;
+    top: var(--top);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--gap);
+  }
+
+  .card {
+    min-width: 2.4em;
+    text-align: center;
+    font-size: var(--fs);
+    font-weight: 800;
+    letter-spacing: -1px;
+    color: #f4f6f8;
+    background: #1c1f26;
+    border: 3px solid #3a4048;
+    border-radius: 18px;
+    padding: .22em .16em .16em;
+    line-height: 1;
+  }
+  body.portrait .card { border-radius: 28px; border-width: 4px; }
+  .card.friend { border-color: #ffb347; box-shadow: 0 0 0 4px #ffb34733; }
+  .card.wait { opacity: .28; }
+  .card.bad { border-color: #ff6b6b; box-shadow: 0 0 0 4px #ff6b6b33; }
+  .hun.dim, .ten.dim, .one.dim { opacity: .28; }
+  .one.on, .ten.on { color: #ffb347; }
+
+  .op {
+    font-size: calc(var(--fs) * .7);
+    font-weight: 800;
+    color: #8b93a0;
+  }
+  .op.bad { color: #ff6b6b; }
+
+  .hint-line {
+    position: absolute;
+    left: 0; right: 0;
+    top: calc(var(--top) + var(--fs) * 1.7);
+    text-align: center;
+    font-size: 18px; font-weight: 800;
+    color: #e8c27a;
+    min-height: 1.4em;
+  }
+  body.portrait .hint-line { font-size: 32px; top: calc(var(--top) + var(--fs) * 1.9); }
+
+  .count {
+    position: absolute;
+    left: 20px; right: 20px;
+    top: calc(var(--top) + var(--fs) * 2.8);
+    text-align: center;
+    font-size: 26px; font-weight: 800;
+    color: #ffb347;
+    min-height: 40px;
+  }
+  body.portrait .count { font-size: 44px; top: calc(var(--top) + var(--fs) * 3.2); }
+  .count b { color: #7ec4ff; }
+  .count .no { color: #ff6b6b; }
+  .count .ok { color: #5ecf8a; }
+  .count.pop { animation: bump .45s cubic-bezier(.2, 1.6, .3, 1); }
+
+  @keyframes bump {
+    0% { transform: scale(.82); }
+    55% { transform: scale(1.06); }
+    100% { transform: scale(1); }
+  }
+</style>
+</head>
+<body class="theme-dark">
+
+<h1>凑整：先圈好朋友</h1>
+<div class="problem">
+  计算：<b>347 + 158 + 253</b>
+</div>
+
+<div class="stage-wrap">
+  <div class="stage" id="stage">
+    <div class="ask" id="ask"></div>
+    <div id="row"></div>
+    <div class="hint-line" id="hintLine"></div>
+    <div class="count" id="count"></div>
+  </div>
+</div>
+
+<script src="lib/anim.js"></script>
+<script>
+const { sleep, cancelled, say, pop } = Anim;
+
+const NUMS = [347, 158, 253];
+const FRIEND = new Set([0, 2]);
+
+const row = document.getElementById('row');
+const ask = document.getElementById('ask');
+const hintLine = document.getElementById('hintLine');
+const countEl = document.getElementById('count');
+
+/* mode:
+   plain  三个数一样亮
+   ones   只亮好朋友的个位 7 和 3
+   tails  亮末两位 47 和 53
+   pair   两张好朋友的卡片描金，158 让开
+   wrong  从左边加，前两张描红
+   all    三张都在，好朋友仍然描金 */
+function paint(mode) {
+  row.innerHTML = '';
+  NUMS.forEach((n, i) => {
+    if (i) {
+      const op = document.createElement('div');
+      op.className = 'op' + (mode === 'wrong' && i === 1 ? ' bad' : '');
+      op.textContent = '+';
+      row.append(op);
+    }
+    const s = String(n);
+    const card = document.createElement('div');
+    const friend = FRIEND.has(i);
+    card.className = 'card'
+      + (mode === 'pair' && friend ? ' friend' : '')
+      + (mode === 'pair' && !friend ? ' wait' : '')
+      + (mode === 'all' && friend ? ' friend' : '')
+      + (mode === 'wrong' && i < 2 ? ' bad' : '')
+      + (mode === 'wrong' && i === 2 ? ' wait' : '');
+    const hun = document.createElement('span');
+    hun.className = 'hun' + (mode === 'ones' || mode === 'tails' ? ' dim' : '');
+    hun.textContent = s.slice(0, -2);
+    const ten = document.createElement('span');
+    ten.className = 'ten'
+      + (mode === 'ones' ? ' dim' : '')
+      + (mode === 'tails' && friend ? ' on' : '');
+    ten.textContent = s.slice(-2, -1);
+    const one = document.createElement('span');
+    one.className = 'one' + ((mode === 'ones' || mode === 'tails') && friend ? ' on' : '');
+    one.textContent = s.slice(-1);
+    card.append(hun, ten, one);
+    row.append(card);
+  });
+}
+
+function setHint(text) {
+  hintLine.textContent = text;
+}
+
+function setCount(html) {
+  countEl.innerHTML = html;
+  countEl.classList.remove('pop');
+  void countEl.offsetWidth;
+  countEl.classList.add('pop');
+}
+
+function resetVisuals() {
+  ask.textContent = '';
+  hintLine.textContent = '';
+  countEl.innerHTML = '';
+  countEl.classList.remove('pop');
+  paint('plain');
+}
+
+Anim.run([
+  {
+    title: '三个数',
+    async play(id) {
+      paint('plain');
+      say('先看', '先<b>别从左边加</b>。三个数排在一起，先找谁和谁是好朋友。');
+      await sleep(1100);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '看个位',
+    async play(id) {
+      paint('ones');
+      setHint('看个位');
+      say('个位', '只看个位。<b>7 和 3</b> 凑成 10，中间的 8 凑不上。');
+      await sleep(500);
+      if (cancelled(id)) return;
+      setCount('7 + 3 = <b>10</b>');
+      pop('7 和 3');
+      await sleep(1100);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '末两位',
+    async play(id) {
+      paint('tails');
+      setHint('再看末两位');
+      say('末两位', '十位 4 + 5 = 9，加上进上来的 1，也是 10。末两位 <b>47 + 53 = 100</b>。');
+      await sleep(500);
+      if (cancelled(id)) return;
+      setCount('47 + 53 = <b>100</b>');
+      await sleep(1200);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '先加这一对',
+    async play(id) {
+      paint('pair');
+      setHint('347 和 253 先加');
+      say('圈起来', '整百是 300 + 200，再加刚才的 100。158 <b>先放着</b>。');
+      await sleep(500);
+      if (cancelled(id)) return;
+      setCount('300 + 200 + 100 = <b>600</b>');
+      pop('600');
+      await sleep(1200);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '从左边加？',
+    async play(id) {
+      paint('wrong');
+      setHint('从左边加，好朋友被拆开');
+      say('卡住', '从左边加是 347 + 158。158 隔在中间，<b>好朋友被拆开了</b>，又要进位。');
+      await sleep(500);
+      if (cancelled(id)) return;
+      setCount('<span class="no">347 + 158 = 505，难算 ✗</span>');
+      pop('先别这样加');
+      await sleep(1200);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '加上 158',
+    async play(id) {
+      paint('all');
+      setHint('600 再加剩下的');
+      say('剩下的', '好朋友加完是 600。现在把放下的 158 加上。');
+      await sleep(400);
+      if (cancelled(id)) return;
+      setCount('600 + 158 = <b>758</b>');
+      pop('758');
+      await sleep(1200);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '答案 758',
+    async play(id) {
+      ask.textContent = '347 + 158 + 253 = ？';
+      paint('all');
+      setHint('先圈好朋友，再算剩下的');
+      setCount('347 + 253 + 158 = <b>758</b> <span class="ok">✓</span>');
+      say('答案', '答案是 <b>758</b>。个位凑成 10 的两个先圈起来，再算剩下的。');
+      pop('758');
+      await sleep(1300);
+      if (cancelled(id)) return;
+    }
+  },
+], { reset: resetVisuals });
+</script>
+</body>
+</html>

@@ -50,7 +50,7 @@ layout:
     <tr>
       <td><i class="fa-calculator"></i></td>
       <td><strong>四 · 巧算</strong></td>
-      <td>先看数再动笔，找能凑整的好朋友。课在写，先练三道</td>
+      <td>先看数再动笔，找能凑整的好朋友。巧算，接着是巧填算符、数字谜</td>
       <td><a href="单元/巧算.md">巧算</a></td>
     </tr>
     <tr>
@@ -139,6 +139,12 @@ layout:
       <td><strong>彩灯</strong></td>
       <td>三 · 周期。红黄蓝重复，第 51 盏刚好除尽，停在最后一个蓝</td>
       <td><a href="题目/彩灯.md">彩灯</a></td>
+    </tr>
+    <tr>
+      <td><i class="fa-plus"></i></td>
+      <td><strong>凑整</strong></td>
+      <td>四 · 巧算。347 和 253 先加得 600，再加 158 得 758</td>
+      <td><a href="题目/凑整.md">凑整</a></td>
     </tr>
     <tr>
       <td><i class="fa-puzzle-piece"></i></td>
