@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>彩灯 · 动态演示</title>
+<meta name="description" content="红黄蓝重复，第 51 盏刚好除尽。余数是 0，停在这一组的最后一盏蓝，不是下一个红。">
+<link rel="stylesheet" href="lib/anim.css?v=portrait">
+<style>
+  html, body { background: #07080a; }
+
+  .stage {
+    --bulb: 54px;
+    --gap: 10px;
+    --top: 132px;
+    --fs: 14px;
+  }
+  body.portrait .stage {
+    --bulb: 108px;
+    --gap: 14px;
+    --top: 300px;
+    --fs: 26px;
+  }
+
+  .ask {
+    position: absolute;
+    left: 50%; top: 108px;
+    transform: translateX(-50%);
+    font-size: 18px; font-weight: 800;
+    color: #e8eaed;
+    white-space: nowrap;
+  }
+  body.portrait .ask { top: 200px; font-size: 32px; }
+  .ask:empty { display: none; }
+  .ask b { color: #ffb347; }
+
+  #board {
+    position: absolute;
+    left: 24px; right: 24px;
+    top: var(--top);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 22px;
+  }
+  body.portrait #board { gap: 36px; }
+
+  .ellipsis {
+    font-size: 28px; font-weight: 800;
+    color: #8b93a0;
+    padding-top: calc(var(--bulb) * .28);
+    letter-spacing: 2px;
+  }
+  body.portrait .ellipsis { font-size: 42px; }
+
+  .grp { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .lamps { display: flex; gap: var(--gap); }
+  .lamp { display: flex; flex-direction: column; align-items: center; gap: 6px; width: var(--bulb); }
+
+  .bulb {
+    width: var(--bulb); height: var(--bulb);
+    border-radius: 50%;
+    box-shadow: inset 0 -8px 12px #0004, 0 0 16px var(--glow);
+  }
+  .bulb.red { background: radial-gradient(circle at 38% 34%, #ffd0d0, #ff5a5a 42%, #c42828); --glow: #ff5a5a88; }
+  .bulb.yellow { background: radial-gradient(circle at 38% 34%, #fff3c4, #ffd15a 42%, #e0a020); --glow: #ffd15a88; }
+  .bulb.blue { background: radial-gradient(circle at 38% 34%, #d4e8ff, #5aa6ff 42%, #2a6ad4); --glow: #5aa6ff88; }
+  .bulb.dim { filter: brightness(.45); box-shadow: none; }
+  .bulb.hot {
+    animation: glow .7s ease-in-out infinite;
+    outline: 4px solid #fff;
+    outline-offset: 4px;
+  }
+  .bulb.ghost {
+    background: transparent;
+    border: 4px dashed #ff6b6b;
+    box-shadow: none;
+    color: #ff6b6b;
+    display: flex; align-items: center; justify-content: center;
+    font-size: var(--fs); font-weight: 800;
+  }
+  @keyframes glow {
+    50% { transform: scale(1.06); }
+  }
+
+  .cap, .num {
+    font-size: var(--fs); font-weight: 800;
+    color: #e8eaed;
+    white-space: nowrap;
+    min-height: 1.2em;
+  }
+  .cap { color: #e8c27a; }
+  .num.mark { color: #ffb347; }
+  .num.pop { animation: bump .45s cubic-bezier(.2, 1.6, .3, 1); }
+
+  .gtag {
+    margin-top: 4px;
+    font-size: var(--fs); font-weight: 800;
+    color: #e8c27a;
+    background: #1c1f26;
+    border: 2px solid #3a4048;
+    border-radius: 999px;
+    padding: 2px 12px;
+  }
+  body.portrait .gtag { padding: 6px 18px; }
+
+  .count {
+    position: absolute;
+    left: 0; right: 0;
+    top: calc(var(--top) + var(--bulb) + 150px);
+    text-align: center;
+    font-size: 24px; font-weight: 800;
+    color: #ffb347;
+    min-height: 36px;
+  }
+  body.portrait .count { font-size: 42px; top: calc(var(--top) + var(--bulb) + 230px); }
+  .count b { color: #7ec4ff; }
+  .count .no { color: #ff6b6b; }
+  .count .ok { color: #5ecf8a; }
+  .count.pop { animation: bump .45s cubic-bezier(.2, 1.6, .3, 1); }
+
+  @keyframes bump {
+    0% { transform: scale(.8); }
+    55% { transform: scale(1.08); }
+    100% { transform: scale(1); }
+  }
+</style>
+</head>
+<body class="theme-dark">
+
+<h1>彩灯：余数是 0，停在最后一个</h1>
+<div class="problem">
+  彩灯按<b>红、黄、蓝</b>一直重复。第 <b>51</b> 盏是什么颜色？
+</div>
+
+<div class="stage-wrap">
+  <div class="stage" id="stage">
+    <div class="ask" id="ask"></div>
+    <div id="board"></div>
+    <div class="count" id="count"></div>
+  </div>
+</div>
+
+<script src="lib/anim.js"></script>
+<script>
+const { sleep, cancelled, say, pop } = Anim;
+
+const COLORS = [
+  { name: '红', cls: 'red' },
+  { name: '黄', cls: 'yellow' },
+  { name: '蓝', cls: 'blue' },
+];
+
+const board = document.getElementById('board');
+const ask = document.getElementById('ask');
+const countEl = document.getElementById('count');
+
+/* 只画两头：第 1 组和第 17 组，中间用省略号。
+   which：0 第 1 组，1 第 17 组。hot 是组里的下标，或 'last'。
+   ghost 为 true 时，在第 17 组后面多画一盏虚线红灯。 */
+function paint(s) {
+  board.innerHTML = '';
+  addGroup(0, s);
+  if (s.tail) {
+    const dots = document.createElement('div');
+    dots.className = 'ellipsis';
+    dots.textContent = '……';
+    board.append(dots);
+    addGroup(1, s);
+    if (s.ghost) addGhost();
+  }
+}
+
+function addGroup(which, s) {
+  const grp = document.createElement('div');
+  grp.className = 'grp';
+  const lamps = document.createElement('div');
+  lamps.className = 'lamps';
+  const base = which === 0 ? 1 : 49;
+  for (let i = 0; i < 3; i++) {
+    const lamp = document.createElement('div');
+    lamp.className = 'lamp';
+    const bulb = document.createElement('div');
+    const on = s.hot === i || (s.hot === 'last' && i === 2);
+    bulb.className = 'bulb ' + COLORS[i].cls + (s.dim && !on ? ' dim' : '') + (on ? ' hot' : '');
+    const cap = document.createElement('div');
+    cap.className = 'cap';
+    cap.textContent = s.caps ? ['第 1 个', '第 2 个', '最后一个'][i] : '';
+    const num = document.createElement('div');
+    num.className = 'num' + (s.nums && on ? ' mark' : '');
+    num.textContent = s.nums ? String(base + i) : '';
+    lamp.append(bulb, cap, num);
+    lamps.append(lamp);
+  }
+  grp.append(lamps);
+  if (s.tags) {
+    const tag = document.createElement('div');
+    tag.className = 'gtag';
+    tag.textContent = which === 0 ? '第 1 组' : '第 17 组';
+    grp.append(tag);
+  }
+  board.append(grp);
+}
+
+function addGhost() {
+  const lamp = document.createElement('div');
+  lamp.className = 'lamp';
+  lamp.style.marginTop = '0';
+  const bulb = document.createElement('div');
+  bulb.className = 'bulb ghost';
+  bulb.textContent = '红？';
+  const cap = document.createElement('div');
+  cap.className = 'cap';
+  cap.textContent = '下一个';
+  const num = document.createElement('div');
+  num.className = 'num';
+  num.textContent = '52';
+  lamp.append(bulb, cap, num);
+  board.append(lamp);
+}
+
+function setAsk(html) {
+  ask.innerHTML = html;
+}
+
+function setCount(html) {
+  countEl.innerHTML = html;
+  countEl.classList.remove('pop');
+  void countEl.offsetWidth;
+  countEl.classList.add('pop');
+}
+
+function resetVisuals() {
+  ask.innerHTML = '';
+  countEl.innerHTML = '';
+  countEl.classList.remove('pop');
+  paint({ tail: false });
+}
+
+Anim.run([
+  {
+    title: '颜色在重复',
+    async play(id) {
+      paint({ tail: true });
+      say('先看', '先<b>不数第几盏</b>。红、黄、蓝，过了蓝又是红，颜色一直这样重复。');
+      await sleep(1100);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '圈出一组',
+    async play(id) {
+      paint({ tail: false, caps: true, tags: true });
+      say('一组', '先圈出<b>一组</b>。红是第 1 个，黄是第 2 个，蓝是这一组的<b>最后一个</b>。');
+      await sleep(1100);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '正好 17 组',
+    async play(id) {
+      setAsk('第 <b>51</b> 盏是什么颜色？');
+      paint({ tail: true, tags: true, caps: true });
+      say('除一下', '51 盏不用都画出来。3 盏一组，51 ÷ 3 = <b>17 组</b>，一盏都没多出来。');
+      await sleep(700);
+      if (cancelled(id)) return;
+      setCount('51 ÷ 3 = <b>17</b> 组 …… <b>0</b>');
+      await sleep(1100);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '第 17 组',
+    async play(id) {
+      paint({ tail: true, tags: true, caps: true, nums: true });
+      say('填号', '第 17 组的三盏，就是第 <b>49、50、51</b> 盏。要找的在这一组里面。');
+      await sleep(1200);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '指到下一个？',
+    async play(id) {
+      paint({ tail: true, tags: true, nums: true, ghost: true, dim: true });
+      say('卡住', '有人说：余数是 0，就是没有，从<b>下一个红</b>开始。');
+      await sleep(900);
+      if (cancelled(id)) return;
+      setCount('<span class="no">再往后是第 52 盏 ✗</span>');
+      pop('多指了一盏');
+      await sleep(1100);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '停在蓝',
+    async play(id) {
+      paint({ tail: true, tags: true, caps: true, nums: true, hot: 'last', dim: true });
+      say('最后一个', '一个都没多出来，就不能再往后指。刚好用完一组，停在这一组的<b>最后一个</b>。');
+      await sleep(600);
+      if (cancelled(id)) return;
+      setCount('余 0 → 最后一个 → <b>蓝</b>');
+      pop('第 51 盏是蓝');
+      await sleep(1200);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '余数是 2',
+    async play(id) {
+      setAsk('如果问第 <b>50</b> 盏呢？');
+      paint({ tail: true, tags: true, caps: true, nums: true, hot: 1, dim: true });
+      say('对比', '第 50 盏：50 ÷ 3 = 16 组<b>余 2</b>。多出来 2 盏，从这一组的头上数，第 2 个是黄。');
+      await sleep(600);
+      if (cancelled(id)) return;
+      setCount('50 ÷ 3 = 16 组 …… <b>2</b> → 黄');
+      await sleep(1200);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '第 51 盏是蓝',
+    async play(id) {
+      setAsk('第 <b>51</b> 盏是什么颜色？');
+      paint({ tail: true, tags: true, nums: true, hot: 'last', dim: true });
+      setCount('51 ÷ 3 = 17 组 …… 0 → <b>蓝色</b> <span class="ok">✓</span>');
+      say('答案', '第 51 盏是<b>蓝色</b>。多出来几个就从头数几个；一个不多，就是最后一个。');
+      pop('蓝色');
+      await sleep(1300);
+      if (cancelled(id)) return;
+    }
+  },
+], { reset: resetVisuals });
+</script>
+</body>
+</html>
