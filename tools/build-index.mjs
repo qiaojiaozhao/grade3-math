@@ -28,7 +28,7 @@ const UNITS = [
   { no: '二', name: '倒推与假设', slug: 'dao-tui-yu-jia-she', pic: '从结果倒着走，或先假设全是一种', todo: [] },
   { no: '三', name: '数清楚', slug: 'shu-qing-chu', pic: '画一条线数点和段，几个一组数有几组', todo: ['枚举'] },
   { no: '四', name: '巧算', slug: 'qiao-suan', pic: '先看数再动笔，找能凑整的好朋友', todo: ['巧填算符', '数字谜'] },
-  { no: '五', name: '图形', slug: 'tu-xing', pic: '按顺序数，凹进去的边推出去', todo: ['数线段数角', '巧求周长', '一笔画'] },
+  { no: '五', name: '图形', slug: 'tu-xing', pic: '按顺序数，凹进去的边推出去', todo: ['巧求周长', '一笔画'] },
   { no: '六', name: '推理', slug: 'tui-li', pic: '一样多的可以换，条件多了画表', todo: ['奇偶'] },
 ];
 
@@ -48,6 +48,7 @@ const MOTIFS = [
   { unit: '数清楚', file: '周期问题.md', name: '周期', mark: '余 0 是最后一个', ink: '#1d4ed8', paper: '#dbeafe', demo: ['彩灯'] },
   { unit: '数清楚', file: '重叠问题.md', name: '重叠', mark: '多的数了两遍', ink: '#0369a1', paper: '#e0f2fe', demo: ['书法'] },
   { unit: '巧算', file: '巧算问题.md', name: '巧算', mark: '先找好朋友', ink: '#0f766e', paper: '#ccfbf1', demo: ['凑整'] },
+  { unit: '图形', file: '数线段数角.md', name: '数线段、数角', mark: '长的也要数', ink: '#4338ca', paper: '#e0e7ff', demo: ['五个点'] },
   { unit: '推理', file: '简单推理.md', name: '图形推理', mark: '图形代表数', ink: '#0f766e', paper: '#e6f7f4', demo: ['图形', '三种'] },
   { unit: '推理', file: '逻辑推理.md', name: '逻辑推理', mark: '打勾就叉掉一列', ink: '#6d28d9', paper: '#ede9fe', demo: ['红黄蓝'] },
 ];
@@ -78,6 +79,7 @@ const PAGE_SLUG = {
   '知识点/周期问题.md': 'zhou-qi-wen-ti',
   '知识点/重叠问题.md': 'chong-die-wen-ti',
   '知识点/巧算问题.md': 'qiao-suan-wen-ti',
+  '知识点/数线段数角.md': 'shu-xian-duan-shu-jiao',
   '知识点/简单推理.md': 'jian-dan-tui-li',
   '知识点/逻辑推理.md': 'luo-ji-tui-li',
   '题目/兄弟分糖.md': 'xiong-di-fen-tang',
@@ -94,6 +96,7 @@ const PAGE_SLUG = {
   '题目/彩灯.md': 'cai-deng',
   '题目/书法和绘画.md': 'shu-fa-he-hui-hua',
   '题目/凑整.md': 'cou-zheng',
+  '题目/五个点.md': 'wu-ge-dian',
   '题目/图形算式.md': 'tu-xing-suan-shi',
   '题目/三种图形.md': 'san-zhong-tu-xing',
   '题目/红黄蓝衣服.md': 'hong-huang-lan-yi-fu',

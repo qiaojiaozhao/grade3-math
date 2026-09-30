@@ -56,7 +56,7 @@ layout:
     <tr>
       <td><i class="fa-shapes"></i></td>
       <td><strong>五 · 图形</strong></td>
-      <td>按顺序数线段、数角；凹进去的边推出去求周长。课在写，先练三道</td>
+      <td>按顺序数线段、数角；凹进去的边推出去求周长。数线段数角，接着是巧求周长、一笔画</td>
       <td><a href="单元/图形.md">图形</a></td>
     </tr>
     <tr>
@@ -151,6 +151,12 @@ layout:
       <td><strong>凑整</strong></td>
       <td>四 · 巧算。347 和 253 先加得 600，再加 158 得 758</td>
       <td><a href="题目/凑整.md">凑整</a></td>
+    </tr>
+    <tr>
+      <td><i class="fa-ellipsis"></i></td>
+      <td><strong>五个点</strong></td>
+      <td>五 · 数线段。只数挨着的是 4 条，长的也数上是 10 条</td>
+      <td><a href="题目/五个点.md">五个点</a></td>
     </tr>
     <tr>
       <td><i class="fa-puzzle-piece"></i></td>

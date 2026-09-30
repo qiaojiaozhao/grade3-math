@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>五个点 · 动态演示</title>
+<meta name="description" content="一条线上 5 个点。只数挨着的是 4 条，从左往右把长的也数上，4 + 3 + 2 + 1 = 10 条。">
+<link rel="stylesheet" href="lib/anim.css?v=portrait">
+<style>
+  html, body { background: #07080a; }
+
+  .stage { --row: 340px; --gap: 92px; --lift: 26px; }
+  body.portrait .stage { --row: 760px; --gap: 150px; --lift: 52px; }
+
+  .ask {
+    position: absolute;
+    left: 50%; top: 108px;
+    transform: translateX(-50%);
+    font-size: 18px; font-weight: 800;
+    color: #e8eaed;
+    white-space: nowrap;
+  }
+  body.portrait .ask { top: 200px; font-size: 34px; }
+  .ask:empty { display: none; }
+
+  #arcs {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .points {
+    position: absolute;
+    left: 50%;
+    top: var(--row);
+    transform: translateX(-50%);
+    display: flex;
+    gap: var(--gap);
+  }
+  .dotwrap { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .pt {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: #f4f6f8;
+    box-shadow: 0 0 0 4px #1c1f26, 0 0 0 6px #8b93a0;
+  }
+  body.portrait .pt { width: 36px; height: 36px; }
+  .pt.on { background: var(--c, #ffb347); box-shadow: 0 0 0 4px #1c1f26, 0 0 0 6px var(--c, #ffb347); }
+  .pname {
+    font-size: 16px; font-weight: 800; color: #e8c27a;
+  }
+  body.portrait .pname { font-size: 28px; }
+
+  .count {
+    position: absolute;
+    left: 16px; right: 16px;
+    top: calc(var(--row) + 78px);
+    text-align: center;
+    font-size: 24px; font-weight: 800;
+    color: #ffb347;
+    min-height: 36px;
+  }
+  body.portrait .count { font-size: 42px; top: calc(var(--row) + 120px); }
+  .count b { color: #7ec4ff; }
+  .count .no { color: #ff6b6b; }
+  .count .ok { color: #5ecf8a; }
+  .count.pop { animation: bump .45s cubic-bezier(.2, 1.6, .3, 1); }
+
+  @keyframes bump {
+    0% { transform: scale(.82); }
+    55% { transform: scale(1.06); }
+    100% { transform: scale(1); }
+  }
+</style>
+</head>
+<body class="theme-dark">
+
+<h1>五个点：长的也要数</h1>
+<div class="problem">
+  一条直线上有 <b>5</b> 个点。这些点一共可以连成多少条线段？
+</div>
+
+<div class="stage-wrap">
+  <div class="stage" id="stage">
+    <div class="ask" id="ask"></div>
+    <svg id="arcs"></svg>
+    <div class="points" id="points"></div>
+    <div class="count" id="count"></div>
+  </div>
+</div>
+
+<script src="lib/anim.js"></script>
+<script>
+const { sleep, cancelled, say } = Anim;
+
+const COLORS = ['#6ea8ff', '#ffb347', '#5ecf8a', '#c084fc'];
+const N = 5;
+
+const arcs = document.getElementById('arcs');
+const dots = document.getElementById('points');
+const ask = document.getElementById('ask');
+const countEl = document.getElementById('count');
+
+for (let i = 1; i <= N; i++) {
+  const wrap = document.createElement('div');
+  wrap.className = 'dotwrap';
+  wrap.innerHTML = `<i class="pt" id="pt${i}"></i><span class="pname">${i}</span>`;
+  dots.append(wrap);
+}
+
+/* segs：已经画上的线段，每条是 [起点, 终点]，点从 1 数。
+   from 是当前正在数的那个点，把它点亮。 */
+function paint(segs, from, color) {
+  const stage = arcs.parentElement.getBoundingClientRect();
+  arcs.setAttribute('viewBox', `0 0 ${stage.width} ${stage.height}`);
+  const lift = parseFloat(getComputedStyle(arcs.parentElement).getPropertyValue('--lift')) || 26;
+  arcs.innerHTML = '';
+  for (const [a, b] of segs) {
+    const p1 = center(a);
+    const p2 = center(b);
+    const span = b - a;
+    const mx = (p1.x + p2.x) / 2;
+    const my = p1.y - span * lift * 2;
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', `M ${p1.x} ${p1.y} Q ${mx} ${my} ${p2.x} ${p2.y}`);
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke', color || COLORS[a - 1]);
+    path.setAttribute('stroke-width', document.body.classList.contains('portrait') ? '8' : '5');
+    path.setAttribute('stroke-linecap', 'round');
+    arcs.append(path);
+  }
+  for (let i = 1; i <= N; i++) {
+    const pt = document.getElementById('pt' + i);
+    pt.classList.toggle('on', i === from);
+    pt.style.setProperty('--c', COLORS[from - 1] || '#ffb347');
+  }
+}
+
+function center(n) {
+  const dot = document.getElementById('pt' + n);
+  const r = dot.getBoundingClientRect();
+  const s = arcs.getBoundingClientRect();
+  return { x: r.left + r.width / 2 - s.left, y: r.top + r.height / 2 - s.top };
+}
+
+function setCount(html) {
+  countEl.innerHTML = html;
+  countEl.classList.remove('pop');
+  void countEl.offsetWidth;
+  countEl.classList.add('pop');
+}
+
+function fromPoint(start, segs) {
+  const next = segs.slice();
+  for (let to = start + 1; to <= N; to++) next.push([start, to]);
+  return next;
+}
+
+function resetVisuals() {
+  ask.textContent = '';
+  countEl.innerHTML = '';
+  countEl.classList.remove('pop');
+  paint([], 0);
+}
+
+Anim.run([
+  {
+    title: '五个点',
+    async play(id) {
+      ask.textContent = '有几条线段？';
+      paint([], 0);
+      say('先看', '一条线上 <b>5 个点</b>。先别数。线段是两个点连起来，挨着的、隔着的，都算。');
+      await sleep(1100);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '只数短的',
+    async play(id) {
+      const short = [[1, 2], [2, 3], [3, 4], [4, 5]];
+      paint(short, 0, '#ff6b6b');
+      say('卡住', '有人只数挨着的：4 条。隔着点的长线段，全漏了。');
+      await sleep(400);
+      if (cancelled(id)) return;
+      setCount('<span class="no">只数短的 = 4 条 ✗</span>');
+      await sleep(1200);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '从第 1 个点',
+    async play(id) {
+      const segs = [];
+      say('第 1 个', '从<b>最左边</b>的点出发，右边 4 个点，一条条连。长的也要。');
+      for (let to = 2; to <= N; to++) {
+        segs.push([1, to]);
+        paint(segs, 1);
+        await sleep(380);
+        if (cancelled(id)) return;
+      }
+      setCount('从第 1 个点：<b>4</b> 条');
+      await sleep(800);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '换第 2 个点',
+    async play(id) {
+      let segs = fromPoint(1, []);
+      say('第 2 个', '换下一个点。<b>只往右连</b>，连回第 1 个点的那条已经数过了。');
+      for (let to = 3; to <= N; to++) {
+        segs.push([2, to]);
+        paint(segs, 2);
+        await sleep(380);
+        if (cancelled(id)) return;
+      }
+      setCount('从第 2 个点：<b>3</b> 条');
+      await sleep(800);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '剩下的点',
+    async play(id) {
+      let segs = fromPoint(2, fromPoint(1, []));
+      say('继续', '第 3 个点往右 2 条，第 4 个点往右 1 条。第 5 个点右边没有了。');
+      for (let to = 4; to <= N; to++) segs.push([3, to]);
+      paint(segs, 3);
+      await sleep(700);
+      if (cancelled(id)) return;
+      segs.push([4, 5]);
+      paint(segs, 4);
+      setCount('第 3 个点 <b>2</b> 条，第 4 个点 <b>1</b> 条');
+      await sleep(1000);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '加起来',
+    async play(id) {
+      const segs = fromPoint(4, fromPoint(3, fromPoint(2, fromPoint(1, []))));
+      paint(segs, 0);
+      say('加起来', '每个点的条数加在一起。越往后越少。');
+      await sleep(300);
+      if (cancelled(id)) return;
+      setCount('4 + 3 + 2 + 1 = <b>10</b>');
+      await sleep(1100);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '一共 10 条',
+    async play(id) {
+      ask.textContent = '一共有几条线段？';
+      const segs = fromPoint(4, fromPoint(3, fromPoint(2, fromPoint(1, []))));
+      paint(segs, 0);
+      setCount('4 + 3 + 2 + 1 = <b>10 条</b> <span class="ok">✓</span>');
+      say('答案', '一共 <b>10 条</b>。从一个点出发把能连的都数完，再换下一个，数过的不再数。');
+      await sleep(1300);
+      if (cancelled(id)) return;
+    }
+  },
+], { reset: resetVisuals });
+</script>
+</body>
+</html>
