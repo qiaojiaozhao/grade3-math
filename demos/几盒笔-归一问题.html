@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>几盒笔 · 动态演示</title>
+<meta name="description" content="3 盒 36 支，先求出 1 盒 12 支，5 盒是 60 支。不能用 36 直接乘 5。">
+<link rel="stylesheet" href="lib/anim.css?v=portrait">
+<style>
+  html, body { background: #07080a; }
+  .row {
+    position: absolute; left: 50%; top: 40%;
+    transform: translateX(-50%);
+    display: flex; gap: 14px;
+  }
+  body.portrait .row { gap: 22px; top: 38%; }
+  .box {
+    width: 72px; height: 88px; border-radius: 12px;
+    background: #243044; border: 3px solid #7ec4ff;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 20px; color: #7ec4ff;
+  }
+  body.portrait .box { width: 108px; height: 132px; font-size: 32px; border-radius: 18px; }
+  .box span { opacity: 0; }
+  .box.show span { opacity: 1; }
+  .box.dim { opacity: .35; }
+  .count {
+    position: absolute; left: 16px; right: 16px; bottom: 12%;
+    text-align: center; font-size: 22px; font-weight: 800; color: #ffb347;
+  }
+  body.portrait .count { font-size: 40px; bottom: 16%; }
+  .count .no { color: #ff6b6b; }
+  .count .ok { color: #5ecf8a; }
+</style>
+</head>
+<body class="theme-dark">
+<h1>几盒笔：先求 1 盒</h1>
+<div class="problem">3 盒彩笔一共 36 支。照这样，5 盒有多少支？</div>
+<div class="stage-wrap"><div class="stage" id="stage">
+  <div class="row" id="row"></div>
+  <div class="count" id="count"></div>
+</div></div>
+<script src="lib/anim.js"></script>
+<script>
+const { sleep, cancelled, say } = Anim;
+const row = document.getElementById('row');
+const countEl = document.getElementById('count');
+
+function boxes(n, show) {
+  row.innerHTML = '';
+  for (let i = 0; i < n; i++) {
+    const el = document.createElement('div');
+    el.className = 'box' + (show ? ' show' : '');
+    el.innerHTML = '<span>12</span>';
+    row.append(el);
+  }
+}
+
+function resetVisuals() {
+  boxes(3, false);
+  countEl.innerHTML = '';
+}
+
+Anim.run([
+  {
+    title: '3 盒',
+    async play(id) {
+      boxes(3, false);
+      say('先看', '3 盒。先<b>别拿 36 去乘</b>。');
+      await sleep(1000);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '错在乘总数',
+    async play(id) {
+      countEl.innerHTML = '<span class="no">36 × 5 ？ 36 已经是 3 盒了</span>';
+      say('会乘错', '36 是 3 盒合在一起的数，不是 1 盒。');
+      await sleep(1300);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '拆开 1 盒',
+    async play(id) {
+      boxes(3, true);
+      countEl.innerHTML = '36 ÷ 3 = 12';
+      say('先求 1 份', '1 盒是 <b>12</b> 支。');
+      await sleep(1200);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '画成 5 盒',
+    async play(id) {
+      boxes(5, true);
+      countEl.innerHTML = '5 个 12';
+      say('再乘份数', '5 盒，就是 <b>5 个 12</b>。');
+      await sleep(1100);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '60 支',
+    async play(id) {
+      boxes(5, true);
+      countEl.innerHTML = '12 × 5 = <span class="ok">60 支</span>';
+      say('答案', '5 盒有 <b>60 支</b>。先算出 1 份，再乘份数。');
+      await sleep(1400);
+      if (cancelled(id)) return;
+    }
+  },
+], { reset: resetVisuals });
+</script>
+</body>
+</html>

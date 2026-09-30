@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>田字 · 动态演示</title>
+<meta name="description" content="田字有 4 个汇了 3 条线的点。单数点不是 0 个或 2 个，不能一笔画。">
+<link rel="stylesheet" href="lib/anim.css?v=portrait">
+<style>
+  html, body { background: #07080a; }
+  svg.grid {
+    position: absolute; left: 50%; top: 42%;
+    width: 280px; height: 280px;
+    transform: translate(-50%, -40%);
+  }
+  body.portrait svg.grid { width: 520px; height: 520px; top: 40%; }
+  .edge { stroke: #9aa3b2; stroke-width: 8; fill: none; }
+  .v { fill: #e8eaed; }
+  .v.odd { fill: #ff6b6b; }
+  .v text { font-weight: 800; font-size: 11px; fill: #07080a; text-anchor: middle; dominant-baseline: central; }
+  .count {
+    position: absolute; left: 16px; right: 16px; bottom: 6%;
+    text-align: center; font-size: 22px; font-weight: 800; color: #ffb347;
+  }
+  body.portrait .count { font-size: 36px; bottom: 8%; }
+  .count .no { color: #ff6b6b; }
+</style>
+</head>
+<body class="theme-dark">
+<h1>田字：先数单数点</h1>
+<div class="problem">「田」字每条线只画一次，笔不离纸，能不能一笔画成？</div>
+<div class="stage-wrap"><div class="stage" id="stage">
+  <svg class="grid" id="grid" viewBox="0 0 240 240"></svg>
+  <div class="count" id="count"></div>
+</div></div>
+<script src="lib/anim.js"></script>
+<script>
+const { sleep, cancelled, say } = Anim;
+const grid = document.getElementById('grid');
+const countEl = document.getElementById('count');
+const pts = [];
+for (let r = 0; r < 3; r++) {
+  for (let c = 0; c < 3; c++) pts.push({ c, r, x: 40 + c * 80, y: 40 + r * 80 });
+}
+const odds = new Set(['0,1', '1,0', '1,2', '2,1']);
+
+function draw(mark) {
+  const ns = 'http://www.w3.org/2000/svg';
+  grid.innerHTML = '';
+  for (let i = 0; i < 3; i++) {
+    const y = 40 + i * 80;
+    const x = 40 + i * 80;
+    const h = document.createElementNS(ns, 'line');
+    h.setAttribute('x1', 40); h.setAttribute('x2', 200);
+    h.setAttribute('y1', y); h.setAttribute('y2', y);
+    h.setAttribute('class', 'edge');
+    const v = document.createElementNS(ns, 'line');
+    v.setAttribute('y1', 40); v.setAttribute('y2', 200);
+    v.setAttribute('x1', x); v.setAttribute('x2', x);
+    v.setAttribute('class', 'edge');
+    grid.append(h, v);
+  }
+  for (const p of pts) {
+    const g = document.createElementNS(ns, 'g');
+    const key = p.r + ',' + p.c;
+    const odd = mark && odds.has(key);
+    const c = document.createElementNS(ns, 'circle');
+    c.setAttribute('cx', p.x); c.setAttribute('cy', p.y);
+    c.setAttribute('r', 16);
+    c.setAttribute('class', 'v' + (odd ? ' odd' : ''));
+    g.append(c);
+    if (mark) {
+      const t = document.createElementNS(ns, 'text');
+      t.setAttribute('x', p.x); t.setAttribute('y', p.y);
+      const deg = (p.r === 1 && p.c === 1) ? 4 : (odd ? 3 : 2);
+      t.textContent = String(deg);
+      g.append(t);
+    }
+    grid.append(g);
+  }
+}
+
+function resetVisuals() {
+  draw(false);
+  countEl.innerHTML = '';
+}
+
+Anim.run([
+  {
+    title: '田字',
+    async play(id) {
+      draw(false);
+      say('先别画', '先<b>别从角上起笔</b>。先数每个点上有几条线。');
+      await sleep(1100);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '标出条数',
+    async play(id) {
+      draw(true);
+      say('数一数', '角上 2 条，正中 4 条，都是双数。边的中点是 <b>3 条</b>。');
+      await sleep(1400);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '四个单数点',
+    async play(id) {
+      draw(true);
+      countEl.innerHTML = '3 是单数，这样的点有 4 个';
+      say('只留单数', '单数点有 <b>4 个</b>。双数点不用管。');
+      await sleep(1200);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '不能',
+    async play(id) {
+      draw(true);
+      countEl.innerHTML = '0 个或 2 个才行，<span class="no">4 个不能</span>';
+      say('答案', '<b>不能</b>一笔画。单数点要是 0 个或 2 个。');
+      await sleep(1400);
+      if (cancelled(id)) return;
+    }
+  },
+], { reset: resetVisuals });
+</script>
+</body>
+</html>

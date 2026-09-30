@@ -23,13 +23,13 @@ const BOOK = 'https://smileyes.gitbook.io/smileyes-docs';
 // slug 是 GitBook 给这个分组生成的网址段（分组名的拼音）。todo 是还没写成课、先在地图上占位的母题。
 // course 是把整个单元串起来的系统课：file 在 docs/单元/ 下，demo 是动画文件名里的关键字。
 const UNITS = [
-  { no: '一', name: '画线段图', slug: 'hua-xian-duan-tu', pic: '两根条子比高矮', todo: ['归一'],
+  { no: '一', name: '画线段图', slug: 'hua-xian-duan-tu', pic: '两根条子比高矮', todo: [],
     course: { file: '画线段图系统课.md', demo: '一张图' } },
   { no: '二', name: '倒推与假设', slug: 'dao-tui-yu-jia-she', pic: '从结果倒着走，或先假设全是一种', todo: [] },
-  { no: '三', name: '数清楚', slug: 'shu-qing-chu', pic: '画一条线数点和段，几个一组数有几组', todo: ['枚举'] },
-  { no: '四', name: '巧算', slug: 'qiao-suan', pic: '先看数再动笔，找能凑整的好朋友', todo: ['巧填算符', '数字谜'] },
-  { no: '五', name: '图形', slug: 'tu-xing', pic: '按顺序数，凹进去的边推出去', todo: ['巧求周长', '一笔画'] },
-  { no: '六', name: '推理', slug: 'tui-li', pic: '一样多的可以换，条件多了画表', todo: ['奇偶'] },
+  { no: '三', name: '数清楚', slug: 'shu-qing-chu', pic: '画一条线数点和段，几个一组数有几组', todo: [] },
+  { no: '四', name: '巧算', slug: 'qiao-suan', pic: '先看数再动笔，找能凑整的好朋友', todo: [] },
+  { no: '五', name: '图形', slug: 'tu-xing', pic: '按顺序数，凹进去的边推出去', todo: [] },
+  { no: '六', name: '推理', slug: 'tui-li', pic: '一样多的可以换，条件多了画表', todo: [] },
 ];
 
 // 奥数拔高系列：独立于六单元，跟着学而思三年级秋季的课走。课表在 home 页里，
@@ -47,6 +47,7 @@ const MOTIFS = [
   { unit: '画线段图', file: '差倍问题.md', name: '差倍', mark: '差 + 倍', ink: '#c05621', paper: '#fff1e4', demo: ['倒油'] },
   { unit: '画线段图', file: '移多补少.md', name: '移多补少', mark: '倒过去就相等', ink: '#8a4ec7', paper: '#f3eaff', demo: ['倒油'] },
   { unit: '画线段图', file: '年龄问题.md', name: '年龄', mark: '差不变', ink: '#c2410c', paper: '#ffedd5', demo: ['妈妈'] },
+  { unit: '画线段图', file: '归一问题.md', name: '归一', mark: '先求 1 份', ink: '#155e75', paper: '#cffafe', demo: ['几盒笔'] },
   { unit: '倒推与假设', file: '还原问题.md', name: '还原', mark: '从结果倒回去', ink: '#be185d', paper: '#fce7f3', demo: ['桃子'] },
   { unit: '倒推与假设', file: '假设法.md', name: '鸡兔同笼', mark: '两种混在一起', ink: '#b45309', paper: '#fff6d8', demo: ['鸡兔'] },
   { unit: '倒推与假设', file: '盈亏问题.md', name: '盈亏', mark: '一多一少', ink: '#be123c', paper: '#ffe4e6', demo: [] },
@@ -55,10 +56,16 @@ const MOTIFS = [
   { unit: '数清楚', file: '过火车问题.md', name: '过火车', mark: '车头进车尾出', ink: '#9a3412', paper: '#ffedd5', demo: ['过桥'] },
   { unit: '数清楚', file: '周期问题.md', name: '周期', mark: '余 0 是最后一个', ink: '#1d4ed8', paper: '#dbeafe', demo: ['彩灯'] },
   { unit: '数清楚', file: '重叠问题.md', name: '重叠', mark: '多的数了两遍', ink: '#0369a1', paper: '#e0f2fe', demo: ['书法'] },
+  { unit: '数清楚', file: '枚举问题.md', name: '枚举', mark: '先定十位', ink: '#047857', paper: '#d1fae5', demo: ['两位数'] },
   { unit: '巧算', file: '巧算问题.md', name: '巧算', mark: '先找好朋友', ink: '#0f766e', paper: '#ccfbf1', demo: ['凑整'] },
+  { unit: '巧算', file: '巧填算符.md', name: '巧填算符', mark: '先比大小', ink: '#0e7490', paper: '#cffafe', demo: ['填运算'] },
+  { unit: '巧算', file: '数字谜.md', name: '数字谜', mark: '从个位看', ink: '#92400e', paper: '#fef3c7', demo: ['竖式'] },
   { unit: '图形', file: '数线段数角.md', name: '数线段、数角', mark: '长的也要数', ink: '#4338ca', paper: '#e0e7ff', demo: ['五个点'] },
+  { unit: '图形', file: '巧求周长.md', name: '巧求周长', mark: '把边推出去', ink: '#ea580c', paper: '#ffedd5', demo: ['台阶'] },
+  { unit: '图形', file: '一笔画.md', name: '一笔画', mark: '先数单数点', ink: '#831843', paper: '#fce7f3', demo: ['田字'] },
   { unit: '推理', file: '简单推理.md', name: '图形推理', mark: '图形代表数', ink: '#0f766e', paper: '#e6f7f4', demo: ['图形', '三种'] },
   { unit: '推理', file: '逻辑推理.md', name: '逻辑推理', mark: '打勾就叉掉一列', ink: '#6d28d9', paper: '#ede9fe', demo: ['红黄蓝'] },
+  { unit: '推理', file: '奇偶问题.md', name: '奇偶', mark: '先数单数', ink: '#9a3412', paper: '#ffedd5', demo: ['分成两堆'] },
 ];
 
 // GitBook 页面网址 = 分组 slug + 文件名的拼音。新建页面要在这里补一行拼音，漏了会直接报错。
@@ -79,6 +86,7 @@ const PAGE_SLUG = {
   '知识点/差倍问题.md': 'cha-bei-wen-ti',
   '知识点/移多补少.md': 'yi-duo-bu-shao',
   '知识点/年龄问题.md': 'nian-ling-wen-ti',
+  '知识点/归一问题.md': 'gui-yi-wen-ti',
   '知识点/还原问题.md': 'huan-yuan-wen-ti',
   '知识点/假设法.md': 'jia-she-fa',
   '知识点/盈亏问题.md': 'ying-kui-wen-ti',
@@ -87,15 +95,22 @@ const PAGE_SLUG = {
   '知识点/过火车问题.md': 'guo-huo-che-wen-ti',
   '知识点/周期问题.md': 'zhou-qi-wen-ti',
   '知识点/重叠问题.md': 'chong-die-wen-ti',
+  '知识点/枚举问题.md': 'mei-ju-wen-ti',
   '知识点/巧算问题.md': 'qiao-suan-wen-ti',
+  '知识点/巧填算符.md': 'qiao-tian-suan-fu',
+  '知识点/数字谜.md': 'shu-zi-mi',
   '知识点/数线段数角.md': 'shu-xian-duan-shu-jiao',
+  '知识点/巧求周长.md': 'qiao-qiu-zhou-chang',
+  '知识点/一笔画.md': 'yi-bi-hua',
   '知识点/简单推理.md': 'jian-dan-tui-li',
   '知识点/逻辑推理.md': 'luo-ji-tui-li',
+  '知识点/奇偶问题.md': 'ji-ou-wen-ti',
   '题目/兄弟分糖.md': 'xiong-di-fen-tang',
   '题目/大衣裤子和鞋.md': 'da-yi-ku-zi-he-xie',
   '题目/甲乙两堆书.md': 'jia-yi-liang-dui-shu',
   '题目/倒油问题.md': 'dao-you-wen-ti',
   '题目/妈妈和小明.md': 'ma-ma-he-xiao-ming',
+  '题目/几盒笔.md': 'ji-he-bi',
   '题目/一筐桃子.md': 'yi-kuang-tao-zi',
   '题目/鸡兔同笼.md': 'ji-tu-tong-long',
   '题目/分苹果.md': 'fen-ping-guo',
@@ -104,11 +119,17 @@ const PAGE_SLUG = {
   '题目/过桥.md': 'guo-qiao',
   '题目/彩灯.md': 'cai-deng',
   '题目/书法和绘画.md': 'shu-fa-he-hui-hua',
+  '题目/两位数.md': 'liang-wei-shu',
   '题目/凑整.md': 'cou-zheng',
+  '题目/填运算.md': 'tian-yun-suan',
+  '题目/竖式填空.md': 'shu-shi-tian-kong',
   '题目/五个点.md': 'wu-ge-dian',
+  '题目/台阶.md': 'tai-jie',
+  '题目/田字.md': 'tian-zi',
   '题目/图形算式.md': 'tu-xing-suan-shi',
   '题目/三种图形.md': 'san-zhong-tu-xing',
   '题目/红黄蓝衣服.md': 'hong-huang-lan-yi-fu',
+  '题目/分成两堆.md': 'fen-cheng-liang-dui',
 };
 
 /** 读 SUMMARY.md，算出每个 docs 页面在 GitBook 上的网址 */
@@ -573,7 +594,6 @@ const html = `<!DOCTYPE html>
     <p>母题学完，跟着学而思的课拔高。上完一讲，回家看这一讲的动画。</p>
   </div>
   ${bagaoSection()}
-
 
   <div class="how">
     <b>怎么陪孩子用：</b>让他先猜这是哪道母题 → 有动画就看一遍 → 把口诀念出来 → 合上页面自己写算式 → 再换一身衣服讲给你听。

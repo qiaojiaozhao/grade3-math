@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>竖式填空 · 动态演示</title>
+<meta name="description" content="□6 + 2□ = 53。个位 6+7=13 进 1，十位因此是 2。26+27=53。">
+<link rel="stylesheet" href="lib/anim.css?v=portrait">
+<style>
+  html, body { background: #07080a; }
+  .sum {
+    position: absolute; left: 50%; top: 40%;
+    transform: translate(-50%, -40%);
+    font-weight: 800; font-size: 40px; color: #e8eaed;
+    font-variant-numeric: tabular-nums;
+  }
+  body.portrait .sum { font-size: 72px; top: 38%; }
+  .sum div { letter-spacing: 10px; text-align: right; }
+  body.portrait .sum div { letter-spacing: 18px; }
+  .line { border-top: 4px solid #e8eaed; margin: 8px 0; }
+  .hot { color: #ffb347; }
+  .carry {
+    font-size: 18px; color: #ff6b6b; letter-spacing: 0;
+    height: 22px; text-align: right; padding-right: 52px;
+  }
+  body.portrait .carry { font-size: 28px; height: 36px; padding-right: 92px; }
+  .count {
+    position: absolute; left: 16px; right: 16px; bottom: 12%;
+    text-align: center; font-size: 22px; font-weight: 800; color: #ffb347;
+  }
+  body.portrait .count { font-size: 38px; bottom: 16%; }
+  .count .ok { color: #5ecf8a; }
+</style>
+</head>
+<body class="theme-dark">
+<h1>竖式填空：从个位看</h1>
+<div class="problem">□6 + 2□ = 53。两个 □ 各是几？</div>
+<div class="stage-wrap"><div class="stage" id="stage">
+  <div class="sum" id="sum"></div>
+  <div class="count" id="count"></div>
+</div></div>
+<script src="lib/anim.js"></script>
+<script>
+const { sleep, cancelled, say } = Anim;
+const sum = document.getElementById('sum');
+const countEl = document.getElementById('count');
+
+function render(tens, ones, carry, hot) {
+  const t = tens == null ? '□' : tens;
+  const o = ones == null ? '□' : ones;
+  const c = carry ? '1' : '';
+  const ht = hot === 'ones' ? ' hot' : '';
+  const hh = hot === 'tens' ? ' hot' : '';
+  sum.innerHTML =
+    `<div class="carry">${c}</div>` +
+    `<div><span class="${hh}">${t}</span><span class="${ht}">6</span></div>` +
+    `<div>+ 2<span class="${ht}">${o}</span></div>` +
+    `<div class="line"></div>` +
+    `<div><span class="${hh}">5</span><span class="${ht}">3</span></div>`;
+}
+
+function resetVisuals() {
+  render(null, null, false, null);
+  countEl.innerHTML = '';
+}
+
+Anim.run([
+  {
+    title: '竖式',
+    async play(id) {
+      render(null, null, false, null);
+      say('从个位', '先看<b>个位</b>。个位没有别人进给它。');
+      await sleep(1100);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '个位对不上',
+    async play(id) {
+      render(null, null, false, 'ones');
+      countEl.innerHTML = '6 + □，个位要是 3';
+      say('对不上', '6 比 3 大。加一个一位数还要留下 3，一定<b>满十进位</b>。');
+      await sleep(1400);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '进 1',
+    async play(id) {
+      render(null, 7, true, 'ones');
+      countEl.innerHTML = '6 + 7 = 13，进 1';
+      say('个位是 7', '13 的个位是 3。向十位进 <b>1</b>。');
+      await sleep(1200);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '十位加上进位',
+    async play(id) {
+      render(2, 7, true, 'tens');
+      countEl.innerHTML = '□ + 2 + 1 = 5，□ = 2';
+      say('别忘了 1', '十位要加上进位的 1。□ + 2 + 1 = 5，□ 是 <b>2</b>。');
+      await sleep(1400);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '26 + 27',
+    async play(id) {
+      render(2, 7, true, null);
+      countEl.innerHTML = '26 + 27 = <span class="ok">53</span>';
+      say('答案', '<b>26 + 27 = 53</b>。从个位看起，对不上就是进了 1。');
+      await sleep(1400);
+      if (cancelled(id)) return;
+    }
+  },
+], { reset: resetVisuals });
+</script>
+</body>
+</html>

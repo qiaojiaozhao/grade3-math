@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>两位数 · 动态演示</title>
+<meta name="description" content="1、2、3 每个只用一次组成两位数。先定十位，每列 2 个，一共 6 个。">
+<link rel="stylesheet" href="lib/anim.css?v=portrait">
+<style>
+  html, body { background: #07080a; }
+  .cols {
+    position: absolute; left: 50%; top: 42%;
+    transform: translate(-50%, -30%);
+    display: flex; gap: 18px;
+  }
+  body.portrait .cols { gap: 28px; top: 40%; }
+  .col {
+    width: 92px; min-height: 180px;
+    border-radius: 16px; background: #1c2430;
+    padding: 12px 10px 16px; box-sizing: border-box;
+  }
+  body.portrait .col { width: 168px; min-height: 320px; padding: 18px 14px 22px; }
+  .ten { text-align: center; font-weight: 800; color: #9aa3b2; font-size: 14px; margin-bottom: 8px; }
+  body.portrait .ten { font-size: 24px; margin-bottom: 14px; }
+  .num {
+    margin: 6px 0; text-align: center; font-weight: 800;
+    font-size: 22px; color: #e8eaed; opacity: 0;
+  }
+  body.portrait .num { font-size: 36px; margin: 12px 0; }
+  .num.on { opacity: 1; color: #7ec4ff; }
+  .col.go { outline: 3px solid #ffb347; }
+  .count {
+    position: absolute; left: 16px; right: 16px; bottom: 8%;
+    text-align: center; font-size: 22px; font-weight: 800; color: #ffb347;
+  }
+  body.portrait .count { font-size: 40px; bottom: 12%; }
+  .count .no { color: #ff6b6b; }
+  .count .ok { color: #5ecf8a; }
+</style>
+</head>
+<body class="theme-dark">
+<h1>两位数：先定十位</h1>
+<div class="problem">用 1、2、3 组成两位数，每个数字只用一次。能组成多少个？</div>
+<div class="stage-wrap"><div class="stage" id="stage">
+  <div class="cols" id="cols"></div>
+  <div class="count" id="count"></div>
+</div></div>
+<script src="lib/anim.js"></script>
+<script>
+const { sleep, cancelled, say } = Anim;
+const cols = document.getElementById('cols');
+const countEl = document.getElementById('count');
+const data = [['12', '13'], ['21', '23'], ['31', '32']];
+
+function build() {
+  cols.innerHTML = '';
+  data.forEach((list, i) => {
+    const col = document.createElement('div');
+    col.className = 'col';
+    col.id = 'col' + i;
+    col.innerHTML = `<div class="ten">十位 ${i + 1}</div>` +
+      list.map((n) => `<div class="num" id="n${n}">${n}</div>`).join('');
+    cols.append(col);
+  });
+}
+build();
+
+function resetVisuals() {
+  build();
+  countEl.innerHTML = '';
+}
+
+Anim.run([
+  {
+    title: '三个数字',
+    async play(id) {
+      say('先别写', '1、2、3，每个只用一次。先<b>别想到哪写到哪</b>。');
+      await sleep(1100);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '漏掉一半',
+    async play(id) {
+      for (const n of ['12', '23', '31']) document.getElementById('n' + n).classList.add('on');
+      countEl.innerHTML = '<span class="no">12、23、31 …… 还没写完</span>';
+      say('会漏', '这样写，21、13、32 就丢了。');
+      await sleep(1300);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '十位是 1',
+    async play(id) {
+      build();
+      document.getElementById('col0').classList.add('go');
+      document.getElementById('n12').classList.add('on');
+      document.getElementById('n13').classList.add('on');
+      countEl.innerHTML = '十位 1：2 个';
+      say('钉住十位', '十位是 <b>1</b>，个位只剩 2 和 3。');
+      await sleep(1200);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '十位是 2',
+    async play(id) {
+      document.getElementById('col0').classList.remove('go');
+      document.getElementById('col1').classList.add('go');
+      document.getElementById('n21').classList.add('on');
+      document.getElementById('n23').classList.add('on');
+      countEl.innerHTML = '十位 2：又是 2 个';
+      say('换下一个', '十位换成 <b>2</b>。个位是 1 和 3，不能再写 2。');
+      await sleep(1200);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '十位是 3',
+    async play(id) {
+      document.getElementById('col1').classList.remove('go');
+      document.getElementById('col2').classList.add('go');
+      document.getElementById('n31').classList.add('on');
+      document.getElementById('n32').classList.add('on');
+      countEl.innerHTML = '十位 3：又是 2 个';
+      say('最后一列', '十位是 <b>3</b>：31、32。');
+      await sleep(1100);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '一共 6 个',
+    async play(id) {
+      for (const n of ['12', '13', '21', '23', '31', '32']) {
+        document.getElementById('n' + n).classList.add('on');
+      }
+      countEl.innerHTML = '2 + 2 + 2 = <span class="ok">6 个</span>';
+      say('答案', '一共 <b>6 个</b>。先定十位，写完再换。');
+      await sleep(1400);
+      if (cancelled(id)) return;
+    }
+  },
+], { reset: resetVisuals });
+</script>
+</body>
+</html>

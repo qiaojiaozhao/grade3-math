@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>填运算 · 动态演示</title>
+<meta name="description" content="4 □ 5 □ 2 = 18。连加只有 11，比 18 小，所以是 4 × 5 − 2。">
+<link rel="stylesheet" href="lib/anim.css?v=portrait">
+<style>
+  html, body { background: #07080a; }
+  .eq {
+    position: absolute; left: 50%; top: 40%;
+    transform: translate(-50%, -40%);
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 800; font-size: 36px; color: #e8eaed;
+  }
+  body.portrait .eq { font-size: 64px; gap: 16px; top: 38%; }
+  .op {
+    min-width: 52px; text-align: center; color: #ffb347;
+    border-bottom: 4px solid #ffb347; padding: 0 4px;
+  }
+  body.portrait .op { min-width: 84px; }
+  .count {
+    position: absolute; left: 16px; right: 16px; bottom: 14%;
+    text-align: center; font-size: 22px; font-weight: 800; color: #ffb347;
+  }
+  body.portrait .count { font-size: 40px; bottom: 18%; }
+  .count .no { color: #ff6b6b; }
+  .count .ok { color: #5ecf8a; }
+</style>
+</head>
+<body class="theme-dark">
+<h1>填运算：先比大小</h1>
+<div class="problem">4 □ 5 □ 2 = 18。□ 里填 +、− 或 ×，不添括号。</div>
+<div class="stage-wrap"><div class="stage" id="stage">
+  <div class="eq">4 <b class="op" id="a">□</b> 5 <b class="op" id="b">□</b> 2 <span id="tail">= 18</span></div>
+  <div class="count" id="count"></div>
+</div></div>
+<script src="lib/anim.js"></script>
+<script>
+const { sleep, cancelled, say } = Anim;
+const a = document.getElementById('a');
+const b = document.getElementById('b');
+const countEl = document.getElementById('count');
+
+function resetVisuals() {
+  a.textContent = '□';
+  b.textContent = '□';
+  countEl.innerHTML = '';
+}
+
+Anim.run([
+  {
+    title: '两个空',
+    async play(id) {
+      say('先别试', '先把 4、5、2 <b>加一加</b>，别急着填符号。');
+      await sleep(1100);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '连加只有 11',
+    async play(id) {
+      a.textContent = '+';
+      b.textContent = '+';
+      countEl.innerHTML = '<span class="no">4 + 5 + 2 = 11，到不了 18</span>';
+      say('比大小', '11 比 18 小。只加只减，抬不上去。');
+      await sleep(1400);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '先乘',
+    async play(id) {
+      a.textContent = '×';
+      b.textContent = '□';
+      countEl.innerHTML = '4 × 5 = 20';
+      say('找乘法', '结果更大，里面要有<b>乘法</b>。4 × 5 = 20。');
+      await sleep(1200);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '再减 2',
+    async play(id) {
+      a.textContent = '×';
+      b.textContent = '−';
+      countEl.innerHTML = '20 − 2 = 18';
+      say('再减', '20 比 18 多 2，把 2 减掉。');
+      await sleep(1100);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '18',
+    async play(id) {
+      a.textContent = '×';
+      b.textContent = '−';
+      countEl.innerHTML = '4 × 5 − 2 = <span class="ok">18</span>';
+      say('答案', '<b>4 × 5 − 2 = 18</b>。先看结果比连加大还是小。');
+      await sleep(1400);
+      if (cancelled(id)) return;
+    }
+  },
+], { reset: resetVisuals });
+</script>
+</body>
+</html>

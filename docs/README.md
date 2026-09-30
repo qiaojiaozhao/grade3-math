@@ -32,7 +32,7 @@ layout:
     <tr>
       <td><i class="fa-chart-simple"></i></td>
       <td><strong>一 · 画线段图</strong></td>
-      <td>两根条子比高矮。和差 → 和倍 → 差倍 → 移多补少 → 年龄</td>
+      <td>两根条子比高矮。和差 → 和倍 → 差倍 → 移多补少 → 年龄 → 归一</td>
       <td><a href="单元/画线段图.md">画线段图</a></td>
     </tr>
     <tr>
@@ -44,25 +44,25 @@ layout:
     <tr>
       <td><i class="fa-tree"></i></td>
       <td><strong>三 · 数清楚</strong></td>
-      <td>画一条线数点和段，几个一组数有几组。植树 → 买赠 → 过火车 → 周期 → 重叠</td>
+      <td>画一条线数点和段，几个一组数有几组。植树 → 买赠 → 过火车 → 周期 → 重叠 → 枚举</td>
       <td><a href="单元/数清楚.md">数清楚</a></td>
     </tr>
     <tr>
       <td><i class="fa-calculator"></i></td>
       <td><strong>四 · 巧算</strong></td>
-      <td>先看数再动笔，找能凑整的好朋友。巧算，接着是巧填算符、数字谜</td>
+      <td>先看数再动笔。巧算 → 巧填算符 → 数字谜</td>
       <td><a href="单元/巧算.md">巧算</a></td>
     </tr>
     <tr>
       <td><i class="fa-shapes"></i></td>
       <td><strong>五 · 图形</strong></td>
-      <td>按顺序数线段、数角；凹进去的边推出去求周长。数线段数角，接着是巧求周长、一笔画</td>
+      <td>按顺序数线段、数角；凹边推出去求周长；先数单数点再决定能不能一笔</td>
       <td><a href="单元/图形.md">图形</a></td>
     </tr>
     <tr>
       <td><i class="fa-puzzle-piece"></i></td>
       <td><strong>六 · 推理</strong></td>
-      <td>一样多的可以换，条件多了画表打勾。图形推理 → 逻辑推理，奇偶还在写</td>
+      <td>一样多的可以换，条件多了画表打勾，能不能分先看单双。图形推理 → 逻辑推理 → 奇偶</td>
       <td><a href="单元/推理.md">推理</a></td>
     </tr>
   </tbody>
@@ -109,6 +109,12 @@ layout:
       <td><a href="题目/妈妈和小明.md">妈妈和小明</a></td>
     </tr>
     <tr>
+      <td><i class="fa-pen"></i></td>
+      <td><strong>几盒笔</strong></td>
+      <td>一 · 归一。3 盒 36 支先拆成 1 盒 12 支，5 盒是 60 支</td>
+      <td><a href="题目/几盒笔.md">几盒笔</a></td>
+    </tr>
+    <tr>
       <td><i class="fa-apple-whole"></i></td>
       <td><strong>一筐桃子</strong></td>
       <td>二 · 还原。最后剩 10 不是半筐，先还 1 个再翻倍</td>
@@ -151,16 +157,46 @@ layout:
       <td><a href="题目/书法和绘画.md">书法和绘画</a></td>
     </tr>
     <tr>
+      <td><i class="fa-list-ol"></i></td>
+      <td><strong>两位数</strong></td>
+      <td>三 · 枚举。先定十位，1、2、3 每个只用一次，组成 6 个两位数</td>
+      <td><a href="题目/两位数.md">两位数</a></td>
+    </tr>
+    <tr>
       <td><i class="fa-plus"></i></td>
       <td><strong>凑整</strong></td>
       <td>四 · 巧算。347 和 253 先加得 600，再加 158 得 758</td>
       <td><a href="题目/凑整.md">凑整</a></td>
     </tr>
     <tr>
+      <td><i class="fa-square-plus"></i></td>
+      <td><strong>填运算</strong></td>
+      <td>四 · 巧填算符。4、5、2 加起来只有 11，所以 4 × 5 − 2 = 18</td>
+      <td><a href="题目/填运算.md">填运算</a></td>
+    </tr>
+    <tr>
+      <td><i class="fa-table-cells"></i></td>
+      <td><strong>竖式填空</strong></td>
+      <td>四 · 数字谜。个位 6 加 7 得 13，进 1，所以是 26 + 27 = 53</td>
+      <td><a href="题目/竖式填空.md">竖式填空</a></td>
+    </tr>
+    <tr>
       <td><i class="fa-ellipsis"></i></td>
       <td><strong>五个点</strong></td>
       <td>五 · 数线段。只数挨着的是 4 条，长的也数上是 10 条</td>
       <td><a href="题目/五个点.md">五个点</a></td>
+    </tr>
+    <tr>
+      <td><i class="fa-stairs"></i></td>
+      <td><strong>台阶</strong></td>
+      <td>五 · 巧求周长。横的竖的推成外框，(12 + 7) × 2 = 38</td>
+      <td><a href="题目/台阶.md">台阶</a></td>
+    </tr>
+    <tr>
+      <td><i class="fa-pencil"></i></td>
+      <td><strong>田字</strong></td>
+      <td>五 · 一笔画。四个边中点各 3 条线，单数点有 4 个，不能一笔</td>
+      <td><a href="题目/田字.md">田字</a></td>
     </tr>
     <tr>
       <td><i class="fa-puzzle-piece"></i></td>
@@ -179,6 +215,12 @@ layout:
       <td><strong>红黄蓝衣服</strong></td>
       <td>六 · 逻辑推理。小红穿蓝之后，蓝这一列都要叉掉</td>
       <td><a href="题目/红黄蓝衣服.md">红黄蓝衣服</a></td>
+    </tr>
+    <tr>
+      <td><i class="fa-scale-unbalanced"></i></td>
+      <td><strong>分成两堆</strong></td>
+      <td>六 · 奇偶。1 到 10 的单数有 5 个，总和 55 是单数，不能分匀</td>
+      <td><a href="题目/分成两堆.md">分成两堆</a></td>
     </tr>
   </tbody>
 </table>

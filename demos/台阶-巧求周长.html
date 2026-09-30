@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>台阶 · 动态演示</title>
+<meta name="description" content="台阶形图形，横的边往上推、竖的边往旁边推，周长还是长方形的 (12+7)×2=38 厘米。">
+<link rel="stylesheet" href="lib/anim.css?v=portrait">
+<style>
+  html, body { background: #07080a; }
+  .board {
+    position: absolute; left: 50%; top: 46%;
+    width: 300px; height: 210px;
+    transform: translate(-50%, -42%);
+  }
+  body.portrait .board { width: 560px; height: 400px; top: 44%; }
+  .step {
+    position: absolute; background: #243044;
+    border: 3px solid #9aa3b2; box-sizing: border-box;
+  }
+  .s1 { left: 0; top: 0; width: 34%; height: 100%; }
+  .s2 { left: 34%; top: 33%; width: 33%; height: 67%; }
+  .s3 { left: 67%; top: 66%; width: 33%; height: 34%; }
+  .frame {
+    position: absolute; inset: 0;
+    border: 0 solid #ffb347; box-sizing: border-box;
+    opacity: 0; pointer-events: none;
+  }
+  .frame.on { opacity: 1; border-width: 6px; }
+  body.portrait .frame.on { border-width: 10px; }
+  .board.flat .step { opacity: .28; border-color: transparent; }
+  .len {
+    position: absolute; color: #ffb347; font-weight: 800;
+    font-size: 16px; opacity: 0;
+  }
+  body.portrait .len { font-size: 28px; }
+  .len.show { opacity: 1; }
+  .len.w { left: 50%; top: -28px; transform: translateX(-50%); }
+  .len.h { right: -8px; top: 50%; transform: translate(100%, -50%); }
+  body.portrait .len.w { top: -48px; }
+  .count {
+    position: absolute; left: 16px; right: 16px; bottom: 8%;
+    text-align: center; font-size: 22px; font-weight: 800; color: #ffb347;
+    min-height: 36px;
+  }
+  body.portrait .count { font-size: 40px; bottom: 10%; }
+  .count .no { color: #ff6b6b; }
+  .count .ok { color: #5ecf8a; }
+</style>
+</head>
+<body class="theme-dark">
+<h1>台阶：把边推出去</h1>
+<div class="problem">台阶形图形，外框长 <b>12</b> 厘米、宽 <b>7</b> 厘米。周长是多少？</div>
+<div class="stage-wrap"><div class="stage" id="stage">
+  <div class="board" id="board">
+    <i class="step s1"></i><i class="step s2"></i><i class="step s3"></i>
+    <i class="frame" id="frame"></i>
+    <span class="len w" id="lw">长 12</span>
+    <span class="len h" id="lh">宽 7</span>
+  </div>
+  <div class="count" id="count"></div>
+</div></div>
+<script src="lib/anim.js"></script>
+<script>
+const { sleep, cancelled, say } = Anim;
+const board = document.getElementById('board');
+const frame = document.getElementById('frame');
+const countEl = document.getElementById('count');
+const lw = document.getElementById('lw');
+const lh = document.getElementById('lh');
+
+function showAnswer() {
+  board.classList.add('flat');
+  frame.classList.add('on');
+  lw.classList.add('show');
+  lh.classList.add('show');
+}
+
+function resetVisuals() {
+  board.classList.remove('flat');
+  frame.classList.remove('on');
+  lw.classList.remove('show');
+  lh.classList.remove('show');
+  countEl.innerHTML = '';
+}
+
+Anim.run([
+  {
+    title: '台阶',
+    async play(id) {
+      say('先看', '台阶凹进去了。先<b>别一段段加</b>。');
+      await sleep(1100);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '一段段加会漏',
+    async play(id) {
+      countEl.innerHTML = '<span class="no">顺着每一小段加，凹进去的容易漏</span>';
+      say('容易漏', '周长是绕外面一圈，不是数有几级台阶。');
+      await sleep(1300);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '推成方框',
+    async play(id) {
+      frame.classList.add('on');
+      say('往外推', '横的边<b>往上推</b>，竖的边<b>往旁边推</b>。');
+      await sleep(1200);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '还是这个长方形',
+    async play(id) {
+      frame.classList.add('on');
+      board.classList.add('flat');
+      say('没变长', '边只是挪了地方。周长还是这个长方形的周长。');
+      await sleep(1200);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '量外框',
+    async play(id) {
+      showAnswer();
+      countEl.innerHTML = '长 12，宽 7';
+      say('现在看数', '外框长 <b>12</b>，宽 <b>7</b>。');
+      await sleep(1100);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '周长 38',
+    async play(id) {
+      showAnswer();
+      countEl.innerHTML = '(12 + 7) × 2 = <span class="ok">38 厘米</span>';
+      say('答案', '周长是 <b>38 厘米</b>。横的往上推，竖的往旁边推。');
+      await sleep(1400);
+      if (cancelled(id)) return;
+    }
+  },
+], { reset: resetVisuals });
+</script>
+</body>
+</html>

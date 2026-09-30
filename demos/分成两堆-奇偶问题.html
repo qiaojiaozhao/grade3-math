@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>分成两堆 · 动态演示</title>
+<meta name="description" content="1 到 10 的单数有 5 个，总和 55 是单数，不能分成和相等的两堆。">
+<link rel="stylesheet" href="lib/anim.css?v=portrait">
+<style>
+  html, body { background: #07080a; }
+  .chips {
+    position: absolute; left: 50%; top: 40%;
+    transform: translateX(-50%);
+    display: flex; flex-wrap: wrap; gap: 10px;
+    width: 340px; justify-content: center;
+  }
+  body.portrait .chips { width: 620px; gap: 16px; top: 36%; }
+  .chip {
+    width: 52px; height: 52px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 20px;
+    background: #1c2430; color: #c5cad3; border: 3px solid #3a4454;
+  }
+  body.portrait .chip { width: 96px; height: 96px; font-size: 34px; }
+  .chip.odd { background: #3a2418; color: #ffb347; border-color: #ffb347; }
+  .count {
+    position: absolute; left: 16px; right: 16px; bottom: 12%;
+    text-align: center; font-size: 22px; font-weight: 800; color: #ffb347;
+  }
+  body.portrait .count { font-size: 38px; bottom: 16%; }
+  .count .no { color: #ff6b6b; }
+  .count .ok { color: #5ecf8a; }
+</style>
+</head>
+<body class="theme-dark">
+<h1>分成两堆：先数单数</h1>
+<div class="problem">1 到 10 能不能分成两堆，让两堆的和一样大？</div>
+<div class="stage-wrap"><div class="stage" id="stage">
+  <div class="chips" id="chips"></div>
+  <div class="count" id="count"></div>
+</div></div>
+<script src="lib/anim.js"></script>
+<script>
+const { sleep, cancelled, say } = Anim;
+const chips = document.getElementById('chips');
+const countEl = document.getElementById('count');
+const odds = new Set([1, 3, 5, 7, 9]);
+
+function paint(mark) {
+  chips.innerHTML = '';
+  for (let n = 1; n <= 10; n++) {
+    const el = document.createElement('div');
+    el.className = 'chip' + (mark && odds.has(n) ? ' odd' : '');
+    el.textContent = String(n);
+    chips.append(el);
+  }
+}
+
+function resetVisuals() {
+  paint(false);
+  countEl.innerHTML = '';
+}
+
+Anim.run([
+  {
+    title: '十张卡片',
+    async play(id) {
+      paint(false);
+      say('先别配', '先<b>不要一个个试</b>哪两个放一堆。');
+      await sleep(1100);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '圈出单数',
+    async play(id) {
+      paint(true);
+      countEl.innerHTML = '单数：1、3、5、7、9';
+      say('数单数', '单数有 <b>5 个</b>。5 自己也是单数。');
+      await sleep(1200);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '总和是单数',
+    async play(id) {
+      paint(true);
+      countEl.innerHTML = '单数个单数，总和是单数';
+      say('总和', '双数怎么加都是双。加进单数个单数，总和还是<b>单数</b>。');
+      await sleep(1300);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '55',
+    async play(id) {
+      paint(true);
+      countEl.innerHTML = '1 + … + 10 = 55';
+      say('算一遍', '55 是单数。两堆一样大，两堆加起来必须是双数。');
+      await sleep(1300);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '不能',
+    async play(id) {
+      paint(true);
+      countEl.innerHTML = '55 ÷ 2 = 27.5，<span class="no">不能</span>';
+      say('答案', '<b>不能</b>。单数个单数，就分不匀。');
+      await sleep(1400);
+      if (cancelled(id)) return;
+    }
+  },
+], { reset: resetVisuals });
+</script>
+</body>
+</html>
