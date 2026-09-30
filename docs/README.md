@@ -62,7 +62,7 @@ layout:
     <tr>
       <td><i class="fa-puzzle-piece"></i></td>
       <td><strong>六 · 推理</strong></td>
-      <td>一样多的可以换，条件多了画表打勾。图形推理 → 逻辑推理 → 奇偶</td>
+      <td>一样多的可以换，条件多了画表打勾。图形推理 → 逻辑推理，奇偶还在写</td>
       <td><a href="单元/推理.md">推理</a></td>
     </tr>
   </tbody>
@@ -157,6 +157,12 @@ layout:
       <td><strong>三种图形</strong></td>
       <td>六 · 图形推理。三串一样长，先换成同一种再求</td>
       <td><a href="题目/三种图形.md">三种图形</a></td>
+    </tr>
+    <tr>
+      <td><i class="fa-shirt"></i></td>
+      <td><strong>红黄蓝衣服</strong></td>
+      <td>六 · 逻辑推理。小红穿蓝之后，蓝这一列都要叉掉</td>
+      <td><a href="题目/红黄蓝衣服.md">红黄蓝衣服</a></td>
     </tr>
   </tbody>
 </table>

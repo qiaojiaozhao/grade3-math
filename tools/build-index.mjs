@@ -29,7 +29,7 @@ const UNITS = [
   { no: '三', name: '数清楚', slug: 'shu-qing-chu', pic: '画一条线数点和段，几个一组数有几组', todo: ['重叠', '枚举'] },
   { no: '四', name: '巧算', slug: 'qiao-suan', pic: '先看数再动笔，找能凑整的好朋友', todo: ['巧填算符', '数字谜'] },
   { no: '五', name: '图形', slug: 'tu-xing', pic: '按顺序数，凹进去的边推出去', todo: ['数线段数角', '巧求周长', '一笔画'] },
-  { no: '六', name: '推理', slug: 'tui-li', pic: '一样多的可以换，条件多了画表', todo: ['逻辑推理', '奇偶'] },
+  { no: '六', name: '推理', slug: 'tui-li', pic: '一样多的可以换，条件多了画表', todo: ['奇偶'] },
 ];
 
 // 已经写成课的母题，按单元里的课序排。demo 是动画文件名里的关键字。
@@ -48,6 +48,7 @@ const MOTIFS = [
   { unit: '数清楚', file: '周期问题.md', name: '周期', mark: '余 0 是最后一个', ink: '#1d4ed8', paper: '#dbeafe', demo: ['彩灯'] },
   { unit: '巧算', file: '巧算问题.md', name: '巧算', mark: '先找好朋友', ink: '#0f766e', paper: '#ccfbf1', demo: ['凑整'] },
   { unit: '推理', file: '简单推理.md', name: '图形推理', mark: '图形代表数', ink: '#0f766e', paper: '#e6f7f4', demo: ['图形', '三种'] },
+  { unit: '推理', file: '逻辑推理.md', name: '逻辑推理', mark: '打勾就叉掉一列', ink: '#6d28d9', paper: '#ede9fe', demo: ['红黄蓝'] },
 ];
 
 // GitBook 页面网址 = 分组 slug + 文件名的拼音。新建页面要在这里补一行拼音，漏了会直接报错。
@@ -76,6 +77,7 @@ const PAGE_SLUG = {
   '知识点/周期问题.md': 'zhou-qi-wen-ti',
   '知识点/巧算问题.md': 'qiao-suan-wen-ti',
   '知识点/简单推理.md': 'jian-dan-tui-li',
+  '知识点/逻辑推理.md': 'luo-ji-tui-li',
   '题目/兄弟分糖.md': 'xiong-di-fen-tang',
   '题目/大衣裤子和鞋.md': 'da-yi-ku-zi-he-xie',
   '题目/甲乙两堆书.md': 'jia-yi-liang-dui-shu',
@@ -91,6 +93,7 @@ const PAGE_SLUG = {
   '题目/凑整.md': 'cou-zheng',
   '题目/图形算式.md': 'tu-xing-suan-shi',
   '题目/三种图形.md': 'san-zhong-tu-xing',
+  '题目/红黄蓝衣服.md': 'hong-huang-lan-yi-fu',
 };
 
 /** 读 SUMMARY.md，算出每个 docs 页面在 GitBook 上的网址 */

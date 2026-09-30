@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>红黄蓝衣服 · 动态演示</title>
+<meta name="description" content="小红只剩蓝，蓝这一列都叉掉。小兰不穿红，只剩黄。小芳剩下来是红。">
+<link rel="stylesheet" href="lib/anim.css?v=portrait">
+<style>
+  html, body { background: #07080a; }
+
+  .stage { --top: 150px; --cell: 72px; --name: 96px; --fs: 28px; }
+  body.portrait .stage { --top: 300px; --cell: 150px; --name: 170px; --fs: 52px; }
+
+  .ask {
+    position: absolute;
+    left: 50%; top: 108px;
+    transform: translateX(-50%);
+    font-size: 17px; font-weight: 800;
+    color: #e8eaed;
+    white-space: nowrap;
+  }
+  body.portrait .ask { top: 190px; font-size: 32px; }
+  .ask:empty { display: none; }
+
+  .grid {
+    position: absolute;
+    left: 50%;
+    top: var(--top);
+    transform: translateX(-50%);
+    display: grid;
+    grid-template-columns: var(--name) repeat(3, var(--cell));
+    gap: 10px;
+  }
+  body.portrait .grid { gap: 14px; }
+
+  .corner { }
+  .colhead, .rowhead {
+    display: flex; align-items: center; justify-content: center;
+    font-size: calc(var(--fs) * .62);
+    font-weight: 800;
+    color: #e8c27a;
+    gap: 6px;
+  }
+  .rowhead { justify-content: flex-end; padding-right: 8px; }
+  .dot {
+    width: .7em; height: .7em; border-radius: 50%;
+    box-shadow: 0 0 10px currentColor;
+  }
+  .dot.red { background: #ff5a5a; color: #ff5a5a; }
+  .dot.yellow { background: #ffd15a; color: #ffd15a; }
+  .dot.blue { background: #5aa6ff; color: #5aa6ff; }
+
+  .cell {
+    height: var(--cell);
+    border-radius: 16px;
+    background: #1c1f26;
+    border: 3px solid #3a4048;
+    display: flex; align-items: center; justify-content: center;
+    font-size: var(--fs); font-weight: 800;
+    color: transparent;
+  }
+  body.portrait .cell { border-radius: 24px; border-width: 4px; }
+  .cell.x { color: #ff6b6b; }
+  .cell.v { color: #5ecf8a; background: #143028; border-color: #5ecf8a; }
+  .cell.ghost { color: #ff6b6b; border-style: dashed; border-color: #ff6b6b; background: #2a1616; }
+  .cell.pop { animation: bump .4s cubic-bezier(.2, 1.6, .3, 1); }
+
+  .count {
+    position: absolute;
+    left: 16px; right: 16px;
+    top: calc(var(--top) + var(--cell) * 3 + 130px);
+    text-align: center;
+    font-size: 22px; font-weight: 800;
+    color: #ffb347;
+    min-height: 36px;
+  }
+  body.portrait .count { font-size: 36px; top: calc(var(--top) + var(--cell) * 3 + 180px); }
+  .count b { color: #7ec4ff; }
+  .count .no { color: #ff6b6b; }
+  .count .ok { color: #5ecf8a; }
+  .count.pop { animation: bump .45s cubic-bezier(.2, 1.6, .3, 1); }
+
+  @keyframes bump {
+    0% { transform: scale(.8); }
+    55% { transform: scale(1.08); }
+    100% { transform: scale(1); }
+  }
+</style>
+</head>
+<body class="theme-dark">
+
+<h1>红黄蓝衣服：打了勾，这一列都叉掉</h1>
+<div class="problem">
+  小红、小兰、小芳各穿<b>红、黄、蓝</b>一种。小红不穿红、也不穿黄，小兰不穿红。三人各穿什么？
+</div>
+
+<div class="stage-wrap">
+  <div class="stage" id="stage">
+    <div class="ask" id="ask"></div>
+    <div class="grid" id="grid"></div>
+    <div class="count" id="count"></div>
+  </div>
+</div>
+
+<script src="lib/anim.js"></script>
+<script>
+const { sleep, cancelled, say } = Anim;
+
+const NAMES = ['小红', '小兰', '小芳'];
+const COLORS = [
+  { name: '红', cls: 'red' },
+  { name: '黄', cls: 'yellow' },
+  { name: '蓝', cls: 'blue' },
+];
+
+const grid = document.getElementById('grid');
+const ask = document.getElementById('ask');
+const countEl = document.getElementById('count');
+
+/* marks[行][列]：'' 空，'x' 叉，'v' 勾。ghost 是误打的勾，画成虚线。 */
+function paint(marks, ghost) {
+  grid.innerHTML = '';
+  const corner = document.createElement('div');
+  corner.className = 'corner';
+  grid.append(corner);
+  for (const c of COLORS) {
+    const h = document.createElement('div');
+    h.className = 'colhead';
+    h.innerHTML = `<i class="dot ${c.cls}"></i>${c.name}`;
+    grid.append(h);
+  }
+  marks.forEach((row, r) => {
+    const name = document.createElement('div');
+    name.className = 'rowhead';
+    name.textContent = NAMES[r];
+    grid.append(name);
+    row.forEach((mark, c) => {
+      const cell = document.createElement('div');
+      const isGhost = ghost && ghost[0] === r && ghost[1] === c;
+      cell.className = 'cell' + (isGhost ? ' ghost' : mark === 'x' ? ' x' : mark === 'v' ? ' v' : '');
+      cell.textContent = isGhost || mark === 'v' ? '✓' : mark === 'x' ? '✗' : '';
+      grid.append(cell);
+    });
+  });
+}
+
+function setCount(html) {
+  countEl.innerHTML = html;
+  countEl.classList.remove('pop');
+  void countEl.offsetWidth;
+  countEl.classList.add('pop');
+}
+
+const E = [
+  ['', '', ''],
+  ['', '', ''],
+  ['', '', ''],
+];
+
+function resetVisuals() {
+  ask.textContent = '';
+  countEl.innerHTML = '';
+  countEl.classList.remove('pop');
+  paint(E);
+}
+
+Anim.run([
+  {
+    title: '先画表',
+    async play(id) {
+      ask.textContent = '三人各穿什么颜色？';
+      paint(E);
+      say('画表', '先<b>别猜</b>。人写在左边，颜色写在上面。每人一种，每种只有一个人。');
+      await sleep(1100);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '小红只剩蓝',
+    async play(id) {
+      paint([
+        ['x', 'x', ''],
+        ['', '', ''],
+        ['', '', ''],
+      ]);
+      say('打叉', '小红不穿红，也不穿黄。这两个格子打叉。');
+      await sleep(900);
+      if (cancelled(id)) return;
+      paint([
+        ['x', 'x', 'v'],
+        ['', '', ''],
+        ['', '', ''],
+      ]);
+      setCount('小红只剩 <b>蓝</b>');
+      say('打勾', '这一行只剩蓝，打勾。');
+      await sleep(1100);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '蓝这一列',
+    async play(id) {
+      paint([
+        ['x', 'x', 'v'],
+        ['', '', 'x'],
+        ['', '', 'x'],
+      ]);
+      say('叉掉一列', '蓝是小红的。小兰、小芳的蓝<b>都打叉</b>，一种颜色只有一个人穿。');
+      await sleep(500);
+      if (cancelled(id)) return;
+      setCount('蓝这一列，别人都不能穿');
+      await sleep(1100);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '小兰也能穿蓝？',
+    async play(id) {
+      const base = [
+        ['x', 'x', 'v'],
+        ['', '', 'x'],
+        ['', '', 'x'],
+      ];
+      paint(base, [1, 2]);
+      say('卡住', '有人忘了这一列，又给小兰打一个蓝。');
+      await sleep(900);
+      if (cancelled(id)) return;
+      paint(base);
+      setCount('<span class="no">蓝已经有人穿了 ✗</span>');
+      await sleep(1100);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '小兰只剩黄',
+    async play(id) {
+      paint([
+        ['x', 'x', 'v'],
+        ['x', '', 'x'],
+        ['', '', 'x'],
+      ]);
+      say('小兰', '小兰还有一句：不穿红。红打叉。红和蓝都没了。');
+      await sleep(900);
+      if (cancelled(id)) return;
+      paint([
+        ['x', 'x', 'v'],
+        ['x', 'v', 'x'],
+        ['', '', 'x'],
+      ]);
+      setCount('小兰只剩 <b>黄</b>');
+      await sleep(1100);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '小芳是剩下的',
+    async play(id) {
+      paint([
+        ['x', 'x', 'v'],
+        ['x', 'v', 'x'],
+        ['', 'x', 'x'],
+      ]);
+      say('剩下的', '黄是小兰的，小芳的黄打叉。她的蓝早就叉了，<b>只剩红</b>。题目没提到她，不用猜。');
+      await sleep(1000);
+      if (cancelled(id)) return;
+      paint([
+        ['x', 'x', 'v'],
+        ['x', 'v', 'x'],
+        ['v', 'x', 'x'],
+      ]);
+      setCount('小芳穿 <b>红</b>');
+      await sleep(1100);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '三人的颜色',
+    async play(id) {
+      paint([
+        ['x', 'x', 'v'],
+        ['x', 'v', 'x'],
+        ['v', 'x', 'x'],
+      ]);
+      setCount('小红<b>蓝</b>　小兰<b>黄</b>　小芳<b>红</b> <span class="ok">✓</span>');
+      say('答案', '小红穿蓝，小兰穿黄，小芳穿红。打了勾，这一行、这一列剩下的都叉掉。');
+      await sleep(1300);
+      if (cancelled(id)) return;
+    }
+  },
+], { reset: resetVisuals });
+</script>
+</body>
+</html>
