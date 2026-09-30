@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>第 1 讲 巧求周长 · 动态演示</title>
+<meta name="description" content="楼梯每一级多长都不知道，也能求周长：横着的边推上去，竖着的边推出去，拼成 12 × 9 的长方形，周长 42 厘米。">
+<link rel="stylesheet" href="lib/anim.css?v=portrait">
+<style>
+  html, body { background: #07080a; }
+
+  #fig {
+    position: absolute;
+    left: 0; right: 0;
+    top: 104px; bottom: 76px;
+    width: 100%;
+    height: calc(100% - 180px);
+    overflow: visible;
+  }
+  body.portrait #fig { top: 200px; bottom: 300px; height: calc(100% - 500px); }
+
+  .shape { fill: #ffb34714; stroke: none; }
+  .ghost { fill: none; stroke: #5a616d; stroke-width: 2; stroke-dasharray: 8 8; }
+  .edge { stroke: #cfd4dc; stroke-width: 6; stroke-linecap: round; }
+  .edge.h { stroke: #ffb347; }
+  .edge.v { stroke: #6ea8ff; }
+  .edge.dim { stroke: #3a404a; }
+  .given { font-size: 26px; font-weight: 800; fill: #e8c27a; }
+  .q { font-size: 30px; font-weight: 900; fill: #ff6b6b; opacity: 0; transition: opacity .3s; }
+  .q.on { opacity: 1; }
+  .trail { stroke-width: 9; stroke-linecap: round; }
+  .walker { fill: #fff; stroke: #07080a; stroke-width: 3; }
+
+  .count {
+    position: absolute;
+    left: 16px; right: 16px;
+    bottom: 22px;
+    text-align: center;
+    font-size: 24px; font-weight: 800;
+    color: #e8eaed;
+    min-height: 36px;
+  }
+  body.portrait .count { bottom: 170px; font-size: 42px; line-height: 1.5; }
+  .count .h { color: #ffb347; }
+  .count .v { color: #6ea8ff; }
+  .count .no { color: #ff6b6b; }
+  .count .ok { color: #5ecf8a; }
+  .count.pop { animation: bump .45s cubic-bezier(.2, 1.6, .3, 1); }
+  @keyframes bump {
+    0% { transform: scale(.82); }
+    55% { transform: scale(1.06); }
+    100% { transform: scale(1); }
+  }
+</style>
+</head>
+<body class="theme-dark">
+
+<h1>第 1 讲 巧求周长：楼梯推出去，变成长方形</h1>
+<div class="problem">
+  一个楼梯形状的图形，最下面一条边长 <b>12 厘米</b>，最左边一条边长 <b>9 厘米</b>，每个拐角都是直角。它的周长是多少厘米？
+</div>
+
+<div class="stage-wrap">
+  <div class="stage" id="stage">
+    <svg id="fig" viewBox="-150 -50 780 480" preserveAspectRatio="xMidYMid meet"></svg>
+    <div class="count" id="count"></div>
+  </div>
+</div>
+
+<script src="lib/anim.js"></script>
+<script>
+const { sleep, cancelled, tween, lerp, say, pop } = Anim;
+
+const S = 40; // 1 厘米画多少
+const NS = 'http://www.w3.org/2000/svg';
+const fig = document.getElementById('fig');
+const countEl = document.getElementById('count');
+
+// 楼梯的拐点（厘米），顺时针。三级台阶故意不一样宽：横 5、4、3，竖 2、3、4，题目都不告诉
+const P = [[0, 0], [5, 0], [5, 2], [9, 2], [9, 5], [12, 5], [12, 9], [0, 9]];
+
+function el(tag, attrs, parent = fig) {
+  const e = document.createElementNS(NS, tag);
+  for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+  parent.append(e);
+  return e;
+}
+
+const shape = el('polygon', { class: 'shape', points: P.map(([x, y]) => `${x * S},${y * S}`).join(' ') });
+const ghost = el('rect', { class: 'ghost', x: 0, y: 0, width: 12 * S, height: 9 * S, opacity: 0 });
+
+// 每条边：横边给 y 和 x 区间，竖边给 x 和 y 区间。top/right 是推出去以后停在哪
+const EDGES = {
+  h1: { dir: 'h', at: 0, from: 0, to: 5 },
+  h2: { dir: 'h', at: 2, from: 5, to: 9, push: 0 },
+  h3: { dir: 'h', at: 5, from: 9, to: 12, push: 0 },
+  v1: { dir: 'v', at: 5, from: 0, to: 2, push: 12 },
+  v2: { dir: 'v', at: 9, from: 2, to: 5, push: 12 },
+  v3: { dir: 'v', at: 12, from: 5, to: 9 },
+  bottom: { dir: 'h', at: 9, from: 0, to: 12 },
+  left: { dir: 'v', at: 0, from: 0, to: 9 },
+};
+const STEPS = ['h1', 'h2', 'h3', 'v1', 'v2', 'v3'];
+for (const [name, e] of Object.entries(EDGES)) e.line = el('line', { class: 'edge', 'data-edge': name });
+const trail = el('g', {});
+
+const qs = STEPS.map((name) => {
+  const e = EDGES[name];
+  const mid = (e.from + e.to) / 2;
+  const [x, y] = e.dir === 'h' ? [mid * S, e.at * S - 16] : [e.at * S + 30, mid * S + 10];
+  return el('text', { class: 'q', x, y, 'text-anchor': 'middle' });
+});
+qs.forEach((q) => (q.textContent = '?'));
+
+const label12 = el('text', { class: 'given', x: 6 * S, y: 9 * S + 42, 'text-anchor': 'middle' });
+label12.textContent = '12 厘米';
+const label9 = el('text', { class: 'given', x: -18, y: 4.5 * S + 9, 'text-anchor': 'end' });
+label9.textContent = '9 厘米';
+
+const walker = el('circle', { class: 'walker', r: 11, cx: 0, cy: 0, opacity: 0 });
+
+/** pH：横边往上推了多少（0→1），pV：竖边往右推了多少 */
+function place(pH, pV) {
+  for (const e of Object.values(EDGES)) {
+    const t = e.dir === 'h' ? pH : pV;
+    const at = e.push === undefined ? e.at : lerp(e.at, e.push, t);
+    const [x1, y1, x2, y2] = e.dir === 'h'
+      ? [e.from, at, e.to, at]
+      : [at, e.from, at, e.to];
+    e.line.setAttribute('x1', x1 * S);
+    e.line.setAttribute('y1', y1 * S);
+    e.line.setAttribute('x2', x2 * S);
+    e.line.setAttribute('y2', y2 * S);
+  }
+}
+
+/** 给边上色：names 里的边按横竖上色，其余变暗；不给 names 就全部恢复成白色 */
+function tint(names, dimOthers = true) {
+  for (const [name, e] of Object.entries(EDGES)) {
+    e.line.classList.remove('h', 'v', 'dim');
+    if (!names) continue;
+    if (names.includes(name)) e.line.classList.add(e.dir);
+    else if (dimOthers) e.line.classList.add('dim');
+  }
+}
+
+function setCount(html) {
+  countEl.innerHTML = html;
+  countEl.classList.remove('pop');
+  void countEl.offsetWidth;
+  countEl.classList.add('pop');
+}
+
+// 沿着边界顺时针走一圈，走过的路按方向上色：左右是橙，上下是蓝
+const LOOP = [...P, P[0]];
+const LENS = LOOP.slice(1).map(([x, y], i) => Math.abs(x - LOOP[i][0]) + Math.abs(y - LOOP[i][1]));
+const TOTAL = LENS.reduce((a, b) => a + b, 0);
+
+function walk(t) {
+  trail.innerHTML = '';
+  let left = t * TOTAL;
+  let pos = LOOP[0];
+  for (let i = 0; i < LENS.length && left > 0; i++) {
+    const [ax, ay] = LOOP[i];
+    const [bx, by] = LOOP[i + 1];
+    const f = Math.min(1, left / LENS[i]);
+    pos = [lerp(ax, bx, f), lerp(ay, by, f)];
+    el('line', {
+      class: 'trail',
+      x1: ax * S, y1: ay * S, x2: pos[0] * S, y2: pos[1] * S,
+      stroke: ay === by ? '#ffb347' : '#6ea8ff',
+    }, trail);
+    left -= LENS[i];
+  }
+  walker.setAttribute('cx', pos[0] * S);
+  walker.setAttribute('cy', pos[1] * S);
+}
+
+function resetVisuals() {
+  place(0, 0);
+  tint(null);
+  qs.forEach((q) => q.classList.remove('on'));
+  ghost.setAttribute('opacity', 0);
+  shape.setAttribute('opacity', 1);
+  trail.innerHTML = '';
+  walker.setAttribute('opacity', 0);
+  countEl.innerHTML = '';
+  countEl.classList.remove('pop');
+}
+
+Anim.run([
+  {
+    title: '一个楼梯',
+    async play(id) {
+      say('先看', '一个<b>楼梯形状</b>的图形。周长就是沿着它的边<b>走一圈</b>，一共走了多远。');
+      await sleep(1200);
+      if (cancelled(id)) return;
+      setCount('题目只告诉我们两条边：下面 12，左边 9');
+      await sleep(900);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '一段段加？',
+    async play(id) {
+      say('卡住', '一段一段加起来？可是楼梯<b>每一级多长</b>，题目一个都没说。');
+      for (const q of qs) {
+        q.classList.add('on');
+        await sleep(260);
+        if (cancelled(id)) return;
+      }
+      setCount('<span class="no">6 段不知道多长，加不下去 ✗</span>');
+      await sleep(1300);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '横着的推上去',
+    async play(id) {
+      tint(['h1', 'h2', 'h3', 'bottom']);
+      say('平移', '把楼梯上<b>横着的三段</b>，一段一段<b>往上推</b>，推到最上面那条线上。');
+      await sleep(900);
+      if (cancelled(id)) return;
+      ghost.setAttribute('opacity', 1);
+      await tween(1400, id, (t) => place(t, 0));
+      if (cancelled(id)) return;
+      setCount('<span class="h">上面三段接起来</span> = 下面那条 = <span class="h">12</span>');
+      await sleep(1200);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '竖着的推出去',
+    async play(id) {
+      place(1, 0);
+      ghost.setAttribute('opacity', 1);
+      tint(['v1', 'v2', 'v3', 'left']);
+      say('平移', '再把<b>竖着的三段</b>往右推，推到最右边那条线上。');
+      await sleep(900);
+      if (cancelled(id)) return;
+      await tween(1400, id, (t) => place(1, t));
+      if (cancelled(id)) return;
+      setCount('<span class="v">右边三段接起来</span> = 左边那条 = <span class="v">9</span>');
+      await sleep(1200);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '变成长方形',
+    async play(id) {
+      place(1, 1);
+      tint(['h1', 'h2', 'h3', 'bottom', 'v1', 'v2', 'v3', 'left']);
+      say('长方形', '6 段边一条都没变长、没变短，只是挪了位置。现在围成一个<b>长 12、宽 9 的长方形</b>。');
+      await sleep(1300);
+      if (cancelled(id)) return;
+      setCount('(<span class="h">12</span> + <span class="v">9</span>) × 2 = <b>42</b>');
+      pop('楼梯的周长 = 长方形的周长');
+      await sleep(1300);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '为什么能推',
+    async play(id) {
+      tint([]);
+      say('标向法', '沿着边走一圈：<b>往右走</b>了几段，最后都要<b>往左走回来</b>；往下走了几段，都要往上走回来。');
+      walker.setAttribute('opacity', 1);
+      await tween(3600, id, (t) => walk(t));
+      if (cancelled(id)) return;
+      setCount('<span class="h">往右三段 = 往左 12</span>　<span class="v">往下三段 = 往上 9</span>');
+      await sleep(1500);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '周长 42 厘米',
+    async play(id) {
+      tint(['h1', 'h2', 'h3', 'bottom', 'v1', 'v2', 'v3', 'left']);
+      say('答案', '周长是 <b>42 厘米</b>。楼梯每级多长都不用知道：横的推上去，竖的推出去，就是长方形。');
+      await sleep(400);
+      if (cancelled(id)) return;
+      setCount('(12 + 9) × 2 = <b>42 厘米</b> <span class="ok">✓</span>');
+      await sleep(1300);
+      if (cancelled(id)) return;
+    }
+  },
+], { reset: resetVisuals });
+</script>
+</body>
+</html>

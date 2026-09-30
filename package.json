@@ -11,6 +11,7 @@
     "record": "node tools/record.mjs",
     "ship": "node tools/ship.mjs",
     "new": "node tools/new-lesson.mjs",
+    "bagao": "node tools/new-bagao.mjs",
     "pdf": "node tools/pdf2png.mjs",
     "cutout": "node tools/cutout.mjs",
     "setup": "npm install && npx playwright install chromium"

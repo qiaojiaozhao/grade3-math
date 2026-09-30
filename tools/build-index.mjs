@@ -32,6 +32,14 @@ const UNITS = [
   { no: '六', name: '推理', slug: 'tui-li', pic: '一样多的可以换，条件多了画表', todo: ['奇偶'] },
 ];
 
+// 奥数拔高系列：独立于六单元，跟着学而思秋季 15 讲走。课表在 home 页里，
+// 讲次页是 docs/拔高/第N讲.md（网址段 di-N-jiang，不用进 PAGE_SLUG），动画是 demos/拔高第N讲-主题.html。
+const BAGAO = { name: '奥数拔高', slug: 'ao-shu-ba-gao', home: '拔高/奥数拔高.md' };
+const BAGAO_INK = [
+  ['#b45309', '#fff6d8'], ['#0f766e', '#ccfbf1'], ['#1d4ed8', '#dbeafe'],
+  ['#be185d', '#fce7f3'], ['#6d28d9', '#ede9fe'], ['#c2410c', '#ffedd5'],
+];
+
 // 已经写成课的母题，按单元里的课序排。demo 是动画文件名里的关键字。
 const MOTIFS = [
   { unit: '画线段图', file: '和差问题.md', name: '和差', mark: '和 + 差', ink: '#2f7a5b', paper: '#e8f6ee', demo: ['大衣'] },
@@ -56,6 +64,7 @@ const MOTIFS = [
 // GitBook 页面网址 = 分组 slug + 文件名的拼音。新建页面要在这里补一行拼音，漏了会直接报错。
 const PAGE_SLUG = {
   'README.md': '',
+  '拔高/奥数拔高.md': 'ao-shu-ba-gao',
   '认出母题.md': 'ren-chu-mu-ti',
   '大纲.md': 'da-gang',
   '单元/画线段图.md': 'hua-xian-duan-tu',
@@ -104,7 +113,13 @@ const PAGE_SLUG = {
 
 /** 读 SUMMARY.md，算出每个 docs 页面在 GitBook 上的网址 */
 function bookUrls() {
-  const groupSlug = Object.fromEntries(UNITS.map((u) => [u.name, u.slug]));
+  const groupSlug = Object.fromEntries([...UNITS, BAGAO].map((u) => [u.name, u.slug]));
+  const slugOf = (file) => {
+    if (file in PAGE_SLUG) return PAGE_SLUG[file];
+    const lecture = file.match(/^拔高\/第(\d+)讲\.md$/);
+    if (lecture) return `di-${lecture[1]}-jiang`;
+    fail(`PAGE_SLUG 里缺 ${file} 的拼音`);
+  };
   const urls = {};
   let group = null;
   for (const line of fs.readFileSync(path.join(ROOT, 'docs/SUMMARY.md'), 'utf8').split('\n')) {
@@ -117,8 +132,7 @@ function bookUrls() {
     const item = line.match(/^\s*\*\s+\[[^\]]*\]\(([^)]+)\)/);
     if (!item) continue;
     const file = decodeURI(item[1]);
-    if (!(file in PAGE_SLUG)) fail(`PAGE_SLUG 里缺 ${file} 的拼音`);
-    const parts = [group && groupSlug[group], PAGE_SLUG[file]].filter(Boolean);
+    const parts = [group && groupSlug[group], slugOf(file)].filter(Boolean);
     urls[file] = parts.length ? `${BOOK}/${parts.join('/')}` : BOOK;
   }
   return urls;
@@ -217,13 +231,53 @@ const units = UNITS.map((u) => ({
   motifs: motifs.filter((m) => m.unit === u.name),
 }));
 
-// 「先看动画」按单元排：系统课的动画在前，母题按课序在后；同一个动画只出现一次
+// 拔高课表：从 home 页「| 第 N 讲 | 主题 | 主要内容 | 状态 |」读，写好的讲次第一格是链接
+const lectures = fs
+  .readFileSync(path.join(ROOT, 'docs', BAGAO.home), 'utf8')
+  .split('\n')
+  .map((l) => l.match(/^\|\s*\[?第 (\d+) 讲\]?(?:\(([^)]+)\))?\s*\|\s*([^|]+?)\s*\|/))
+  .filter(Boolean)
+  .map(([, n, link, topic]) => {
+    const no = Number(n);
+    if (!link) return { no, topic, done: false };
+    const file = `拔高/${decodeURI(link)}`;
+    if (!fs.existsSync(path.join(ROOT, 'docs', file))) fail(`${BAGAO.home} 课表链到的 ${file} 找不到`);
+    const [ink, paper] = BAGAO_INK[(no - 1) % BAGAO_INK.length];
+    return {
+      no, topic, done: true, ink, paper,
+      mark: `第 ${no} 讲`,
+      name: topic,
+      motto: mdMotto(fs.readFileSync(path.join(ROOT, 'docs', file), 'utf8')),
+      href: urlOf(file),
+      problems: [],
+      demos: animations.filter((a) => a.file.startsWith(`拔高第${no}讲-`)),
+    };
+  });
+const bagaoHref = urlOf(BAGAO.home);
+const upcoming = lectures.filter((l) => !l.done);
+
+// 「先看动画」按单元排：系统课的动画在前，母题按课序在后，拔高讲次最后；同一个动画只出现一次
 const orderedAnimations = [
   ...new Set([
     ...units.flatMap((u) => [...u.courseDemos, ...u.motifs.flatMap((m) => m.demos)]),
+    ...lectures.flatMap((l) => l.demos || []),
     ...animations,
   ]),
 ];
+
+const bagaoSection = () => `
+<section class="unit">
+  <div class="unit-head">
+    <span class="unit-no">拔高</span>
+    <h3>${esc(BAGAO.name)}</h3>
+    <span class="unit-pic">跟着学而思秋季 15 讲，一讲一个动画</span>
+    <span class="unit-links"><a class="unit-go" href="${esc(bagaoHref)}">15 讲课表 →</a></span>
+  </div>
+  <div class="map">
+    ${lectures.filter((l) => l.done).map(tile).join('\n')}
+    ${upcoming.length ? `<div class="tile todo"><div class="tile-main"><div class="tile-mark">还没上</div><p class="motto">${upcoming.slice(0, 4).map((l) => `第 ${l.no} 讲 ${esc(l.topic)}`).join('、')}${upcoming.length > 4 ? `，一共还有 ${upcoming.length} 讲` : ''}</p></div></div>` : ''}
+  </div>
+</section>`;
 
 const unitSection = (u) => `
 <section class="unit">
@@ -491,6 +545,7 @@ const html = `<!DOCTYPE html>
       <div class="actions">
         <a class="btn primary" href="${urlOf('认出母题.md')}">我这道题是哪一类？</a>
         <a class="btn ghost" href="${urlOf('大纲.md')}">三年级还有哪些</a>
+        <a class="btn ghost" href="${esc(bagaoHref)}">奥数拔高 · 15 讲</a>
       </div>
     </div>
     <div class="cast" aria-hidden="true">
@@ -512,6 +567,13 @@ const html = `<!DOCTYPE html>
     <p>每个单元是一种画法。点单元名看这一单元怎么学，点卡片看母题，点小标签看例题或动画。</p>
   </div>
   ${units.map(unitSection).join('\n')}
+
+  <div class="sec">
+    <h2>往上走一格</h2>
+    <p>母题学完，跟着学而思的课拔高。上完一讲，回家看这一讲的动画。</p>
+  </div>
+  ${bagaoSection()}
+
 
   <div class="how">
     <b>怎么陪孩子用：</b>让他先猜这是哪道母题 → 有动画就看一遍 → 把口诀念出来 → 合上页面自己写算式 → 再换一身衣服讲给你听。
