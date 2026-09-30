@@ -44,7 +44,7 @@ layout:
     <tr>
       <td><i class="fa-tree"></i></td>
       <td><strong>三 · 数清楚</strong></td>
-      <td>画一条线数点和段，几个一组数有几组。植树 → 买赠 → 过火车 → 周期</td>
+      <td>画一条线数点和段，几个一组数有几组。植树 → 买赠 → 过火车 → 周期 → 重叠</td>
       <td><a href="单元/数清楚.md">数清楚</a></td>
     </tr>
     <tr>
@@ -139,6 +139,12 @@ layout:
       <td><strong>彩灯</strong></td>
       <td>三 · 周期。红黄蓝重复，第 51 盏刚好除尽，停在最后一个蓝</td>
       <td><a href="题目/彩灯.md">彩灯</a></td>
+    </tr>
+    <tr>
+      <td><i class="fa-palette"></i></td>
+      <td><strong>书法和绘画</strong></td>
+      <td>三 · 重叠。25 加 23 比全班多 6，这 6 个人两样都参加</td>
+      <td><a href="题目/书法和绘画.md">书法和绘画</a></td>
     </tr>
     <tr>
       <td><i class="fa-plus"></i></td>

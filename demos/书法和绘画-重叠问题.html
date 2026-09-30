@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>书法和绘画 · 动态演示</title>
+<meta name="description" content="书法 25 加绘画 23 得 48，比全班 42 多 6。多出来的 6 个人两样都参加，被数了两遍。">
+<link rel="stylesheet" href="lib/anim.css?v=portrait">
+<style>
+  html, body { background: #07080a; }
+
+  .stage { --top: 140px; --d: 168px; --fs: 42px; }
+  body.portrait .stage { --top: 280px; --d: 340px; --fs: 72px; }
+
+  .ask {
+    position: absolute;
+    left: 50%; top: 108px;
+    transform: translateX(-50%);
+    font-size: 18px; font-weight: 800;
+    color: #e8c27a;
+    white-space: nowrap;
+  }
+  body.portrait .ask { top: 190px; font-size: 34px; }
+  .ask:empty { display: none; }
+
+  .board {
+    position: absolute;
+    left: 50%;
+    top: var(--top);
+    height: var(--d);
+    transform: translateX(-50%);
+  }
+  .circle {
+    position: absolute; top: 0;
+    width: var(--d); height: var(--d);
+    border-radius: 50%;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    font-weight: 800;
+  }
+  .circle.shu {
+    left: 0;
+    background: #3ea0e822;
+    border: 4px solid #3ea0e8;
+    color: #9fd4ff;
+  }
+  .circle.hua {
+    right: 0;
+    background: #ff8a3d22;
+    border: 4px solid #ff8a3d;
+    color: #ffc49a;
+  }
+  .circle b {
+    font-size: var(--fs);
+    color: #f4f6f8;
+    line-height: 1;
+  }
+  .circle .lab { font-size: calc(var(--fs) * .38); margin-bottom: 4px; }
+  .circle.shu.out b { transform: translateX(-28px); }
+  .circle.hua.out b { transform: translateX(28px); }
+  body.portrait .circle.shu.out b { transform: translateX(-72px); }
+  body.portrait .circle.hua.out b { transform: translateX(72px); }
+
+  .mid {
+    position: absolute;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: var(--fs); font-weight: 800;
+    color: #ffb347;
+    opacity: 0;
+  }
+  .mid.on { opacity: 1; }
+  .mid small {
+    display: block;
+    text-align: center;
+    font-size: calc(var(--fs) * .32);
+    color: #e8c27a;
+  }
+
+  .count {
+    position: absolute;
+    left: 16px; right: 16px;
+    top: calc(var(--top) + var(--d) + 36px);
+    text-align: center;
+    font-size: 24px; font-weight: 800;
+    color: #ffb347;
+    min-height: 40px;
+  }
+  body.portrait .count { font-size: 42px; top: calc(var(--top) + var(--d) + 64px); }
+  .count b { color: #7ec4ff; }
+  .count .no { color: #ff6b6b; }
+  .count .ok { color: #5ecf8a; }
+  .count.pop { animation: bump .45s cubic-bezier(.2, 1.6, .3, 1); }
+
+  @keyframes bump {
+    0% { transform: scale(.82); }
+    55% { transform: scale(1.06); }
+    100% { transform: scale(1); }
+  }
+</style>
+</head>
+<body class="theme-dark">
+
+<h1>书法和绘画：多出来的数了两遍</h1>
+<div class="problem">
+  全班 <b>42</b> 人，书法 <b>25</b> 人，绘画 <b>23</b> 人。每人至少参加一项。两项都参加的有多少人？
+</div>
+
+<div class="stage-wrap">
+  <div class="stage" id="stage">
+    <div class="ask" id="ask"></div>
+    <div class="board" id="board">
+      <div class="circle shu" id="cS"><span class="lab">书法</span><b id="nS">25</b></div>
+      <div class="circle hua" id="cH"><span class="lab">绘画</span><b id="nH">23</b></div>
+      <div class="mid" id="mid"></div>
+    </div>
+    <div class="count" id="count"></div>
+  </div>
+</div>
+
+<script src="lib/anim.js"></script>
+<script>
+const { sleep, cancelled, tween, say } = Anim;
+
+const board = document.getElementById('board');
+const cS = document.getElementById('cS');
+const cH = document.getElementById('cH');
+const nS = document.getElementById('nS');
+const nH = document.getElementById('nH');
+const mid = document.getElementById('mid');
+const ask = document.getElementById('ask');
+const countEl = document.getElementById('count');
+
+/* sep：两个圈之间空多少像素。负数就是叠在一起。
+   side 为 true 时，两边的数字往外挪，给中间让位置。 */
+function paint(sep, side) {
+  board.style.width = `calc(var(--d) * 2 + ${sep}px)`;
+  cS.classList.toggle('out', side);
+  cH.classList.toggle('out', side);
+}
+
+function setMid(html) {
+  mid.innerHTML = html;
+  mid.classList.toggle('on', !!html);
+}
+
+function setCount(html) {
+  countEl.innerHTML = html;
+  countEl.classList.remove('pop');
+  void countEl.offsetWidth;
+  countEl.classList.add('pop');
+}
+
+function resetVisuals() {
+  ask.textContent = '';
+  nS.textContent = '25';
+  nH.textContent = '23';
+  setMid('');
+  countEl.innerHTML = '';
+  countEl.classList.remove('pop');
+  paint(48, false);
+}
+
+Anim.run([
+  {
+    title: '两个小组',
+    async play(id) {
+      ask.textContent = '全班 42 人';
+      paint(48, false);
+      say('先看', '先<b>别加</b>。书法 25 人，绘画 23 人，是两个圈。全班一共 42 人。');
+      await sleep(1100);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '加起来',
+    async play(id) {
+      paint(48, false);
+      say('加起来', '两个圈里的人数加起来是 48。');
+      await sleep(400);
+      if (cancelled(id)) return;
+      setCount('25 + 23 = <b>48</b>');
+      await sleep(1100);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '比全班多',
+    async play(id) {
+      paint(48, false);
+      say('比一比', '可是班上只有 42 人。<b>48 比 42 多了 6</b>，人不会变多。');
+      await sleep(400);
+      if (cancelled(id)) return;
+      setCount('48 − 42 = <b>6</b>');
+      await sleep(1100);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '48 个人？',
+    async play(id) {
+      paint(48, false);
+      say('卡住', '有人说：参加的一共 48 人。班上没有这么多人。');
+      await sleep(400);
+      if (cancelled(id)) return;
+      setCount('<span class="no">48 是次数，不是人数 ✗</span>');
+      await sleep(1200);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '叠在一起',
+    async play(id) {
+      say('中间', '把两个圈叠上。多出来的 6 个人，站在<b>中间</b>，两头都数到了。');
+      await tween(900, id, (e) => paint(48 + ( -150 - 48) * e, e > .6));
+      if (cancelled(id)) return;
+      nS.textContent = '19';
+      nH.textContent = '17';
+      setMid('6<small>都参加</small>');
+      setCount('两项都参加 = <b>6</b>');
+      await sleep(1200);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '拆开验算',
+    async play(id) {
+      paint(-150, true);
+      nS.textContent = '19';
+      nH.textContent = '17';
+      setMid('6<small>都参加</small>');
+      say('验算', '只参加书法 19，只参加绘画 17，两样都参加 6。加起来正好是全班。');
+      await sleep(400);
+      if (cancelled(id)) return;
+      setCount('19 + 6 + 17 = <b>42</b>');
+      await sleep(1200);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '都参加 6 人',
+    async play(id) {
+      ask.textContent = '两项都参加的有几人？';
+      paint(-150, true);
+      nS.textContent = '19';
+      nH.textContent = '17';
+      setMid('6<small>都参加</small>');
+      setCount('25 + 23 − 42 = <b>6 人</b> <span class="ok">✓</span>');
+      say('答案', '两项都参加的有 <b>6 人</b>。两圈加起来比全班多几个，中间就有几个人。');
+      await sleep(1300);
+      if (cancelled(id)) return;
+    }
+  },
+], { reset: resetVisuals });
+</script>
+</body>
+</html>
