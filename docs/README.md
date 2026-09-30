@@ -52,6 +52,12 @@ layout:
       <td><a href="知识点/移多补少.md">移多补少</a></td>
     </tr>
     <tr>
+      <td><i class="fa-cake-candles"></i></td>
+      <td><strong>年龄</strong></td>
+      <td>今年、几年后、几年前。两个人一起长一岁，高出的那一截不变</td>
+      <td><a href="知识点/年龄问题.md">年龄问题</a></td>
+    </tr>
+    <tr>
       <td><i class="fa-paw"></i></td>
       <td><strong>鸡兔同笼</strong></td>
       <td>两种东西混在一起。先当全是鸡，少的脚两只两只添</td>
@@ -167,6 +173,12 @@ layout:
       <td><strong>大衣裤子和鞋</strong></td>
       <td>和差。先捆成一包，做两次和差</td>
       <td><a href="题目/大衣裤子和鞋.md">大衣裤子和鞋</a></td>
+    </tr>
+    <tr>
+      <td><i class="fa-cake-candles"></i></td>
+      <td><strong>妈妈和小明</strong></td>
+      <td>年龄。两根年龄条一起长，橙色那截不变；差 28 是 2 份，6 年后是 3 倍</td>
+      <td><a href="题目/妈妈和小明.md">妈妈和小明</a></td>
     </tr>
   </tbody>
 </table>

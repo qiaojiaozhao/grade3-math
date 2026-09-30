@@ -56,6 +56,15 @@ const MOTIFS = [
     demo: ['倒油'],
   },
   {
+    file: '年龄问题.md',
+    name: '年龄',
+    slug: 'zhi-shi-dian/nian-ling-wen-ti',
+    mark: '差不变',
+    ink: '#c2410c',
+    paper: '#ffedd5',
+    demo: ['妈妈'],
+  },
+  {
     file: '假设法.md',
     name: '鸡兔同笼',
     slug: 'zhi-shi-dian/jia-she-fa',
@@ -133,6 +142,7 @@ const PROBLEM_SLUG = {
   '一筐桃子.md': 'li-ti/yi-kuang-tao-zi',
   '过桥.md': 'li-ti/guo-qiao',
   '买五送一.md': 'li-ti/mai-wu-song-yi',
+  '妈妈和小明.md': 'li-ti/ma-ma-he-xiao-ming',
 };
 
 const readDir = (d) =>

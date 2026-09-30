@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>妈妈和小明 · 动态演示</title>
+<meta name="description" content="两个人一起长大，高出的那一截不变。差 28 是 2 份，1 份 14，小明长到 14 岁要 6 年。">
+<link rel="stylesheet" href="lib/anim.css?v=portrait">
+<style>
+  html, body { background: #07080a; }
+
+  :root {
+    --stage-h: 640px;
+    --mom: #f0705a;
+    --kid: #3ea0e8;
+    --grow: #5ecf8a;
+    --gap: #ff8a3d;
+  }
+
+  .stage {
+    --u: 7px;
+    --ground: 96px;
+    --colw: 96px;
+    --face: 64px;
+    --spread: 96px;
+  }
+  body.portrait .stage {
+    --u: 18px;
+    --ground: 300px;
+    --colw: 180px;
+    --face: 150px;
+    --spread: 150px;
+  }
+
+  .year {
+    position: absolute;
+    left: 24px; top: 108px;
+    padding: 6px 16px;
+    border-radius: 999px;
+    background: #1c1f26;
+    border: 2px solid #3a4048;
+    font-size: 18px;
+    font-weight: 800;
+    color: #e8c27a;
+    z-index: 3;
+  }
+  body.portrait .year {
+    left: 50%; top: 150px;
+    transform: translateX(-50%);
+    font-size: 30px;
+    padding: 10px 28px;
+  }
+  .year.tick { animation: bump .35s cubic-bezier(.2, 1.6, .3, 1); }
+  body.portrait .year.tick { animation-name: bump-center; }
+
+  .field {
+    position: absolute;
+    left: 0; right: 0; top: 0;
+    bottom: var(--ground);
+  }
+  .ground {
+    position: absolute;
+    left: 10%; right: 10%;
+    bottom: calc(var(--ground) - 3px);
+    height: 3px;
+    border-radius: 2px;
+    background: #3a4048;
+  }
+
+  .col {
+    position: absolute;
+    bottom: 0;
+    width: var(--colw);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  #colM { left: calc(50% - var(--spread) - var(--colw)); }
+  #colK { left: calc(50% + var(--spread)); }
+
+  .face {
+    width: var(--face);
+    height: var(--face);
+    background: bottom center / contain no-repeat;
+    margin-bottom: 4px;
+    transform-origin: bottom center;
+    animation: breathe 2.8s ease-in-out infinite;
+  }
+  #colM .face { background-image: url(assets/妈妈.png); }
+  #colK .face { background-image: url(assets/小明.png); animation-delay: -1.3s; }
+  @keyframes breathe {
+    0%, 100% { transform: translateY(0) scaleY(1); }
+    50% { transform: translateY(-3px) scaleY(1.02); }
+  }
+
+  .age {
+    min-height: 26px;
+    font-size: 20px;
+    font-weight: 800;
+    color: #f4f6f8;
+    margin-bottom: 4px;
+    white-space: nowrap;
+  }
+  body.portrait .age { font-size: 38px; min-height: 50px; margin-bottom: 8px; }
+  .age.pop { animation: bump .45s cubic-bezier(.2, 1.6, .3, 1); }
+
+  .stack {
+    width: 72%;
+    display: flex;
+    flex-direction: column-reverse;
+  }
+  .seg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 800;
+    color: #1a1208;
+    overflow: hidden;
+    white-space: nowrap;
+    box-shadow: inset 0 1px 0 #fff3;
+  }
+  body.portrait .seg { font-size: 26px; }
+  .stack .seg:first-child { border-radius: 0 0 6px 6px; }
+  .stack .seg:last-child { border-radius: 8px 8px 0 0; }
+  .stack .seg:only-child { border-radius: 8px; }
+  .seg.mom { background: linear-gradient(180deg, #f59a88, var(--mom)); }
+  .seg.kid { background: linear-gradient(180deg, #7ec4f5, var(--kid)); }
+  .seg.grow { background: linear-gradient(180deg, #9ae8b6, var(--grow)); }
+  .seg.gap { background: linear-gradient(180deg, #ffb070, var(--gap)); }
+  .seg.part { border-top: 3px dashed #1a1208aa; }
+
+  .name {
+    position: absolute;
+    bottom: calc(var(--ground) - 34px);
+    width: var(--colw);
+    text-align: center;
+    font-size: 16px;
+    font-weight: 800;
+    color: #e8c27a;
+  }
+  body.portrait .name { bottom: calc(var(--ground) - 60px); font-size: 30px; }
+  #nameM { left: calc(50% - var(--spread) - var(--colw)); }
+  #nameK { left: calc(50% + var(--spread)); }
+
+  .line {
+    position: absolute;
+    left: calc(50% - var(--spread) - var(--colw) - 12px);
+    width: calc(var(--spread) * 2 + var(--colw) * 2 + 24px);
+    border-top: 3px dashed #ffb34799;
+    display: none;
+  }
+  .line.on { display: block; }
+
+  .count {
+    position: absolute;
+    left: 0; right: 0;
+    bottom: 22px;
+    min-height: 36px;
+    text-align: center;
+    font-size: 24px;
+    font-weight: 800;
+    color: #ffb347;
+  }
+  body.portrait .count { bottom: 110px; font-size: 44px; min-height: 60px; }
+  .count b { color: #ff8a3d; }
+  .count .no { color: #ff6b6b; }
+  .count .ok { color: #5ecf8a; }
+  .count.pop { animation: bump .45s cubic-bezier(.2, 1.6, .3, 1); }
+
+  @keyframes bump {
+    0% { transform: scale(.75); }
+    55% { transform: scale(1.12); }
+    100% { transform: scale(1); }
+  }
+  @keyframes bump-center {
+    0% { transform: translateX(-50%) scale(.75); }
+    55% { transform: translateX(-50%) scale(1.12); }
+    100% { transform: translateX(-50%) scale(1); }
+  }
+</style>
+</head>
+<body class="theme-dark">
+
+<h1>妈妈和小明：一起长大，差不变</h1>
+<div class="problem">
+  妈妈今年 <b>36</b> 岁，小明今年 <b>8</b> 岁。几年后，妈妈的年龄是小明的 <b>3</b> 倍？
+</div>
+
+<div class="stage-wrap">
+  <div class="stage" id="stage">
+    <div class="year" id="year">今年</div>
+    <div class="field">
+      <div class="line" id="line"></div>
+      <div class="col" id="colM">
+        <div class="age" id="tagM"></div>
+        <div class="face"></div>
+        <div class="stack" id="stM"></div>
+      </div>
+      <div class="col" id="colK">
+        <div class="age" id="tagK"></div>
+        <div class="face"></div>
+        <div class="stack" id="stK"></div>
+      </div>
+    </div>
+    <div class="ground"></div>
+    <div class="name" id="nameM">妈妈</div>
+    <div class="name" id="nameK">小明</div>
+    <div class="count" id="count"></div>
+  </div>
+</div>
+
+<script src="lib/anim.js"></script>
+<script>
+const { sleep, cancelled, tween, lerp, say, pop } = Anim;
+
+const MOM = 36;
+const KID = 8;
+const TIMES = 3;
+const GAP = MOM - KID;
+const PART = GAP / (TIMES - 1);
+const YEARS = PART - KID;
+
+const yearEl = document.getElementById('year');
+const line = document.getElementById('line');
+const stM = document.getElementById('stM');
+const stK = document.getElementById('stK');
+const tagM = document.getElementById('tagM');
+const tagK = document.getElementById('tagK');
+const countEl = document.getElementById('count');
+
+/* 画面状态。gm / gk 是今年以后各自长出来的岁数，画成绿色。
+   gap 为 true 时，妈妈的条拆成「和小明一样高的部分 + 橙色高出的一截」。
+   split 为 true 时，妈妈的条按小明的高度切成 TIMES 份。 */
+const TODAY = { m: MOM, k: KID, gm: 0, gk: 0 };
+
+function seg(cls, v, text) {
+  const el = document.createElement('div');
+  el.className = 'seg ' + cls;
+  el.style.height = `calc(var(--u) * ${Math.max(v, 0)})`;
+  if (text) el.textContent = text;
+  return el;
+}
+
+const round = (v) => Math.round(v);
+
+function paint(s) {
+  stK.innerHTML = '';
+  stK.append(seg('kid', s.k - s.gk, s.split ? '1 份' : ''));
+  if (s.gk > 0.01) stK.append(seg('grow', s.gk, s.nums && s.gk >= 3 ? `+${round(s.gk)}` : ''));
+
+  stM.innerHTML = '';
+  if (s.split) {
+    stM.append(seg('mom', s.k, '1 份'));
+    for (let i = 1; i < TIMES; i++) stM.append(seg('gap part', s.k, '1 份'));
+  } else if (s.gap) {
+    stM.append(seg('mom', s.k - s.gk));
+    if (s.gk > 0.01) stM.append(seg('grow', s.gk, s.nums && s.gk >= 3 ? `+${round(s.gk)}` : ''));
+    stM.append(seg('gap', s.m - s.k, s.nums ? `差 ${round(s.m - s.k)}` : '高出的一截'));
+  } else {
+    stM.append(seg('mom', s.m - s.gm));
+    if (s.gm > 0.01) stM.append(seg('grow', s.gm, s.nums && s.gm >= 3 ? `+${round(s.gm)}` : ''));
+  }
+
+  tagM.textContent = s.nums ? `${round(s.m)} 岁` : '';
+  tagK.textContent = s.nums ? `${round(s.k)} 岁` : '';
+
+  line.classList.toggle('on', !!s.line);
+  line.style.bottom = `calc(var(--u) * ${s.k})`;
+
+  const y = s.yearText || (round(s.gk) === 0 ? '今年' : `${round(s.gk)} 年后`);
+  if (yearEl.textContent !== y) {
+    yearEl.textContent = y;
+    bump(yearEl, 'tick');
+  }
+}
+
+function bump(el, cls) {
+  el.classList.remove(cls);
+  void el.offsetWidth;
+  el.classList.add(cls);
+}
+
+async function animate(from, to, ms, id) {
+  await tween(ms, id, (e) => {
+    const s = { ...to };
+    for (const key of ['m', 'k', 'gm', 'gk']) s[key] = lerp(from[key], to[key], e);
+    paint(s);
+  });
+}
+
+function setCount(html) {
+  countEl.innerHTML = html;
+  bump(countEl, 'pop');
+}
+
+function resetVisuals() {
+  countEl.innerHTML = '';
+  countEl.classList.remove('pop');
+  yearEl.textContent = '今年';
+  paint(TODAY);
+}
+
+Anim.run([
+  {
+    title: '今年',
+    async play(id) {
+      paint(TODAY);
+      say('先看', '先<b>不看数字</b>。左边是妈妈，右边是小明，妈妈的年龄条高出一大截。');
+      await sleep(900);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '高出的那一截',
+    async play(id) {
+      paint({ ...TODAY, line: true });
+      say('画线', '在小明头顶画一条线。妈妈比这条线<b>高出的那一截</b>，就是两人的年龄差。');
+      await sleep(700);
+      if (cancelled(id)) return;
+      paint({ ...TODAY, line: true, gap: true });
+      pop('涂成橙色');
+      await sleep(800);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '一起长大',
+    async play(id) {
+      const from = { ...TODAY, line: true, gap: true };
+      paint(from);
+      say('长大', '时间往前走。每过一年，两个人<b>各长 1 岁</b>，绿色是长出来的。');
+      await sleep(600);
+      if (cancelled(id)) return;
+      await animate(from, { ...from, m: MOM + 5, k: KID + 5, gm: 5, gk: 5 }, 2600, id);
+      if (cancelled(id)) return;
+      say('长大', '两个人长得一样多，橙色那一截<b>一点没变</b>。');
+      pop('差不变');
+      await sleep(900);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '差是 28',
+    async play(id) {
+      paint({ ...TODAY, line: true, gap: true, nums: true });
+      bump(tagM, 'pop');
+      bump(tagK, 'pop');
+      say('数字', `现在看数字。妈妈 ${MOM} 岁，小明 ${KID} 岁。橙色那一截是 <b>${GAP}</b> 岁，过多少年都是 ${GAP}。`);
+      await sleep(500);
+      if (cancelled(id)) return;
+      setCount(`${MOM} − ${KID} = <b>${GAP}</b>`);
+      await sleep(800);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '只让小明长？',
+    async play(id) {
+      const wrong = MOM / TIMES;
+      const g = wrong - KID;
+      const s0 = { ...TODAY, nums: true };
+      paint(s0);
+      say('卡住', `有人这样算：${MOM} ÷ ${TIMES} = ${wrong}，小明长到 ${wrong} 岁就行，要 ${g} 年。`);
+      await sleep(600);
+      if (cancelled(id)) return;
+      const s1 = { ...s0, k: wrong, gk: g };
+      await animate(s0, s1, 1200, id);
+      if (cancelled(id)) return;
+      await sleep(400);
+      if (cancelled(id)) return;
+      say('卡住', `可这 ${g} 年里妈妈<b>也在长</b>，她已经 ${MOM + g} 岁了。`);
+      await animate(s1, { ...s1, m: MOM + g, gm: g }, 1200, id);
+      if (cancelled(id)) return;
+      bump(tagM, 'pop');
+      pop(`妈妈也长了 ${g} 岁`);
+      setCount(`<span class="no">${MOM + g} 不是 ${wrong} 的 ${TIMES} 倍 ✗</span>`);
+      await sleep(900);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '那一年画成份',
+    async play(id) {
+      const s = { m: PART * TIMES, k: PART, gm: 0, gk: 0, yearText: '? 年后' };
+      paint(s);
+      say('份数', `跳到妈妈是小明 ${TIMES} 倍的那一年。小明是 <b>1 份</b>，妈妈是一样高的 <b>${TIMES} 份</b>。`);
+      await sleep(700);
+      if (cancelled(id)) return;
+      paint({ ...s, split: true });
+      await sleep(700);
+      if (cancelled(id)) return;
+      say('份数', `妈妈比小明多出 <b>${TIMES - 1} 份</b>，就是橙色那一截。它永远是 ${GAP}。`);
+      pop(`${TIMES - 1} 份 = ${GAP}`);
+      await sleep(900);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '1 份是 14',
+    async play(id) {
+      const s = { m: PART * TIMES, k: PART, gm: 0, gk: 0, yearText: '? 年后', split: true, nums: true };
+      paint(s);
+      bump(tagK, 'pop');
+      say('求 1 份', `${TIMES - 1} 份是 ${GAP}，1 份就是 ${PART}。那一年小明 <b>${PART} 岁</b>，妈妈 ${PART * TIMES} 岁。`);
+      await sleep(400);
+      if (cancelled(id)) return;
+      setCount(`${GAP} ÷ (${TIMES} − 1) = <b>${PART}</b>`);
+      await sleep(900);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '6 年后',
+    async play(id) {
+      const from = { ...TODAY, line: true, gap: true, nums: true };
+      paint(from);
+      say('几年后', `小明从 ${KID} 岁长到 ${PART} 岁，要过几年？`);
+      await sleep(500);
+      if (cancelled(id)) return;
+      const to = { ...from, m: MOM + YEARS, k: PART, gm: YEARS, gk: YEARS };
+      await animate(from, to, 2400, id);
+      if (cancelled(id)) return;
+      bump(tagM, 'pop');
+      bump(tagK, 'pop');
+      setCount(`<b>${YEARS}</b> 年后：${MOM + YEARS} = ${PART} × ${TIMES} <span class="ok">✓</span>`);
+      say('答案', `<b>${YEARS} 年后</b>，妈妈的年龄是小明的 ${TIMES} 倍。两人一起长，差不变：先用差求出那一年，再倒回今年。`);
+      await sleep(900);
+      if (cancelled(id)) return;
+    }
+  },
+], { reset: resetVisuals });
+</script>
+</body>
+</html>
