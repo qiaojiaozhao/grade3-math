@@ -3,7 +3,7 @@
  *
  * 用法: npm run bagao -- <第几讲>
  *   例: npm run bagao -- 1
- * 主题和本讲大纲从 docs/拔高/奥数拔高.md 的「15 讲课表」里读。
+ * 主题和本讲大纲从 docs/拔高/奥数拔高.md 的「课表」里读。
  *
  * 会生成（已存在的不会覆盖）：
  *   docs/拔高/第<N>讲.md                 讲次页
@@ -34,7 +34,7 @@ if (rowAt < 0) {
   console.error(`${HOME} 的课表里没有第 ${no} 讲，先把这一讲加进课表`);
   process.exit(1);
 }
-const [, topic, outline] = homeLines[rowAt].split('|').map((c) => c.trim()).slice(1);
+const [, topic, outline, , handout] = homeLines[rowAt].split('|').map((c) => c.trim()).slice(1);
 
 const page = `拔高/第${no}讲.md`;
 const demoName = `拔高第${no}讲-${topic}.html`;
@@ -50,6 +50,7 @@ const targets = [
         .replaceAll('【N】', String(no))
         .replaceAll('【主题】', topic)
         .replaceAll('【主要内容】', outline)
+        .replaceAll('「【讲义】」', handout ? `「${handout}」` : '')
         .replaceAll('【文件名】.html', encodeURI(demoName)),
   },
   {

@@ -261,10 +261,10 @@ Anim.run([
     }
   },
   {
-    title: '为什么能推',
+    title: '标向法',
     async play(id) {
       tint([]);
-      say('标向法', '沿着边走一圈：<b>往右走</b>了几段，最后都要<b>往左走回来</b>；往下走了几段，都要往上走回来。');
+      say('标向法', '<b>定起点</b>，顺着边走一圈<b>标方向</b>：往右走的都要往左走回来，往下走的都要往上走回来。');
       walker.setAttribute('opacity', 1);
       await tween(3600, id, (t) => walk(t));
       if (cancelled(id)) return;

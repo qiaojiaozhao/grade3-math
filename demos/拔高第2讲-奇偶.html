@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>第 2 讲 奇偶 · 动态演示</title>
+<meta name="description" content="把数两个两个排成对，奇数总会多出一个落单的。1 + 2 + … + 9 不用加：只有 5 个落单，两两配对还剩 1 个，和是奇数。">
+<link rel="stylesheet" href="lib/anim.css?v=portrait">
+<style>
+  html, body { background: #07080a; }
+
+  .stage { --k: .74; }
+  body.portrait .stage { --k: 1.55; }
+
+  #board {
+    position: absolute;
+    left: 50%; top: 104px;
+    width: 640px; height: 420px;
+    transform: translateX(-50%) scale(var(--k));
+    transform-origin: top center;
+  }
+  body.portrait #board { top: 330px; }
+
+  .d {
+    position: absolute;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: #d7dbe2;
+    box-shadow: 0 0 0 3px #1c1f26;
+    transition: left .8s cubic-bezier(.4, 0, .2, 1), top .8s cubic-bezier(.4, 0, .2, 1), background .4s, box-shadow .4s;
+  }
+  .d.sm { width: 20px; height: 20px; }
+  .d.single { background: #ff6b6b; box-shadow: 0 0 0 3px #1c1f26, 0 0 14px #ff6b6baa; }
+  .d.single.pulse { animation: pulse 1s ease-in-out infinite; }
+  .d.paired { background: #5ecf8a; box-shadow: 0 0 0 3px #1c1f26, 0 0 12px #5ecf8a88; }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.35); }
+  }
+
+  .lab {
+    position: absolute;
+    font-size: 28px; font-weight: 900;
+    color: #e8c27a;
+    transition: left .8s cubic-bezier(.4, 0, .2, 1), opacity .4s;
+    white-space: nowrap;
+  }
+  .lab.sm { font-size: 20px; }
+  .lab.tag { font-size: 22px; font-weight: 800; color: #aab2bf; }
+  .lab .odd { color: #ff6b6b; }
+  .lab .even { color: #5ecf8a; }
+
+  .count {
+    position: absolute;
+    left: 16px; right: 16px;
+    bottom: 22px;
+    text-align: center;
+    font-size: 24px; font-weight: 800;
+    color: #e8eaed;
+    min-height: 36px;
+  }
+  body.portrait .count { bottom: 190px; font-size: 40px; line-height: 1.5; }
+  .count .odd, .count .no { color: #ff6b6b; }
+  .count .even, .count .ok { color: #5ecf8a; }
+  .count.pop { animation: bump .45s cubic-bezier(.2, 1.6, .3, 1); }
+  @keyframes bump {
+    0% { transform: scale(.82); }
+    55% { transform: scale(1.06); }
+    100% { transform: scale(1); }
+  }
+</style>
+</head>
+<body class="theme-dark">
+
+<h1>第 2 讲 奇偶：只数落单的</h1>
+<div class="problem">
+  <b>1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9</b> 的结果是奇数还是偶数？不许一个一个加。
+</div>
+
+<div class="stage-wrap">
+  <div class="stage" id="stage">
+    <div id="board"></div>
+    <div class="count" id="count"></div>
+  </div>
+</div>
+
+<script src="lib/anim.js"></script>
+<script>
+const { sleep, cancelled, say, pop } = Anim;
+
+const board = document.getElementById('board');
+const countEl = document.getElementById('count');
+
+/** 把 n 个点两个一对竖着排：第 i 个点在第 i÷2 列、第 i%2 行。奇数最后一个就是落单的 */
+function block(n, x, y, small = false) {
+  const dots = [];
+  for (let i = 0; i < n; i++) {
+    const d = document.createElement('i');
+    d.className = 'd' + (small ? ' sm' : '');
+    if (n % 2 === 1 && i === n - 1) d.classList.add('single');
+    board.append(d);
+    dots.push(d);
+  }
+  arrange(dots, x, y, small ? 26 : 40);
+  return dots;
+}
+
+function arrange(dots, x, y, pitch = 40) {
+  dots.forEach((d, i) => {
+    d.style.left = x + Math.floor(i / 2) * pitch + 'px';
+    d.style.top = y + (i % 2) * pitch + 'px';
+  });
+}
+
+const cols = (n, pitch = 40) => Math.ceil(n / 2) * pitch;
+
+function label(html, x, y, cls = '') {
+  const l = document.createElement('div');
+  l.className = 'lab ' + cls;
+  l.innerHTML = html;
+  l.style.left = x + 'px';
+  l.style.top = y + 'px';
+  board.append(l);
+  return l;
+}
+
+function setCount(html) {
+  countEl.innerHTML = html;
+  countEl.classList.remove('pop');
+  void countEl.offsetWidth;
+  countEl.classList.add('pop');
+}
+
+/** 两个奇偶数合在一起：a 的成对部分、b 的成对部分、最后是两个数落单的 */
+function merge(a, b) {
+  const pairs = (ds) => (ds.length % 2 ? ds.slice(0, -1) : ds);
+  const singles = [a, b].filter((ds) => ds.length % 2).map((ds) => ds[ds.length - 1]);
+  return { order: [...pairs(a), ...pairs(b), ...singles], singles };
+}
+
+// 第 4～6 幕：1 到 9 排两行，每个数一小块
+const NUMS = [[1, 2, 3, 4, 5], [6, 7, 8, 9]];
+function nineBlocks() {
+  const all = [];
+  NUMS.forEach((row, r) => {
+    let x = 30;
+    for (const n of row) {
+      label(String(n), x, r * 150 + 6, 'sm');
+      all.push({ n, dots: block(n, x, r * 150 + 42, true) });
+      x += cols(n, 26) + 50;
+    }
+  });
+  return all;
+}
+
+function lineUp(singles, y) {
+  singles.forEach((d, i) => {
+    d.style.left = 150 + i * 70 + (i % 2) * -18 + 'px';
+    d.style.top = y + 'px';
+  });
+}
+
+function resetVisuals() {
+  board.innerHTML = '';
+  countEl.innerHTML = '';
+  countEl.classList.remove('pop');
+}
+
+Anim.run([
+  {
+    title: '两个两个站好',
+    async play(id) {
+      say('先看', '把一个数排成<b>两个两个一对</b>。刚好排完的是<b>偶数</b>；多出一个<b>落单</b>的，是<b>奇数</b>。');
+      label('6', 60, 60);
+      block(6, 110, 50);
+      await sleep(700);
+      if (cancelled(id)) return;
+      label('<span class="even">偶数</span>：没人落单', 280, 66, 'tag');
+      await sleep(700);
+      if (cancelled(id)) return;
+      label('7', 60, 230);
+      block(7, 110, 220);
+      await sleep(700);
+      if (cancelled(id)) return;
+      label('<span class="odd">奇数</span>：落单 1 个', 320, 236, 'tag');
+      setCount('看个位就知道：<span class="even">0 2 4 6 8</span> 是偶，<span class="odd">1 3 5 7 9</span> 是奇');
+      await sleep(1200);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '奇 + 奇',
+    async play(id) {
+      say('奇 + 奇', '5 和 7 都是奇数，<b>各带一个落单的</b>。合在一起会怎样？');
+      const tags = [label('5', 60, 60), label('7', 380, 60)];
+      const a = block(5, 60, 110);
+      const b = block(7, 380, 110);
+      await sleep(1300);
+      if (cancelled(id)) return;
+      const { order, singles } = merge(a, b);
+      tags.forEach((t) => (t.style.opacity = 0));
+      arrange(order, 120, 110);
+      await sleep(1000);
+      if (cancelled(id)) return;
+      singles.forEach((d) => { d.classList.remove('single'); d.classList.add('paired'); });
+      label('12', 120, 220);
+      setCount('奇 + 奇 = <span class="even">偶</span>：两个落单的，凑成了一对');
+      await sleep(1400);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '奇 + 偶',
+    async play(id) {
+      say('奇 + 偶', '5 带一个落单的，4 一个也没有。合在一起，落单的那个<b>还是没人陪</b>。');
+      const tags = [label('5', 60, 60), label('4', 380, 60)];
+      const a = block(5, 60, 110);
+      const b = block(4, 380, 110);
+      await sleep(1300);
+      if (cancelled(id)) return;
+      tags.forEach((t) => (t.style.opacity = 0));
+      arrange(merge(a, b).order, 140, 110);
+      await sleep(1000);
+      if (cancelled(id)) return;
+      label('9', 140, 220);
+      setCount('奇 + 偶 = <span class="odd">奇</span>　偶数加进来，不会多出落单的');
+      await sleep(1400);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '只看落单的',
+    async play(id) {
+      say('题目', '1 加到 9，<b>别急着加</b>。只看一件事：谁身上带着<b>落单的</b>？');
+      const all = nineBlocks();
+      await sleep(1200);
+      if (cancelled(id)) return;
+      all.forEach(({ dots }) => dots.forEach((d) => d.classList.contains('single') && d.classList.add('pulse')));
+      setCount('只有 <span class="odd">1、3、5、7、9</span> 带着落单的，偶数一个都没有');
+      await sleep(1500);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '落单的配对',
+    async play(id) {
+      say('配对', '把 5 个落单的请出来，<b>两个两个配成对</b>。');
+      const singles = nineBlocks().flatMap(({ dots }) => dots.filter((d) => d.classList.contains('single')));
+      await sleep(600);
+      if (cancelled(id)) return;
+      lineUp(singles, 330);
+      await sleep(1100);
+      if (cancelled(id)) return;
+      for (const d of singles.slice(0, 4)) {
+        d.classList.remove('single');
+        d.classList.add('paired');
+        await sleep(300);
+        if (cancelled(id)) return;
+      }
+      singles[4].classList.add('pulse');
+      setCount('5 个落单的：配成 2 对，<span class="odd">还剩 1 个</span>');
+      await sleep(1400);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '是奇数',
+    async play(id) {
+      const singles = nineBlocks().flatMap(({ dots }) => dots.filter((d) => d.classList.contains('single')));
+      lineUp(singles, 330);
+      singles.slice(0, 4).forEach((d) => { d.classList.remove('single'); d.classList.add('paired'); });
+      singles[4].classList.add('pulse');
+      say('答案', '结果是<b>奇数</b>。奇数有 5 个，是<b>奇数个奇数</b>，最后总会剩一个落单的。');
+      await sleep(700);
+      if (cancelled(id)) return;
+      setCount('1 + 2 + … + 9 = <span class="odd">45，奇数</span> <span class="ok">✓</span>');
+      pop('奇数个奇数 → 奇');
+      await sleep(1400);
+      if (cancelled(id)) return;
+    }
+  },
+], { reset: resetVisuals });
+</script>
+</body>
+</html>

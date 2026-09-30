@@ -32,7 +32,7 @@ const UNITS = [
   { no: '六', name: '推理', slug: 'tui-li', pic: '一样多的可以换，条件多了画表', todo: ['奇偶'] },
 ];
 
-// 奥数拔高系列：独立于六单元，跟着学而思秋季 15 讲走。课表在 home 页里，
+// 奥数拔高系列：独立于六单元，跟着学而思三年级秋季的课走。课表在 home 页里，
 // 讲次页是 docs/拔高/第N讲.md（网址段 di-N-jiang，不用进 PAGE_SLUG），动画是 demos/拔高第N讲-主题.html。
 const BAGAO = { name: '奥数拔高', slug: 'ao-shu-ba-gao', home: '拔高/奥数拔高.md' };
 const BAGAO_INK = [
@@ -270,8 +270,8 @@ const bagaoSection = () => `
   <div class="unit-head">
     <span class="unit-no">拔高</span>
     <h3>${esc(BAGAO.name)}</h3>
-    <span class="unit-pic">跟着学而思秋季 15 讲，一讲一个动画</span>
-    <span class="unit-links"><a class="unit-go" href="${esc(bagaoHref)}">15 讲课表 →</a></span>
+    <span class="unit-pic">跟着学而思三年级秋季的课，一讲一个动画</span>
+    <span class="unit-links"><a class="unit-go" href="${esc(bagaoHref)}">课表 →</a></span>
   </div>
   <div class="map">
     ${lectures.filter((l) => l.done).map(tile).join('\n')}
@@ -545,7 +545,7 @@ const html = `<!DOCTYPE html>
       <div class="actions">
         <a class="btn primary" href="${urlOf('认出母题.md')}">我这道题是哪一类？</a>
         <a class="btn ghost" href="${urlOf('大纲.md')}">三年级还有哪些</a>
-        <a class="btn ghost" href="${esc(bagaoHref)}">奥数拔高 · 15 讲</a>
+        <a class="btn ghost" href="${esc(bagaoHref)}">奥数拔高 · 跟着学而思</a>
       </div>
     </div>
     <div class="cast" aria-hidden="true">

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>第 3 讲 乘法巧算 · 动态演示</title>
+<meta name="description" content="25 × 99 是 99 袋、每袋 25 颗。先借 1 袋凑成 100 袋是 2500，还回去的是 1 袋 25 颗，不是 1 颗：2500 − 25 = 2475。">
+<link rel="stylesheet" href="lib/anim.css?v=portrait">
+<style>
+  html, body { background: #07080a; }
+
+  .stage { --k: .74; }
+  body.portrait .stage { --k: 1.55; }
+
+  #board {
+    position: absolute;
+    left: 50%; top: 100px;
+    width: 640px; height: 430px;
+    transform: translateX(-50%) scale(var(--k));
+    transform-origin: top center;
+  }
+  body.portrait #board { top: 320px; }
+
+  .bag {
+    position: absolute;
+    width: 32px; height: 32px;
+    border-radius: 8px 8px 10px 10px;
+    background: #c77d2e;
+    box-shadow: inset 0 -4px 0 #0003, 0 0 0 2px #1c1f26;
+    color: #fff4e0;
+    font-size: 12px; font-weight: 900;
+    display: grid; place-items: center;
+    transition: left .9s cubic-bezier(.4, 0, .2, 1), top .9s cubic-bezier(.4, 0, .2, 1),
+                background .4s, opacity .4s, transform .4s;
+  }
+  .bag.big { width: 64px; height: 64px; font-size: 22px; border-radius: 14px 14px 18px 18px; }
+  .bag.hole { background: transparent; box-shadow: inset 0 0 0 2px #8b93a0; color: transparent; border-radius: 8px; }
+  .bag.lent { background: #3ea0e8; }
+  .bag.lent.big { font-size: 20px; }
+  .bag.shake { animation: shake .5s ease-in-out 2; }
+  .bag.breathe { animation: breathe 2.4s ease-in-out infinite; }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px) rotate(-6deg); }
+    75% { transform: translateX(6px) rotate(6deg); }
+  }
+  @keyframes breathe {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-3px) scale(1.04); }
+  }
+
+  .box100 {
+    position: absolute;
+    left: 250px; top: 110px;
+    width: 140px; height: 140px;
+    border-radius: 22px;
+    background: #2f7a5b;
+    color: #eafff3;
+    font-size: 48px; font-weight: 900;
+    display: grid; place-items: center;
+    opacity: 0;
+    transform: scale(.4);
+    transition: opacity .4s, transform .5s cubic-bezier(.2, 1.6, .3, 1);
+  }
+  .box100.on { opacity: 1; transform: scale(1); }
+  .box100 small { display: block; font-size: 18px; text-align: center; }
+
+  .lab {
+    position: absolute;
+    font-size: 24px; font-weight: 800;
+    color: #e8c27a;
+    white-space: nowrap;
+  }
+
+  .count {
+    position: absolute;
+    left: 16px; right: 16px;
+    bottom: 22px;
+    text-align: center;
+    font-size: 24px; font-weight: 800;
+    color: #e8eaed;
+    min-height: 36px;
+  }
+  body.portrait .count { bottom: 190px; font-size: 40px; line-height: 1.5; }
+  .count .no { color: #ff6b6b; }
+  .count .ok { color: #5ecf8a; }
+  .count .blue { color: #7ec4ff; }
+  .count.pop { animation: bump .45s cubic-bezier(.2, 1.6, .3, 1); }
+  @keyframes bump {
+    0% { transform: scale(.82); }
+    55% { transform: scale(1.06); }
+    100% { transform: scale(1); }
+  }
+</style>
+</head>
+<body class="theme-dark">
+
+<h1>第 3 讲 乘法巧算：少的是 1 袋，不是 1 颗</h1>
+<div class="problem">
+  巧算：<b>25 × 99</b> = ？
+</div>
+
+<div class="stage-wrap">
+  <div class="stage" id="stage">
+    <div id="board"></div>
+    <div class="count" id="count"></div>
+  </div>
+</div>
+
+<script src="lib/anim.js"></script>
+<script>
+const { sleep, cancelled, say, pop } = Anim;
+
+const board = document.getElementById('board');
+const countEl = document.getElementById('count');
+
+const PITCH = 38;
+const GRID_X = (640 - PITCH * 10) / 2;
+const GRID_Y = 20;
+
+function bag(x, y, cls = '') {
+  const b = document.createElement('div');
+  b.className = 'bag ' + cls;
+  b.textContent = '25';
+  b.style.left = x + 'px';
+  b.style.top = y + 'px';
+  b.style.animationDelay = `${-Math.random() * 2.4}s`;
+  board.append(b);
+  return b;
+}
+
+/** 10 × 10 的格子，前 99 格是袋子，最后一格先空着。返回最后一格 */
+function grid() {
+  let last;
+  for (let i = 0; i < 100; i++) {
+    const x = GRID_X + (i % 10) * PITCH;
+    const y = GRID_Y + Math.floor(i / 10) * PITCH;
+    last = bag(x, y, i === 99 ? 'hole' : '');
+  }
+  return last;
+}
+
+function lend(b) {
+  b.classList.remove('hole');
+  b.classList.add('lent');
+}
+
+function label(html, x, y) {
+  const l = document.createElement('div');
+  l.className = 'lab';
+  l.innerHTML = html;
+  l.style.left = x + 'px';
+  l.style.top = y + 'px';
+  board.append(l);
+  return l;
+}
+
+function setCount(html) {
+  countEl.innerHTML = html;
+  countEl.classList.remove('pop');
+  void countEl.offsetWidth;
+  countEl.classList.add('pop');
+}
+
+function giveBack(b) {
+  bag(b.style.left.replace('px', ''), b.style.top.replace('px', ''), 'hole');
+  b.classList.add('big');
+  b.style.left = GRID_X + PITCH * 10 + 24 + 'px';
+  b.style.top = GRID_Y + PITCH * 9 - 30 + 'px';
+  b.textContent = '25 颗';
+}
+
+function resetVisuals() {
+  board.innerHTML = '';
+  countEl.innerHTML = '';
+  countEl.classList.remove('pop');
+}
+
+Anim.run([
+  {
+    title: '好朋友',
+    async play(id) {
+      say('好朋友', '25 × 4：<b>4 袋</b>，每袋 25 颗。');
+      const bags = [0, 1, 2, 3].map((i) => bag(170 + i * 80, 150, 'big breathe'));
+      await sleep(1200);
+      if (cancelled(id)) return;
+      bags.forEach((b) => { b.style.left = '288px'; b.style.top = '148px'; b.style.opacity = 0; });
+      const box = document.createElement('div');
+      box.className = 'box100';
+      box.innerHTML = '<div>100<small>颗</small></div>';
+      board.append(box);
+      await sleep(700);
+      if (cancelled(id)) return;
+      box.classList.add('on');
+      say('好朋友', '4 袋 25 颗倒在一起，正好 <b>100</b>。25 和 4 是一对<b>乘法好朋友</b>。');
+      setCount('25 × 4 = 100　2 × 5 = 10　8 × 125 = 1000');
+      await sleep(1400);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '99 袋',
+    async play(id) {
+      say('题目', '25 × 99 就是 <b>99 袋</b>，每袋 25 颗。一袋一袋加，要加到天黑。');
+      const hole = grid();
+      await sleep(1300);
+      if (cancelled(id)) return;
+      hole.classList.add('shake');
+      setCount('数一数：一排 10 袋，10 排<b>差 1 袋</b>就满了');
+      await sleep(1400);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '先借 1 袋',
+    async play(id) {
+      const hole = grid();
+      say('拆减', '先<b>借 1 袋</b>放进空格，凑成整整齐齐的 <b>100 袋</b>。');
+      await sleep(900);
+      if (cancelled(id)) return;
+      lend(hole);
+      await sleep(700);
+      if (cancelled(id)) return;
+      setCount('100 袋：25 × 100 = <b>2500</b> 颗');
+      pop('100 袋好算！');
+      await sleep(1400);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '还多少？',
+    async play(id) {
+      const hole = grid();
+      lend(hole);
+      say('小心', '借来的要<b>还回去</b>。有人写成 2500 − 1……还的是 1 颗吗？');
+      await sleep(1000);
+      if (cancelled(id)) return;
+      hole.classList.add('shake');
+      setCount('<span class="no">2500 − 1 ✗</span>　借的是 <span class="blue">1 袋</span>，不是 1 颗');
+      await sleep(1600);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '还 1 袋',
+    async play(id) {
+      const hole = grid();
+      lend(hole);
+      say('还回去', '把借来的那 <b>1 袋</b>拿出来。1 袋里是 <b>25 颗</b>。');
+      await sleep(800);
+      if (cancelled(id)) return;
+      giveBack(hole);
+      await sleep(1100);
+      if (cancelled(id)) return;
+      label('还回去', GRID_X + PITCH * 10 + 20, GRID_Y + PITCH * 9 + 44);
+      setCount('2500 − <span class="blue">25</span>　100 和 1 都要乘 25');
+      await sleep(1400);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '2475',
+    async play(id) {
+      const hole = grid();
+      lend(hole);
+      giveBack(hole);
+      label('还回去', GRID_X + PITCH * 10 + 20, GRID_Y + PITCH * 9 + 44);
+      say('答案', '25 × 99 = 25 × (100 − 1) = 2500 − 25 = <b>2475</b>。括号里是减，拆开也用减。');
+      await sleep(600);
+      if (cancelled(id)) return;
+      setCount('25 × 99 = 2500 − 25 = <b>2475</b> <span class="ok">✓</span>');
+      await sleep(1400);
+      if (cancelled(id)) return;
+    }
+  },
+], { reset: resetVisuals });
+</script>
+</body>
+</html>
