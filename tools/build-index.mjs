@@ -21,8 +21,10 @@ const BOOK = 'https://smileyes.gitbook.io/smileyes-docs';
 
 // 六个单元，顺序就是学习顺序。name 必须和 docs/SUMMARY.md 里的「## 分组名」一模一样，
 // slug 是 GitBook 给这个分组生成的网址段（分组名的拼音）。todo 是还没写成课、先在地图上占位的母题。
+// course 是把整个单元串起来的系统课：file 在 docs/单元/ 下，demo 是动画文件名里的关键字。
 const UNITS = [
-  { no: '一', name: '画线段图', slug: 'hua-xian-duan-tu', pic: '两根条子比高矮', todo: ['归一'] },
+  { no: '一', name: '画线段图', slug: 'hua-xian-duan-tu', pic: '两根条子比高矮', todo: ['归一'],
+    course: { file: '画线段图系统课.md', demo: '一张图' } },
   { no: '二', name: '倒推与假设', slug: 'dao-tui-yu-jia-she', pic: '从结果倒着走，或先假设全是一种', todo: [] },
   { no: '三', name: '数清楚', slug: 'shu-qing-chu', pic: '画一条线数点和段，几个一组数有几组', todo: ['周期', '重叠', '枚举'] },
   { no: '四', name: '巧算', slug: 'qiao-suan', pic: '先看数再动笔，找能凑整的好朋友', todo: ['巧算', '巧填算符', '数字谜'] },
@@ -52,6 +54,7 @@ const PAGE_SLUG = {
   '认出母题.md': 'ren-chu-mu-ti',
   '大纲.md': 'da-gang',
   '单元/画线段图.md': 'hua-xian-duan-tu',
+  '单元/画线段图系统课.md': 'hua-xian-duan-tu-xi-tong-ke',
   '单元/倒推与假设.md': 'dao-tui-yu-jia-she',
   '单元/数清楚.md': 'shu-qing-chu',
   '单元/巧算.md': 'qiao-suan',
@@ -194,22 +197,30 @@ const motifs = MOTIFS.map((cfg) => {
 const units = UNITS.map((u) => ({
   ...u,
   href: urlOf(`单元/${u.name}.md`),
+  courseHref: u.course ? urlOf(`单元/${u.course.file}`) : null,
+  courseDemos: u.course ? animations.filter((a) => a.file.includes(u.course.demo)) : [],
   motifs: motifs.filter((m) => m.unit === u.name),
 }));
 
-// 「先看动画」按单元里的课序排，同一个动画挂在两道母题下只出现一次
+// 「先看动画」按单元排：系统课的动画在前，母题按课序在后；同一个动画只出现一次
 const orderedAnimations = [
-  ...new Set([...motifs.flatMap((m) => m.demos), ...animations]),
+  ...new Set([
+    ...units.flatMap((u) => [...u.courseDemos, ...u.motifs.flatMap((m) => m.demos)]),
+    ...animations,
+  ]),
 ];
 
 const unitSection = (u) => `
 <section class="unit">
-  <a class="unit-head" href="${esc(u.href)}">
+  <div class="unit-head">
     <span class="unit-no">第${u.no}单元</span>
     <h3>${esc(u.name)}</h3>
     <span class="unit-pic">${esc(u.pic)}</span>
-    <span class="unit-go">单元导读 →</span>
-  </a>
+    <span class="unit-links">
+      ${u.courseHref ? `<a class="unit-go" href="${esc(u.courseHref)}">系统课 →</a>` : ''}
+      <a class="unit-go" href="${esc(u.href)}">单元导读 →</a>
+    </span>
+  </div>
   <div class="map">
     ${u.motifs.map(tile).join('\n')}
     ${u.todo.length ? `<div class="tile todo"><div class="tile-main"><div class="tile-mark">还在写</div><p class="motto">${u.todo.map(esc).join('、')}</p></div></div>` : ''}
@@ -414,8 +425,9 @@ const html = `<!DOCTYPE html>
   }
   .unit-head h3 { font-size: 24px; color: var(--brand); }
   .unit-pic { font-size: 15px; color: var(--soft); }
-  .unit-go { margin-left: auto; font-size: 14px; font-weight: 800; color: var(--accent); }
-  .unit-head:hover .unit-go { text-decoration: underline; }
+  .unit-links { margin-left: auto; display: flex; gap: 16px; }
+  .unit-go { font-size: 14px; font-weight: 800; color: var(--accent); text-decoration: none; }
+  .unit-go:hover { text-decoration: underline; }
   .tile.todo {
     --ink: #8a96a3; --paper: #f3f5f7;
     min-height: 0;

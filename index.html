@@ -163,8 +163,9 @@
   }
   .unit-head h3 { font-size: 24px; color: var(--brand); }
   .unit-pic { font-size: 15px; color: var(--soft); }
-  .unit-go { margin-left: auto; font-size: 14px; font-weight: 800; color: var(--accent); }
-  .unit-head:hover .unit-go { text-decoration: underline; }
+  .unit-links { margin-left: auto; display: flex; gap: 16px; }
+  .unit-go { font-size: 14px; font-weight: 800; color: var(--accent); text-decoration: none; }
+  .unit-go:hover { text-decoration: underline; }
   .tile.todo {
     --ink: #8a96a3; --paper: #f3f5f7;
     min-height: 0;
@@ -227,6 +228,12 @@
   </div>
   <div class="shows">
     
+<a class="show" href="demos/%E4%B8%80%E5%BC%A0%E5%9B%BE%E4%BA%94%E7%A7%8D%E9%97%AE%E6%B3%95-%E7%94%BB%E7%BA%BF%E6%AE%B5%E5%9B%BE.html">
+  <span class="go">播放</span>
+  <strong>一张图，五种问法：第一单元总复习</strong>
+  <span>哥哥 42 颗、弟弟 14 颗。藏起不同的数，就是和差、和倍、差倍、移多补少、年龄五道题——答案都是 14，因为是同一张图。</span>
+</a>
+
 <a class="show" href="demos/%E5%A4%A7%E8%A1%A3%E8%A3%A4%E5%AD%90%E5%92%8C%E9%9E%8B-%E5%92%8C%E5%B7%AE%E9%97%AE%E9%A2%98.html">
   <span class="go">播放</span>
   <strong>大衣裤子和鞋：先捆成一包</strong>
@@ -300,12 +307,15 @@
   </div>
   
 <section class="unit">
-  <a class="unit-head" href="https://smileyes.gitbook.io/smileyes-docs/hua-xian-duan-tu/hua-xian-duan-tu">
+  <div class="unit-head">
     <span class="unit-no">第一单元</span>
     <h3>画线段图</h3>
     <span class="unit-pic">两根条子比高矮</span>
-    <span class="unit-go">单元导读 →</span>
-  </a>
+    <span class="unit-links">
+      <a class="unit-go" href="https://smileyes.gitbook.io/smileyes-docs/hua-xian-duan-tu/hua-xian-duan-tu-xi-tong-ke">系统课 →</a>
+      <a class="unit-go" href="https://smileyes.gitbook.io/smileyes-docs/hua-xian-duan-tu/hua-xian-duan-tu">单元导读 →</a>
+    </span>
+  </div>
   <div class="map">
     
 <article class="tile" style="--ink:#2f7a5b;--paper:#e8f6ee">
@@ -372,12 +382,15 @@
 </section>
 
 <section class="unit">
-  <a class="unit-head" href="https://smileyes.gitbook.io/smileyes-docs/dao-tui-yu-jia-she/dao-tui-yu-jia-she">
+  <div class="unit-head">
     <span class="unit-no">第二单元</span>
     <h3>倒推与假设</h3>
     <span class="unit-pic">从结果倒着走，或先假设全是一种</span>
-    <span class="unit-go">单元导读 →</span>
-  </a>
+    <span class="unit-links">
+      
+      <a class="unit-go" href="https://smileyes.gitbook.io/smileyes-docs/dao-tui-yu-jia-she/dao-tui-yu-jia-she">单元导读 →</a>
+    </span>
+  </div>
   <div class="map">
     
 <article class="tile" style="--ink:#be185d;--paper:#fce7f3">
@@ -420,12 +433,15 @@
 </section>
 
 <section class="unit">
-  <a class="unit-head" href="https://smileyes.gitbook.io/smileyes-docs/shu-qing-chu/shu-qing-chu">
+  <div class="unit-head">
     <span class="unit-no">第三单元</span>
     <h3>数清楚</h3>
     <span class="unit-pic">画一条线数点和段，几个一组数有几组</span>
-    <span class="unit-go">单元导读 →</span>
-  </a>
+    <span class="unit-links">
+      
+      <a class="unit-go" href="https://smileyes.gitbook.io/smileyes-docs/shu-qing-chu/shu-qing-chu">单元导读 →</a>
+    </span>
+  </div>
   <div class="map">
     
 <article class="tile" style="--ink:#3d8a4a;--paper:#e8f6ee">
@@ -468,12 +484,15 @@
 </section>
 
 <section class="unit">
-  <a class="unit-head" href="https://smileyes.gitbook.io/smileyes-docs/qiao-suan/qiao-suan">
+  <div class="unit-head">
     <span class="unit-no">第四单元</span>
     <h3>巧算</h3>
     <span class="unit-pic">先看数再动笔，找能凑整的好朋友</span>
-    <span class="unit-go">单元导读 →</span>
-  </a>
+    <span class="unit-links">
+      
+      <a class="unit-go" href="https://smileyes.gitbook.io/smileyes-docs/qiao-suan/qiao-suan">单元导读 →</a>
+    </span>
+  </div>
   <div class="map">
     
     <div class="tile todo"><div class="tile-main"><div class="tile-mark">还在写</div><p class="motto">巧算、巧填算符、数字谜</p></div></div>
@@ -481,12 +500,15 @@
 </section>
 
 <section class="unit">
-  <a class="unit-head" href="https://smileyes.gitbook.io/smileyes-docs/tu-xing/tu-xing">
+  <div class="unit-head">
     <span class="unit-no">第五单元</span>
     <h3>图形</h3>
     <span class="unit-pic">按顺序数，凹进去的边推出去</span>
-    <span class="unit-go">单元导读 →</span>
-  </a>
+    <span class="unit-links">
+      
+      <a class="unit-go" href="https://smileyes.gitbook.io/smileyes-docs/tu-xing/tu-xing">单元导读 →</a>
+    </span>
+  </div>
   <div class="map">
     
     <div class="tile todo"><div class="tile-main"><div class="tile-mark">还在写</div><p class="motto">数线段数角、巧求周长、一笔画</p></div></div>
@@ -494,12 +516,15 @@
 </section>
 
 <section class="unit">
-  <a class="unit-head" href="https://smileyes.gitbook.io/smileyes-docs/tui-li/tui-li">
+  <div class="unit-head">
     <span class="unit-no">第六单元</span>
     <h3>推理</h3>
     <span class="unit-pic">一样多的可以换，条件多了画表</span>
-    <span class="unit-go">单元导读 →</span>
-  </a>
+    <span class="unit-links">
+      
+      <a class="unit-go" href="https://smileyes.gitbook.io/smileyes-docs/tui-li/tui-li">单元导读 →</a>
+    </span>
+  </div>
   <div class="map">
     
 <article class="tile" style="--ink:#0f766e;--paper:#e6f7f4">
