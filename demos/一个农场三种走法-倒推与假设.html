@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>一个农场，三种走法 · 动态演示</title>
+<meta name="description" content="第二单元总复习。胡萝卜原来几根、兔子有几只、分萝卜对不对得上：还原、鸡兔同笼、盈亏三道题，都是先找一个算得出来的样子，差多少就一步步调回来。">
+<link rel="stylesheet" href="lib/anim.css?v=portrait">
+<style>
+  html, body { background: #07080a; }
+
+  .stage {
+    --d: 20px;
+    --gap: 6px;
+    --colgap: 18px;
+    --askTop: 92px;
+    --fieldTop: 150px;
+    --countTop: 400px;
+    --fs: 14px;
+  }
+  body.portrait .stage {
+    --d: 52px;
+    --gap: 16px;
+    --colgap: 34px;
+    --askTop: 300px;
+    --fieldTop: 520px;
+    --countTop: 1180px;
+    --fs: 30px;
+  }
+
+  .ask {
+    position: absolute;
+    left: 50%; top: var(--askTop);
+    transform: translateX(-50%);
+    width: 88%;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    text-align: center;
+    font-size: 15px; font-weight: 800; line-height: 1.5;
+    color: #e8eaed;
+  }
+  body.portrait .ask { font-size: 32px; gap: 18px; }
+  .ask:empty { display: none; }
+  .ask .no {
+    background: #ff8a3d; color: #1a1208;
+    border-radius: 999px; padding: 3px 12px;
+  }
+  body.portrait .ask .no { padding: 6px 24px; }
+  .ask.pop { animation: bump-center .45s cubic-bezier(.2, 1.6, .3, 1); }
+
+  .field {
+    position: absolute;
+    left: 0; right: 0; top: var(--fieldTop);
+    display: flex; flex-direction: column; align-items: center;
+    gap: calc(var(--gap) * 2.2);
+  }
+
+  .row {
+    display: flex; align-items: center; gap: var(--gap);
+  }
+  .row .tag-l {
+    width: calc(var(--d) * 3.4);
+    text-align: right;
+    margin-right: calc(var(--gap) * 1.5);
+    font-size: var(--fs); font-weight: 800; color: #e8c27a;
+    white-space: nowrap;
+  }
+
+  .cols {
+    display: flex; align-items: flex-end; gap: var(--colgap);
+  }
+  .col {
+    display: flex; flex-direction: column-reverse; align-items: center; gap: var(--gap);
+  }
+  .col .lab {
+    margin-top: calc(var(--gap) * 0.6);
+    font-size: var(--fs); font-weight: 800; color: #e8c27a;
+  }
+  .col .lab.rabbit { color: #ffb347; }
+
+  .pip {
+    width: var(--d); height: var(--d);
+    border-radius: 50%;
+    flex: none;
+  }
+  .pip.w { background: #e8eaed; }
+  .pip.g { background: #ffb347; box-shadow: 0 0 0 3px #ffb34755; }
+  .pip.b { background: #6ea8ff; }
+  .pip.n { background: #5ecf8a; }
+  .pip.h { border: 3px dashed #ff6b6b; background: transparent; box-sizing: border-box; }
+  .pip.pop { animation: squash .5s cubic-bezier(.2, 1.6, .3, 1); }
+
+  .pile {
+    display: flex; align-items: center; gap: var(--gap);
+    min-height: var(--d);
+  }
+  .pile .tag-l {
+    margin-right: calc(var(--gap) * 1.5);
+    font-size: var(--fs); font-weight: 800; color: #e8c27a;
+    white-space: nowrap;
+  }
+  .pile .tag-l.short { color: #ff6b6b; }
+
+  .count {
+    position: absolute;
+    left: 0; right: 0; top: var(--countTop);
+    text-align: center;
+    font-size: 22px; font-weight: 800; line-height: 1.5;
+    color: #ffb347;
+  }
+  body.portrait .count { font-size: 44px; }
+  .count b { color: #5ecf8a; }
+  .count .no { color: #ff6b6b; text-decoration: line-through; }
+  .count.pop { animation: bump .45s cubic-bezier(.2, 1.6, .3, 1); }
+
+  .recap {
+    position: absolute;
+    left: 50%; top: calc(var(--countTop) - 30px);
+    transform: translateX(-50%);
+    display: none;
+    grid-template-columns: auto auto;
+    gap: 4px 20px;
+    font-size: 16px; font-weight: 800;
+    white-space: nowrap;
+  }
+  body.portrait .recap { top: calc(var(--countTop) - 60px); font-size: 34px; gap: 18px 32px; }
+  .recap.on { display: grid; }
+  .recap .k { color: #e8c27a; text-align: right; }
+  .recap .v { color: #f4f6f8; }
+  .recap .v b { color: #5ecf8a; }
+  .recap .hide { visibility: hidden; }
+
+  @keyframes squash {
+    0% { transform: scale(1.4, .5); }
+    55% { transform: scale(.85, 1.2); }
+    100% { transform: scale(1, 1); }
+  }
+  @keyframes bump {
+    0% { transform: scale(.75); }
+    55% { transform: scale(1.12); }
+    100% { transform: scale(1); }
+  }
+  @keyframes bump-center {
+    0% { transform: translateX(-50%) scale(.75); }
+    55% { transform: translateX(-50%) scale(1.12); }
+    100% { transform: translateX(-50%) scale(1); }
+  }
+</style>
+</head>
+<body class="theme-dark">
+
+<h1>一个农场，三种走法：第二单元总复习</h1>
+<div class="problem">
+  农场里有鸡和兔，还有一筐胡萝卜。三个问题：胡萝卜原来几根？兔子有几只？分萝卜对不对得上？
+</div>
+
+<div class="stage-wrap">
+  <div class="stage" id="stage">
+    <div class="ask" id="ask"></div>
+    <div class="field" id="field"></div>
+    <div class="count" id="count"></div>
+    <div class="recap" id="recap"></div>
+  </div>
+</div>
+
+<script src="lib/anim.js"></script>
+<script>
+const { sleep, cancelled, say } = Anim;
+
+const LEFT = 4;
+const HEADS = 8;
+const FEET = 26;
+const EACH1 = 3;
+const EACH2 = 5;
+const OVER = 7;
+const SHORT = 3;
+const RABBITS = (FEET - HEADS * 2) / 2;
+const CARROTS = ((LEFT + 1) * 2 + 1) * 2;
+
+const field = document.getElementById('field');
+const ask = document.getElementById('ask');
+const countEl = document.getElementById('count');
+const recap = document.getElementById('recap');
+
+/* 一个点的写法：'w' 白、'g' 还回来的金色、'b' 翻倍复制的蓝色、'n' 新添的绿色、'h' 缺的红虚线。
+   末尾带 '*' 的这一步刚出现，弹一下。 */
+function dot(t) {
+  const fresh = t.endsWith('*');
+  return `<div class="pip ${t[0]}${fresh ? ' pop' : ''}"></div>`;
+}
+
+function rep(t, n) {
+  return Array.from({ length: n }, () => t);
+}
+
+/* rows：还原用，一行一串点，左边写这一行是什么 */
+function paintRows(rows) {
+  field.innerHTML = rows.map(([label, dots]) =>
+    `<div class="row"><span class="tag-l">${label}</span>${dots.map(dot).join('')}</div>`).join('');
+}
+
+/* cols：鸡兔和盈亏用，一列一只，点从下往上摞；pile 是桌上多出来或缺的那一排 */
+function paintCols(cols, labels, pile = null) {
+  const colHtml = cols.map((dots, i) => {
+    const lab = labels[i];
+    const cls = lab === '兔' ? 'lab rabbit' : 'lab';
+    return `<div class="col"><span class="${cls}">${lab}</span>${dots.map(dot).join('')}</div>`;
+  }).join('');
+  let pileHtml = '';
+  if (pile) {
+    const [label, dots, short] = pile;
+    pileHtml = `<div class="pile"><span class="tag-l${short ? ' short' : ''}">${label}</span>${dots.map(dot).join('')}</div>`;
+  }
+  field.innerHTML = `<div class="cols">${colHtml}</div>${pileHtml}`;
+}
+
+function bump(el) {
+  el.classList.remove('pop');
+  void el.offsetWidth;
+  el.classList.add('pop');
+}
+
+function setAsk(no, text) {
+  ask.innerHTML = `<span class="no">${no}</span><span>${text}</span>`;
+  bump(ask);
+}
+
+function setCount(html) {
+  countEl.innerHTML = html;
+  bump(countEl);
+}
+
+const RECAP = [
+  ['还原', `(${LEFT} + 1) × 2 = 10，(10 + 1) × 2 = <b>${CARROTS} 根</b>`],
+  ['鸡兔同笼', `${FEET - HEADS * 2} ÷ 2 = <b>${RABBITS} 只兔</b>`],
+  ['盈亏', `(${OVER} + ${SHORT}) ÷ (${EACH2} − ${EACH1}) = <b>${RABBITS} 只</b>`],
+  ['对一对', `${RABBITS} × ${EACH1} + ${OVER} = <b>${CARROTS} 根</b>`],
+];
+
+function showRecap(n) {
+  recap.innerHTML = RECAP.map(([k, v], i) => {
+    const hide = i < n ? '' : ' hide';
+    return `<span class="k${hide}">${k}</span><span class="v${hide}">${v}</span>`;
+  }).join('');
+  recap.classList.add('on');
+}
+
+function resetVisuals() {
+  field.innerHTML = '';
+  ask.innerHTML = '';
+  countEl.innerHTML = '';
+  countEl.classList.remove('pop');
+  recap.classList.remove('on');
+}
+
+const ASK1 = `兔子吃一筐胡萝卜，每天吃掉一半多 1 根，两天后剩 ${LEFT} 根。原来几根？`;
+const ASK2 = `鸡和兔一共 ${HEADS} 个头，${FEET} 只脚。兔有几只？`;
+const ASK3 = `胡萝卜分给兔子：每只 ${EACH1} 根，多 ${OVER} 根；每只 ${EACH2} 根，少 ${SHORT} 根。几只兔？`;
+
+Anim.run([
+  {
+    title: '最后剩 4 根',
+    async play(id) {
+      setAsk('第 1 问 · 还原', ASK1);
+      paintRows([['最后剩', rep('w', LEFT)]]);
+      say('倒着走', `题目从前往后讲，我们从<b>最后剩的 ${LEFT} 根</b>往回走。这是一个<b>算得出来的样子</b>。`);
+      await sleep(1300);
+      if (cancelled(id)) return;
+      setCount(`<span class="no">${LEFT} × 2 × 2 = 16</span>`);
+      say('倒着走', '只翻倍两次是 16，不对。每天还<b>多吃了 1 根</b>，那 1 根没还回来。');
+      await sleep(1500);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '先还 1，再翻倍',
+    async play(id) {
+      setAsk('第 1 问 · 还原', ASK1);
+      paintRows([['最后剩', [...rep('w', LEFT), 'g*']]]);
+      say('先还 1', '第二天多吃的 1 根，<b>先放回来</b>。现在这 5 根，才是正好一半。');
+      await sleep(1300);
+      if (cancelled(id)) return;
+      paintRows([['留下的一半', [...rep('w', LEFT), 'g']], ['吃掉的一半', rep('b*', LEFT + 1)]]);
+      setCount(`(${LEFT} + 1) × 2 = <b>10</b>`);
+      say('再翻倍', '吃掉的另一半和它一样多，再来一份。第二天吃之前是 <b>10 根</b>。');
+      await sleep(1500);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '再倒一步',
+    async play(id) {
+      setAsk('第 1 问 · 还原', ASK1);
+      paintRows([['第一天剩', [...rep('w', 10), 'g*']]]);
+      setCount('10 + 1 = 11');
+      say('再倒一步', '第一天也一样：先把多吃的 <b>1 根还回来</b>，11 根是一半。');
+      await sleep(1300);
+      if (cancelled(id)) return;
+      paintRows([['留下的一半', [...rep('w', 10), 'g']], ['吃掉的一半', rep('b*', 11)]]);
+      setCount(`(10 + 1) × 2 = <b>${CARROTS} 根</b>`);
+      say('还原', `原来有 <b>${CARROTS} 根</b>。每一步都是<b>先还 1，再翻倍</b>，最后一步最先撤回。`);
+      await sleep(1600);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '先当全是鸡',
+    async play(id) {
+      setAsk('第 2 问 · 鸡兔同笼', ASK2);
+      paintCols(rep(['w*', 'w*'], HEADS), rep('鸡', HEADS));
+      say('先假设', `这回没有「最后剩的」。那就<b>自己造一个算得出来的样子</b>：先当 ${HEADS} 只全是鸡。`);
+      await sleep(1300);
+      if (cancelled(id)) return;
+      setCount(`2 × ${HEADS} = ${HEADS * 2} 只脚，还差 ${FEET - HEADS * 2} 只`);
+      say('先假设', `全是鸡只有 ${HEADS * 2} 只脚，比 ${FEET} 只<b>少 ${FEET - HEADS * 2} 只</b>。差多少，就调多少。`);
+      await sleep(1500);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '两只两只添',
+    async play(id) {
+      setAsk('第 2 问 · 鸡兔同笼', ASK2);
+      const cols = rep(['w', 'w'], HEADS);
+      const labels = rep('鸡', HEADS);
+      paintCols(cols, labels);
+      say('一只只换', '把一只鸡换成兔，不是重新长 4 只脚，是<b>再添 2 只</b>。');
+      await sleep(1000);
+      if (cancelled(id)) return;
+      for (let i = 0; i < RABBITS; i++) {
+        cols[i] = ['w', 'w', 'n*', 'n*'];
+        labels[i] = '兔';
+        paintCols(cols, labels);
+        setCount(`${HEADS * 2 + i * 2} → ${HEADS * 2 + (i + 1) * 2} 只脚`);
+        await sleep(600);
+        if (cancelled(id)) return;
+        cols[i] = ['w', 'w', 'n', 'n'];
+      }
+      paintCols(cols, labels);
+      setCount(`${FEET - HEADS * 2} ÷ 2 = <b>${RABBITS} 只兔</b>`);
+      say('鸡兔同笼', `添了 ${RABBITS} 次就够 ${FEET} 只脚。<b>总共差 10，每只差 2</b>，兔有 ${RABBITS} 只。`);
+      await sleep(1600);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '先每只给 3 根',
+    async play(id) {
+      setAsk('第 3 问 · 盈亏', ASK3);
+      paintCols(rep(rep('w*', EACH1), RABBITS), rep('?', RABBITS), [`多 ${OVER}`, rep('w*', OVER)]);
+      say('两个样子', `题目直接给了一个算得出来的样子：每只 ${EACH1} 根，桌上<b>还多 ${OVER} 根</b>。兔有几只先不管。`);
+      await sleep(1600);
+      if (cancelled(id)) return;
+      say('两个样子', `要改成每只 ${EACH2} 根，每只都要<b>再添 2 根</b>。桌上的 ${OVER} 根够不够？`);
+      await sleep(1300);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '每只再添 2 根',
+    async play(id) {
+      setAsk('第 3 问 · 盈亏', ASK3);
+      const cols = rep(rep('w', EACH1), RABBITS);
+      const labels = rep('?', RABBITS);
+      let pile = OVER;
+      let missing = 0;
+      paintCols(cols, labels, [`多 ${pile}`, rep('w', pile)]);
+      await sleep(700);
+      if (cancelled(id)) return;
+      for (let i = 0; i < RABBITS; i++) {
+        const fromPile = Math.min(2, pile);
+        pile -= fromPile;
+        missing += 2 - fromPile;
+        cols[i] = [...rep('w', EACH1), ...rep('n*', fromPile), ...rep('h*', 2 - fromPile)];
+        labels[i] = '兔';
+        const pileRow = pile > 0 ? [`多 ${pile}`, rep('w', pile)] : [`少 ${missing}`, [], true];
+        paintCols(cols, labels, pileRow);
+        if (pile === 0 && missing > 0) say('不够了', `桌上的 ${OVER} 根用完了，还<b>缺 ${missing} 根</b>（红圈）。`);
+        await sleep(700);
+        if (cancelled(id)) return;
+        cols[i] = cols[i].map((t) => t[0]);
+      }
+      paintCols(cols, labels, [`少 ${SHORT}`, [], true]);
+      setCount(`多的 ${OVER} + 少的 ${SHORT} = 10 根<br>10 ÷ 2 = <b>${RABBITS} 只</b>`);
+      say('盈亏', `每只多添 2 根，一共多要了 <b>${OVER} + ${SHORT} = 10 根</b>。<b>总共差 10，每只差 2</b>，又是 ${RABBITS} 只。`);
+      await sleep(1700);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '三道题对上了',
+    async play(id) {
+      setAsk('一个农场', `${RABBITS} 只兔，${CARROTS} 根胡萝卜`);
+      paintCols(rep(rep('w', EACH1), RABBITS), rep('兔', RABBITS), [`多 ${OVER}`, rep('w', OVER)]);
+      say('对一对', '把三道题的答案排一排——');
+      for (let n = 1; n <= RECAP.length; n++) {
+        showRecap(n);
+        await sleep(500);
+        if (cancelled(id)) return;
+      }
+      say('答案', `胡萝卜 <b>${CARROTS} 根</b>，兔子 <b>${RABBITS} 只</b>，三道题对上了。都是<b>先找一个算得出来的样子，差多少，一步一步调回来</b>。`);
+      await sleep(1800);
+      if (cancelled(id)) return;
+    }
+  },
+], { reset: resetVisuals });
+</script>
+</body>
+</html>

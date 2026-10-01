@@ -25,7 +25,8 @@ const BOOK = 'https://smileyes.gitbook.io/smileyes-docs';
 const UNITS = [
   { no: '一', name: '画线段图', slug: 'hua-xian-duan-tu', pic: '两根条子比高矮', todo: [],
     course: { file: '画线段图系统课.md', demo: '一张图' } },
-  { no: '二', name: '倒推与假设', slug: 'dao-tui-yu-jia-she', pic: '从结果倒着走，或先假设全是一种', todo: [] },
+  { no: '二', name: '倒推与假设', slug: 'dao-tui-yu-jia-she', pic: '从结果倒着走，或先假设全是一种', todo: [],
+    course: { file: '倒推与假设系统课.md', demo: '农场' } },
   { no: '三', name: '数清楚', slug: 'shu-qing-chu', pic: '画一条线数点和段，几个一组数有几组', todo: [] },
   { no: '四', name: '巧算', slug: 'qiao-suan', pic: '先看数再动笔，找能凑整的好朋友', todo: [] },
   { no: '五', name: '图形', slug: 'tu-xing', pic: '按顺序数，凹进去的边推出去', todo: [] },
@@ -77,6 +78,7 @@ const PAGE_SLUG = {
   '单元/画线段图.md': 'hua-xian-duan-tu',
   '单元/画线段图系统课.md': 'hua-xian-duan-tu-xi-tong-ke',
   '单元/倒推与假设.md': 'dao-tui-yu-jia-she',
+  '单元/倒推与假设系统课.md': 'dao-tui-yu-jia-she-xi-tong-ke',
   '单元/数清楚.md': 'shu-qing-chu',
   '单元/巧算.md': 'qiao-suan',
   '单元/图形.md': 'tu-xing',
