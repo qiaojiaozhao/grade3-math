@@ -36,6 +36,14 @@ const UNITS = [
 // 奥数拔高系列：独立于六单元，跟着学而思三年级秋季的课走。课表在 home 页里，
 // 讲次页是 docs/拔高/第N讲.md（网址段 di-N-jiang，不用进 PAGE_SLUG），动画是 demos/拔高第N讲-主题.html。
 const BAGAO = { name: '奥数拔高', slug: 'ao-shu-ba-gao', home: '拔高/奥数拔高.md' };
+// 专题：跨几道母题讲一根骨头的长文章，不进单元课序。file 在 docs/ 下，demo 是动画文件名里的关键字。
+const ZHUANTI = {
+  name: '专题', slug: 'zhuan-ti',
+  items: [
+    { file: '专题/骨头和衣服.md', name: '骨头搞清楚，衣服随便换', mark: '和差 · 差倍 · 和倍', ink: '#7c2d12', paper: '#fde8d7', demo: ['骨头'] },
+  ],
+};
+
 const BAGAO_INK = [
   ['#b45309', '#fff6d8'], ['#0f766e', '#ccfbf1'], ['#1d4ed8', '#dbeafe'],
   ['#be185d', '#fce7f3'], ['#6d28d9', '#ede9fe'], ['#c2410c', '#ffedd5'],
@@ -73,6 +81,7 @@ const MOTIFS = [
 const PAGE_SLUG = {
   'README.md': '',
   '拔高/奥数拔高.md': 'ao-shu-ba-gao',
+  '专题/骨头和衣服.md': 'gu-tou-he-yi-fu',
   '认出母题.md': 'ren-chu-mu-ti',
   '大纲.md': 'da-gang',
   '单元/画线段图.md': 'hua-xian-duan-tu',
@@ -136,7 +145,7 @@ const PAGE_SLUG = {
 
 /** 读 SUMMARY.md，算出每个 docs 页面在 GitBook 上的网址 */
 function bookUrls() {
-  const groupSlug = Object.fromEntries([...UNITS, BAGAO].map((u) => [u.name, u.slug]));
+  const groupSlug = Object.fromEntries([...UNITS, ZHUANTI, BAGAO].map((u) => [u.name, u.slug]));
   const slugOf = (file) => {
     if (file in PAGE_SLUG) return PAGE_SLUG[file];
     const lecture = file.match(/^拔高\/第(\d+)讲\.md$/);
@@ -276,6 +285,17 @@ const lectures = fs
       demos: animations.filter((a) => a.file.startsWith(`拔高第${no}讲-`)),
     };
   });
+const topics = ZHUANTI.items.map((t) => {
+  if (!fs.existsSync(path.join(ROOT, 'docs', t.file))) fail(`专题 ${t.file} 找不到`);
+  return {
+    ...t,
+    motto: mdMotto(fs.readFileSync(path.join(ROOT, 'docs', t.file), 'utf8')),
+    href: urlOf(t.file),
+    problems: [],
+    demos: animations.filter((a) => t.demo.some((k) => a.file.includes(k))),
+  };
+});
+
 const bagaoHref = urlOf(BAGAO.home);
 const upcoming = lectures.filter((l) => !l.done);
 
@@ -283,10 +303,23 @@ const upcoming = lectures.filter((l) => !l.done);
 const orderedAnimations = [
   ...new Set([
     ...units.flatMap((u) => [...u.courseDemos, ...u.motifs.flatMap((m) => m.demos)]),
+    ...topics.flatMap((t) => t.demos),
     ...lectures.flatMap((l) => l.demos || []),
     ...animations,
   ]),
 ];
+
+const topicSection = () => `
+<section class="unit">
+  <div class="unit-head">
+    <span class="unit-no">专题</span>
+    <h3>一根骨头讲透</h3>
+    <span class="unit-pic">跨几道母题，衣服换来换去，骨头是同一根</span>
+  </div>
+  <div class="map">
+    ${topics.map(tile).join('\n')}
+  </div>
+</section>`;
 
 const bagaoSection = () => `
 <section class="unit">
@@ -590,6 +623,12 @@ const html = `<!DOCTYPE html>
     <p>每个单元是一种画法。点单元名看这一单元怎么学，点卡片看母题，点小标签看例题或动画。</p>
   </div>
   ${units.map(unitSection).join('\n')}
+
+  <div class="sec">
+    <h2>专题</h2>
+    <p>几道母题学完，把它们放在一起看，认出同一根骨头。</p>
+  </div>
+  ${topicSection()}
 
   <div class="sec">
     <h2>往上走一格</h2>

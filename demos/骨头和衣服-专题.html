@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>骨头搞清楚，衣服随便换 · 动态演示</title>
+<meta name="description" content="大衣裤子和鞋、插花、父子年龄，三道题穿的衣服不一样，骨头是同一根：先找一样大的那一块，再数题目给的数里有几块。">
+<link rel="stylesheet" href="lib/anim.css?v=portrait">
+<style>
+  html, body { background: #07080a; }
+
+  .stage {
+    --k: .56;
+    --askTop: 92px;
+    --boardTop: 190px;
+    --rowH: 34px;
+    --rowGap: 26px;
+    --labW: 110px;
+    --fs: 13px;
+    --countTop: 395px;
+  }
+  body.portrait .stage {
+    --k: 1;
+    --askTop: 290px;
+    --boardTop: 640px;
+    --rowH: 84px;
+    --rowGap: 64px;
+    --labW: 200px;
+    --fs: 28px;
+    --countTop: 1170px;
+  }
+
+  .ask {
+    position: absolute;
+    left: 50%; top: var(--askTop);
+    transform: translateX(-50%);
+    width: 88%;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    text-align: center;
+    font-size: 15px; font-weight: 800; line-height: 1.5;
+    color: #e8eaed;
+  }
+  body.portrait .ask { font-size: 32px; gap: 18px; }
+  .ask:empty { display: none; }
+  .ask .no {
+    background: #ff8a3d; color: #1a1208;
+    border-radius: 999px; padding: 3px 12px;
+  }
+  body.portrait .ask .no { padding: 6px 24px; }
+  .ask.pop { animation: bump-center .45s cubic-bezier(.2, 1.6, .3, 1); }
+
+  .board {
+    position: absolute;
+    left: 50%; top: var(--boardTop);
+    width: calc(var(--labW) + 24px + 740px * var(--k));
+    transform: translateX(-50%);
+  }
+  .lane {
+    position: relative;
+    height: var(--rowH);
+    margin-bottom: var(--rowGap);
+  }
+  .lane .who {
+    position: absolute;
+    left: 0; top: 0;
+    width: var(--labW); height: var(--rowH);
+    display: flex; flex-direction: column; align-items: flex-end; justify-content: center;
+    font-size: var(--fs); font-weight: 800; color: #e8c27a;
+    line-height: 1.15;
+    white-space: nowrap;
+  }
+  .lane .who small { color: #f4f6f8; font-size: calc(var(--fs) * 1.15); }
+  .track {
+    position: absolute;
+    left: calc(var(--labW) + 24px); top: 0;
+    height: var(--rowH);
+  }
+
+  .seg {
+    position: absolute;
+    top: 0; height: var(--rowH);
+    display: flex; align-items: center; justify-content: center;
+    font-size: var(--fs); font-weight: 800;
+    color: #1a1208;
+    white-space: nowrap;
+    overflow: hidden;
+    border-radius: 6px;
+    box-sizing: border-box;
+    transition: opacity .4s;
+  }
+  .seg.a { background: #6ea8ff; }
+  .seg.b { background: #c084fc; }
+  .seg.x { background: #ff8a3d; }
+  .seg.n { background: #5ecf8a; }
+  .seg.part { border-left: 3px dashed #1a1208aa; }
+  .seg.ghost { background: transparent; border: 3px dashed #ff8a3d88; color: #ff8a3d; }
+  .seg.short { background: repeating-linear-gradient(135deg, #ff6b6b33 0 10px, transparent 10px 20px); border: 3px dashed #ff6b6b; color: #ff6b6b; }
+  .seg.grey { background: #3a4048; color: #9aa3ad; }
+  .seg.note { background: transparent; color: #ff6b6b; justify-content: flex-start; overflow: visible; }
+  .seg.pop { animation: squash .5s cubic-bezier(.2, 1.6, .3, 1); }
+
+  .vline {
+    position: absolute;
+    top: calc(var(--rowH) * -0.7);
+    height: calc(var(--rowH) * 2.9 + var(--rowGap));
+    border-left: 3px dashed #ffb347;
+    z-index: 3;
+  }
+  .vline span {
+    position: absolute;
+    left: 8px; top: calc(var(--fs) * -1.4);
+    font-size: var(--fs); font-weight: 800; color: #ffb347;
+    white-space: nowrap;
+  }
+
+  .count {
+    position: absolute;
+    left: 0; right: 0; top: var(--countTop);
+    text-align: center;
+    font-size: 21px; font-weight: 800; line-height: 1.55;
+    color: #ffb347;
+  }
+  body.portrait .count { font-size: 42px; }
+  .count b { color: #5ecf8a; }
+  .count .no { color: #ff6b6b; text-decoration: line-through; }
+  .count.pop { animation: bump .45s cubic-bezier(.2, 1.6, .3, 1); }
+
+  .recap {
+    position: absolute;
+    left: 50%; top: calc(var(--countTop) - 20px);
+    transform: translateX(-50%);
+    display: none;
+    grid-template-columns: auto auto;
+    gap: 4px 20px;
+    font-size: 16px; font-weight: 800;
+    white-space: nowrap;
+  }
+  body.portrait .recap { top: calc(var(--countTop) - 40px); font-size: 34px; gap: 18px 30px; }
+  .recap.on { display: grid; }
+  .recap .k { color: #e8c27a; text-align: right; }
+  .recap .v { color: #f4f6f8; }
+  .recap .v b { color: #5ecf8a; }
+  .recap .hide { visibility: hidden; }
+
+  @keyframes squash {
+    0% { transform: scale(1.15, .6); }
+    55% { transform: scale(.95, 1.12); }
+    100% { transform: scale(1, 1); }
+  }
+  @keyframes bump {
+    0% { transform: scale(.75); }
+    55% { transform: scale(1.12); }
+    100% { transform: scale(1); }
+  }
+  @keyframes bump-center {
+    0% { transform: translateX(-50%) scale(.75); }
+    55% { transform: translateX(-50%) scale(1.12); }
+    100% { transform: translateX(-50%) scale(1); }
+  }
+</style>
+</head>
+<body class="theme-dark">
+
+<h1>骨头搞清楚，衣服随便换</h1>
+<div class="problem">
+  三道题：买衣服、插花、父子年龄。衣服不一样，骨头是同一根：<b>先找一样大的那一块，再数题目给的数里有几块。</b>
+</div>
+
+<div class="stage-wrap">
+  <div class="stage" id="stage">
+    <div class="ask" id="ask"></div>
+    <div class="board" id="board"></div>
+    <div class="count" id="count"></div>
+    <div class="recap" id="recap"></div>
+  </div>
+</div>
+
+<script src="lib/anim.js"></script>
+<script>
+const { sleep, cancelled, say } = Anim;
+
+/* 三道题的数 */
+const TOTAL = 420, PACK_OVER = 220, COAT_OVER = 80;
+const SHOE = (TOTAL - PACK_OVER) / 2;
+const PACK = SHOE + PACK_OVER;
+const PANTS = (PACK - COAT_OVER) / 2;
+const COAT = PANTS + COAT_OVER;
+
+const EACH_A = 6, SHORT_A = 14, EACH_B = 4, SHORT_B = 2;
+const VASES = (SHORT_A - SHORT_B) / (EACH_A - EACH_B);
+const ROSES = VASES * EACH_A - SHORT_A;
+
+const AGE_SUM = 52, BACK = 8, TIMES = 5;
+const SON_THEN = (AGE_SUM - BACK * 2) / (TIMES + 1);
+const SON = SON_THEN + BACK;
+const DAD = AGE_SUM - SON;
+
+const board = document.getElementById('board');
+const ask = document.getElementById('ask');
+const countEl = document.getElementById('count');
+const recap = document.getElementById('recap');
+
+/* lanes：[{ who, segs: [[起点, 宽, 样式, 字]] }]，起点和宽都按竖版像素写，横版乘 --k。
+   line：[x, 字] 画一条竖虚线 */
+function paint(lanes, scale, line = null) {
+  const px = (v) => `calc(${v * scale}px * var(--k))`;
+  board.innerHTML = lanes.map(({ who, segs }, i) => {
+    const segHtml = segs.map(([x, w, cls, text = '']) =>
+      `<div class="seg ${cls}" style="left:${px(x)};width:${px(w)}">${text}</div>`).join('');
+    const lineHtml = line && i === 0
+      ? `<div class="vline" style="left:${px(line[0])}"><span>${line[1]}</span></div>` : '';
+    return `<div class="lane"><div class="who">${who}</div><div class="track">${segHtml}${lineHtml}</div></div>`;
+  }).join('');
+}
+
+function bump(el) {
+  el.classList.remove('pop');
+  void el.offsetWidth;
+  el.classList.add('pop');
+}
+
+function setAsk(no, text) {
+  ask.innerHTML = `<span class="no">${no}</span><span>${text}</span>`;
+  bump(ask);
+}
+
+function setCount(html) {
+  countEl.innerHTML = html;
+  bump(countEl);
+}
+
+const S1 = 2;
+const S2 = 20;
+const S3 = 18;
+
+const ASK1 = `${TOTAL} 元买大衣、裤子和鞋。大衣比裤子贵 ${COAT_OVER} 元，大衣和裤子一共比鞋贵 ${PACK_OVER} 元。`;
+const ASK2 = `每瓶插 ${EACH_A} 朵，缺 ${SHORT_A} 朵；每瓶插 ${EACH_B} 朵，缺 ${SHORT_B} 朵。几个花瓶，几朵月季？`;
+const ASK3 = `父子今年年龄和是 ${AGE_SUM} 岁。${BACK} 年前，爸爸的年龄是儿子的 ${TIMES} 倍。两人今年各几岁？`;
+
+function vaseLanes(withBlocks) {
+  const a = [[0, ROSES, 'a', '手里的月季'], [ROSES, SHORT_A, 'short', `缺 ${SHORT_A}`]];
+  if (withBlocks) {
+    a.length = 1;
+    a.push([ROSES, SHORT_B, 'short']);
+    for (let i = 0; i < VASES; i++) {
+      a.push([ROSES + SHORT_B + i * 2, 2, 'x part' + (withBlocks === 'pop' ? ' pop' : ''), '2']);
+    }
+  }
+  return [
+    { who: `每瓶 ${EACH_A} 朵`, segs: a },
+    { who: `每瓶 ${EACH_B} 朵`, segs: [[0, ROSES, 'b', '手里的月季'], [ROSES, SHORT_B, 'short'], [ROSES + SHORT_B + 0.6, 6, 'note', `缺 ${SHORT_B}`]] },
+  ];
+}
+
+/* now 今年 / back 倒回去的 8 年变灰 / then 8 年前切成块 / answer 再长回 8 年 */
+function ageLanes(mode) {
+  if (mode === 'now') {
+    return [
+      { who: '爸爸', segs: [[0, DAD, 'a', '']] },
+      { who: '儿子', segs: [[0, SON, 'b', '']] },
+    ];
+  }
+  if (mode === 'back') {
+    return [
+      { who: '爸爸', segs: [[0, DAD - BACK, 'a', ''], [DAD - BACK, BACK, 'grey pop', `−${BACK}`]] },
+      { who: '儿子', segs: [[0, SON_THEN, 'b', ''], [SON_THEN, BACK, 'grey pop', `−${BACK}`]] },
+    ];
+  }
+  const blocks = Array.from({ length: TIMES }, (_, i) => [i * SON_THEN, SON_THEN, 'a part', `${i + 2}`]);
+  if (mode === 'then') {
+    return [
+      { who: `${BACK} 年前的爸爸`, segs: blocks },
+      { who: `${BACK} 年前的儿子`, segs: [[0, SON_THEN, 'b', '1']] },
+    ];
+  }
+  return [
+    { who: `爸爸<small>${DAD}</small>`, segs: [...blocks, [DAD - BACK, BACK, 'n', `+${BACK}`]] },
+    { who: `儿子<small>${SON}</small>`, segs: [[0, SON_THEN, 'b', '1'], [SON_THEN, BACK, 'n', `+${BACK}`]] },
+  ];
+}
+
+const RECAP = [
+  ['和差', `(${TOTAL} − ${PACK_OVER}) ÷ 2 = <b>${SHOE}</b>，一块是一双鞋`],
+  ['插花', `(${SHORT_A} − ${SHORT_B}) ÷ 2 = <b>${VASES}</b>，一块是每瓶差的 2 朵`],
+  ['和倍', `(${AGE_SUM} − ${BACK} × 2) ÷ 6 = <b>${SON_THEN}</b>，一块是那年的儿子`],
+];
+
+function showRecap(n) {
+  recap.innerHTML = RECAP.map(([k, v], i) => {
+    const hide = i < n ? '' : ' hide';
+    return `<span class="k${hide}">${k}</span><span class="v${hide}">${v}</span>`;
+  }).join('');
+  recap.classList.add('on');
+}
+
+function resetVisuals() {
+  board.innerHTML = '';
+  ask.innerHTML = '';
+  countEl.innerHTML = '';
+  countEl.classList.remove('pop');
+  recap.classList.remove('on');
+}
+
+Anim.run([
+  {
+    title: '和差 · 多出来一截',
+    async play(id) {
+      setAsk('和差 · 大衣裤子和鞋', ASK1);
+      paint([
+        { who: '大衣+裤子', segs: [[0, PACK, 'a', '捆成一包']] },
+        { who: '鞋', segs: [[0, SHOE, 'b', '鞋']] },
+      ], S1);
+      say('先看', '大衣和裤子先<b>捆成一包</b>，和鞋比高矮。一包比鞋长出来一截。');
+      await sleep(1300);
+      if (cancelled(id)) return;
+      paint([
+        { who: '大衣+裤子', segs: [[0, SHOE, 'a', ''], [SHOE, PACK_OVER, 'x pop', `多出来的 ${PACK_OVER}`]] },
+        { who: '鞋', segs: [[0, SHOE, 'b', '鞋']] },
+      ], S1);
+      say('先看', `长出来的这一截就是 <b>${PACK_OVER} 元</b>。它<b>不是鞋的钱</b>，是一包比鞋多的。`);
+      await sleep(1500);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '和差 · 剩下两双鞋',
+    async play(id) {
+      setAsk('和差 · 大衣裤子和鞋', ASK1);
+      paint([
+        { who: '大衣+裤子', segs: [[0, SHOE, 'a', ''], [SHOE, PACK_OVER, 'ghost', '拿掉']] },
+        { who: '鞋', segs: [[0, SHOE, 'b', '鞋']] },
+      ], S1);
+      setCount(`${TOTAL} − ${PACK_OVER} = 200`);
+      say('拿掉', `从总价里把多出来的 ${PACK_OVER} 拿掉，剩下 200 元。`);
+      await sleep(1300);
+      if (cancelled(id)) return;
+      paint([
+        { who: '大衣+裤子', segs: [[0, SHOE, 'b pop', '一双鞋'], [SHOE, PACK_OVER, 'ghost', '拿掉']] },
+        { who: '鞋', segs: [[0, SHOE, 'b pop', '一双鞋']] },
+      ], S1);
+      setCount(`200 是 2 块一样大的：200 ÷ 2 = <b>${SHOE}</b>`);
+      say('一样大的块', `剩下两段<b>一样长</b>，200 元正好是<b>两双鞋</b>的钱。鞋 ${SHOE} 元，一包 ${SHOE} + ${PACK_OVER} = ${PACK} 元。`);
+      await sleep(1700);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '和差 · 解开一包',
+    async play(id) {
+      setAsk('和差 · 大衣裤子和鞋', ASK1);
+      paint([
+        { who: '大衣', segs: [[0, PANTS, 'a', ''], [PANTS, COAT_OVER, 'x pop', `多 ${COAT_OVER}`]] },
+        { who: '裤子', segs: [[0, PANTS, 'a', '']] },
+      ], S1);
+      setCount(`(${PACK} − ${COAT_OVER}) ÷ 2 = ${PANTS}`);
+      say('再来一次', `解开一包，大衣比裤子贵 ${COAT_OVER}。还是那一招：拿掉多的，剩下两块一样大。`);
+      await sleep(1500);
+      if (cancelled(id)) return;
+      paint([
+        { who: `大衣<small>${COAT}</small>`, segs: [[0, PANTS, 'a', ''], [PANTS, COAT_OVER, 'x', `多 ${COAT_OVER}`]] },
+        { who: `裤子<small>${PANTS}</small>`, segs: [[0, PANTS, 'a', '']] },
+        { who: `鞋<small>${SHOE}</small>`, segs: [[0, SHOE, 'b', '']] },
+      ], S1);
+      setCount(`大衣 <b>${COAT}</b>　裤子 <b>${PANTS}</b>　鞋 <b>${SHOE}</b>`);
+      say('和差', `大衣 <b>${COAT} 元</b>，裤子 <b>${PANTS} 元</b>，鞋 <b>${SHOE} 元</b>。一共 ${TOTAL} ✓`);
+      await sleep(1600);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '插花 · 两种插法',
+    async play(id) {
+      setAsk('差倍的骨头 · 插花', ASK2);
+      paint(vaseLanes(false), S2, [ROSES, '手里的月季到这里']);
+      say('两根条子', `整根条子是<b>要插的花</b>：上面每瓶 ${EACH_A} 朵，下面每瓶 ${EACH_B} 朵。黄线是<b>手里的月季</b>，两次一样多，超出黄线的就是缺的。`);
+      await sleep(1700);
+      if (cancelled(id)) return;
+      say('两根条子', `插 ${EACH_A} 朵超出黄线 ${SHORT_A}，插 ${EACH_B} 朵只超出 ${SHORT_B}。上面那根<b>长出来多少</b>？`);
+      await sleep(1400);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '插花 · 长出来的那一截',
+    async play(id) {
+      setAsk('差倍的骨头 · 插花', ASK2);
+      paint(vaseLanes(false), S2, [ROSES, '手里的月季到这里']);
+      setCount(`${SHORT_A} − ${SHORT_B} = 12`);
+      say('差出来', `上面比下面长出 ${SHORT_A} − ${SHORT_B} = <b>12 朵</b>。这一截是每个花瓶<b>多插的 2 朵</b>摞起来的。`);
+      await sleep(1500);
+      if (cancelled(id)) return;
+      paint(vaseLanes('pop'), S2, [ROSES, '手里的月季到这里']);
+      await sleep(900);
+      if (cancelled(id)) return;
+      paint(vaseLanes(true), S2, [ROSES, '手里的月季到这里']);
+      setCount(`12 ÷ 2 = <b>${VASES} 个花瓶</b><br>${VASES} × ${EACH_A} − ${SHORT_A} = <b>${ROSES} 朵</b>`);
+      say('插花', `12 朵切成一块一块的 2 朵，有 <b>${VASES} 块</b>，就是 ${VASES} 个花瓶。月季 ${ROSES} 朵。两次都是缺，所以是<b>相减</b>。`);
+      await sleep(1800);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '和倍 · 一起倒回 8 年',
+    async play(id) {
+      setAsk('和倍 · 父子年龄', ASK3);
+      paint(ageLanes('now'), S3);
+      setCount(`今年一共 ${AGE_SUM} 岁`);
+      say('先对齐', `「${TIMES} 倍」说的是 ${BACK} 年前，和也要倒回 ${BACK} 年前，<b>两个人都要倒</b>。`);
+      await sleep(1400);
+      if (cancelled(id)) return;
+      paint(ageLanes('back'), S3);
+      setCount(`<span class="no">${AGE_SUM} − ${BACK}</span>　${AGE_SUM} − ${BACK} × 2 = 36`);
+      say('先对齐', `爸爸少 ${BACK} 岁，儿子也少 ${BACK} 岁，和少了 <b>2 个 ${BACK}</b>，是 36。只减一个 ${BACK}，44 ÷ 6 除不尽。`);
+      await sleep(1800);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '和倍 · 那一年是 6 块',
+    async play(id) {
+      setAsk('和倍 · 父子年龄', ASK3);
+      paint(ageLanes('then'), S3);
+      setCount(`36 ÷ (${TIMES} + 1) = ${SON_THEN}`);
+      say('数块', `${BACK} 年前，儿子 1 块，爸爸 ${TIMES} 块，一共 <b>${TIMES + 1} 块</b>。一块是 ${SON_THEN} 岁。`);
+      await sleep(1600);
+      if (cancelled(id)) return;
+      paint(ageLanes('answer'), S3);
+      setCount(`儿子 ${SON_THEN} + ${BACK} = <b>${SON}</b>　爸爸 ${AGE_SUM} − ${SON} = <b>${DAD}</b>`);
+      say('和倍', `再一起长回 ${BACK} 年：儿子今年 <b>${SON} 岁</b>，爸爸 <b>${DAD} 岁</b>。验：${BACK} 年前 ${DAD - BACK} = ${SON_THEN} × ${TIMES} ✓`);
+      await sleep(1800);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '一根骨头',
+    async play(id) {
+      setAsk('三件衣服，一根骨头', '先找一样大的那一块，再数题目给的数里有几块');
+      paint(ageLanes('answer'), S3);
+      say('对一对', '三道题排在一起——');
+      for (let n = 1; n <= RECAP.length; n++) {
+        showRecap(n);
+        await sleep(600);
+        if (cancelled(id)) return;
+      }
+      say('答案', `大衣 ${COAT}、裤子 ${PANTS}、鞋 ${SHOE}；${VASES} 个花瓶 ${ROSES} 朵；儿子 ${SON} 岁、爸爸 ${DAD} 岁。都是<b>先找一样大的那一块</b>。`);
+      await sleep(1900);
+      if (cancelled(id)) return;
+    }
+  },
+], { reset: resetVisuals });
+</script>
+</body>
+</html>
