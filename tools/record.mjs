@@ -30,6 +30,7 @@ if (!fs.existsSync(htmlPath)) {
 const W = parseInt(process.argv[3] || '1080', 10);
 const H = parseInt(process.argv[4] || '1920', 10);
 const outPath = htmlPath.replace(/\.html$/, '.mp4');
+const BGM = path.join(ROOT, 'demos', 'assets', 'bgm.m4a');
 
 const RECORD_CHROME = `
   html, body { background: #07080a !important; }
@@ -85,6 +86,7 @@ try {
 
   // 结尾多留 2 秒，别让最后一句话一闪而过
   await page.waitForTimeout(2000);
+  const clipSec = (Date.now() - tPage) / 1000 - leadSec;
 
   await context.close();
   await browser.close();
@@ -97,10 +99,20 @@ try {
   const webm = fs.readdirSync(tmpDir).find((f) => f.endsWith('.webm'));
   if (!webm) throw new Error('没有生成录像文件');
 
+  // 背景乐循环铺满全片，压低音量，首尾淡入淡出；没有 bgm 文件就出无声视频
+  const music = fs.existsSync(BGM)
+    ? [
+        '-stream_loop', '-1', '-i', BGM,
+        '-map', '0:v', '-map', '1:a',
+        '-af', `volume=0.35,afade=t=in:d=1.5,afade=t=out:st=${Math.max(0, clipSec - 2.5).toFixed(2)}:d=2.5`,
+        '-c:a', 'aac', '-b:a', '128k', '-shortest',
+      ]
+    : [];
   execFileSync('ffmpeg', [
     '-y', '-v', 'error',
     '-ss', leadSec.toFixed(2),
     '-i', path.join(tmpDir, webm),
+    ...music,
     // 录课是高频动作，优先出片速度；veryfast 对屏幕动画体积影响很小。
     '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '20',
     '-pix_fmt', 'yuv420p', '-r', '30',

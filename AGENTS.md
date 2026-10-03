@@ -266,8 +266,10 @@ index.html       GitHub Pages 落地页，由 npm run index 生成，别手改
 | `npm run check` | 查所有内部链接 |
 | `npm run pdf -- <pdf>` | 扫描讲义转图片 |
 | `npm run cutout -- <png> [输出]` | 角色图去白底、裁边、缩小 |
+| `npm run bgm` | 重新合成背景乐 `demos/assets/bgm.m4a`（原创八音盒，可循环） |
 
-录制依赖 `ffmpeg`，没有就 `brew install ffmpeg`。
+录制依赖 `ffmpeg`，没有就 `brew install ffmpeg`。`record` 会自动把 `demos/assets/bgm.m4a`
+循环铺进视频，压低音量、首尾淡入淡出；删掉这个文件就录无声版。
 
 ## 改引擎的时候
 

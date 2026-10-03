@@ -14,6 +14,7 @@
     "bagao": "node tools/new-bagao.mjs",
     "pdf": "node tools/pdf2png.mjs",
     "cutout": "node tools/cutout.mjs",
+    "bgm": "python3 tools/make-bgm.py",
     "setup": "npm install && npx playwright install chromium"
   },
   "devDependencies": {
