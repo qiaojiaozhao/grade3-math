@@ -166,7 +166,9 @@
 
 <script src="lib/anim.js"></script>
 <script>
-const { sleep, cancelled, say } = Anim;
+const { cancelled, say } = Anim;
+const SLOW = 2;
+const sleep = ms => Anim.sleep(ms * SLOW);
 
 const LOGS = 4, PIECES = 6, PER_CUT = 2;
 const CUTS = PIECES - 1;
