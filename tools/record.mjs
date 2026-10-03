@@ -104,7 +104,7 @@ try {
     ? [
         '-stream_loop', '-1', '-i', BGM,
         '-map', '0:v', '-map', '1:a',
-        '-af', `volume=0.35,afade=t=in:d=1.5,afade=t=out:st=${Math.max(0, clipSec - 2.5).toFixed(2)}:d=2.5`,
+        '-af', `volume=0.1,afade=t=in:d=1.5,afade=t=out:st=${Math.max(0, clipSec - 2.5).toFixed(2)}:d=2.5`,
         '-c:a', 'aac', '-b:a', '128k', '-shortest',
       ]
     : [];
