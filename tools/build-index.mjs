@@ -41,6 +41,7 @@ const ZHUANTI = {
   name: '专题', slug: 'zhuan-ti',
   items: [
     { file: '专题/骨头和衣服.md', name: '骨头搞清楚，衣服随便换', mark: '和差 · 差倍 · 和倍', ink: '#7c2d12', paper: '#fde8d7', demo: ['骨头'] },
+    { file: '专题/段和接头.md', name: '段和接头', mark: '重叠 · 锯木头', ink: '#3f6212', paper: '#ecfccb', demo: ['接头'] },
   ],
 };
 
@@ -82,6 +83,7 @@ const PAGE_SLUG = {
   'README.md': '',
   '拔高/奥数拔高.md': 'ao-shu-ba-gao',
   '专题/骨头和衣服.md': 'gu-tou-he-yi-fu',
+  '专题/段和接头.md': 'duan-he-jie-tou',
   '认出母题.md': 'ren-chu-mu-ti',
   '大纲.md': 'da-gang',
   '单元/画线段图.md': 'hua-xian-duan-tu',

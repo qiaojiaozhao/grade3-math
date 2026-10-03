@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>段和接头 · 动态演示</title>
+<meta name="description" content="锯木头、纸条、铁链，三道题都是几段东西排一排：接头比段少 1 个。锯木头数锯口，纸条和铁链减掉接头上重叠的那一截。">
+<link rel="stylesheet" href="lib/anim.css?v=portrait">
+<style>
+  html, body { background: #07080a; }
+
+  .stage {
+    --k: .56;
+    --askTop: 92px;
+    --boardTop: 190px;
+    --countTop: 400px;
+    --fs: 13px;
+  }
+  body.portrait .stage {
+    --k: 1;
+    --askTop: 290px;
+    --boardTop: 620px;
+    --countTop: 1180px;
+    --fs: 28px;
+  }
+
+  .ask {
+    position: absolute;
+    left: 50%; top: var(--askTop);
+    transform: translateX(-50%);
+    width: 88%;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    text-align: center;
+    font-size: 15px; font-weight: 800; line-height: 1.5;
+    color: #e8eaed;
+  }
+  body.portrait .ask { font-size: 32px; gap: 18px; }
+  .ask:empty { display: none; }
+  .ask .no {
+    background: #ff8a3d; color: #1a1208;
+    border-radius: 999px; padding: 3px 12px;
+  }
+  body.portrait .ask .no { padding: 6px 24px; }
+  .ask.pop { animation: bump-center .45s cubic-bezier(.2, 1.6, .3, 1); }
+
+  .board {
+    position: absolute;
+    left: 50%; top: var(--boardTop);
+    width: calc(820px * var(--k));
+    height: calc(460px * var(--k));
+    transform: translateX(-50%);
+  }
+
+  .el {
+    position: absolute;
+    box-sizing: border-box;
+    display: flex; align-items: center; justify-content: center;
+    font-size: var(--fs); font-weight: 800;
+    white-space: nowrap;
+  }
+  .el.pop { animation: squash .5s cubic-bezier(.2, 1.6, .3, 1); }
+
+  .wood {
+    background: #b7824a;
+    border-radius: 10px;
+    box-shadow: inset 0 -6px 0 #8a5a2b, inset 0 4px 0 #d9a46b;
+  }
+  .mark { border-left: 3px dashed #5a3a1a88; }
+  .cut { background: #ff6b6b; border-radius: 3px; }
+  .cutno { color: #ff6b6b; }
+  .lab { color: #e8c27a; }
+  .lab.left { justify-content: flex-end; }
+  .red { color: #ff6b6b; }
+  .green { color: #5ecf8a; }
+
+  .strip { background: #6ea8ff; border-radius: 4px; color: #0b1a33; }
+  .strip.b { background: #c084fc; color: #1f0b33; }
+  .over { background: #ffb347; border-radius: 4px; color: #1a1208; }
+  .ghost { border: 3px dashed #ff8a3d; color: #ff8a3d; border-radius: 4px; }
+
+  .ring {
+    border: calc(20px * var(--k)) solid #aeb8c4;
+    border-radius: calc(70px * var(--k));
+  }
+  .ring.mid { border-color: #dfe5ec; }
+  .wallA { background: #6ea8ff; border-radius: 3px; }
+  .wallB { background: #c084fc; border-radius: 3px; }
+  .joint { border: 3px solid #ffb347; border-radius: 8px; }
+
+  .brace {
+    border: 3px solid #e8c27a;
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+    align-items: flex-end;
+  }
+  .brace span {
+    position: absolute;
+    top: 100%;
+    margin-top: 6px;
+    color: #e8c27a;
+  }
+
+  .count {
+    position: absolute;
+    left: 0; right: 0; top: var(--countTop);
+    text-align: center;
+    font-size: 21px; font-weight: 800; line-height: 1.55;
+    color: #ffb347;
+  }
+  body.portrait .count { font-size: 42px; }
+  .count b { color: #5ecf8a; }
+  .count .no { color: #ff6b6b; text-decoration: line-through; }
+  .count.pop { animation: bump .45s cubic-bezier(.2, 1.6, .3, 1); }
+
+  .recap {
+    position: absolute;
+    left: 50%; top: calc(var(--countTop) - 40px);
+    transform: translateX(-50%);
+    display: none;
+    grid-template-columns: auto auto auto;
+    gap: 4px 18px;
+    font-size: 15px; font-weight: 800;
+    white-space: nowrap;
+  }
+  body.portrait .recap { top: calc(var(--countTop) - 90px); font-size: 32px; gap: 20px 26px; }
+  .recap.on { display: grid; }
+  .recap .k { color: #e8c27a; text-align: right; }
+  .recap .m { color: #ffb347; }
+  .recap .v { color: #f4f6f8; }
+  .recap .v b { color: #5ecf8a; }
+  .recap .hide { visibility: hidden; }
+
+  @keyframes squash {
+    0% { transform: scale(1.3, .6); }
+    55% { transform: scale(.9, 1.15); }
+    100% { transform: scale(1, 1); }
+  }
+  @keyframes bump {
+    0% { transform: scale(.75); }
+    55% { transform: scale(1.12); }
+    100% { transform: scale(1); }
+  }
+  @keyframes bump-center {
+    0% { transform: translateX(-50%) scale(.75); }
+    55% { transform: translateX(-50%) scale(1.12); }
+    100% { transform: translateX(-50%) scale(1); }
+  }
+</style>
+</head>
+<body class="theme-dark">
+
+<h1>段和接头：几段排一排，接头比段少 1</h1>
+<div class="problem">
+  锯木头、粘纸条、套铁链。先数<b>接头</b>有几个，再看接头上发生了什么：锯的要数次数，叠的要减掉。
+</div>
+
+<div class="stage-wrap">
+  <div class="stage" id="stage">
+    <div class="ask" id="ask"></div>
+    <div class="board" id="board"></div>
+    <div class="count" id="count"></div>
+    <div class="recap" id="recap"></div>
+  </div>
+</div>
+
+<script src="lib/anim.js"></script>
+<script>
+const { sleep, cancelled, say } = Anim;
+
+const LOGS = 4, PIECES = 6, PER_CUT = 2;
+const CUTS = PIECES - 1;
+const STRIP = 45, JOINED = 80;
+const OVERLAP = STRIP * 2 - JOINED;
+const RING_MM = 30, WALL = 2, RINGS = 3;
+const JOINTS = RINGS - 1;
+const CHAIN = RING_MM * RINGS - WALL * 2 * JOINTS;
+
+const board = document.getElementById('board');
+const ask = document.getElementById('ask');
+const countEl = document.getElementById('count');
+const recap = document.getElementById('recap');
+
+/* 坐标都按竖版像素写，横版乘 --k */
+const px = (v) => `calc(${v}px * var(--k))`;
+function el(x, y, w, h, cls, html = '') {
+  return `<div class="el ${cls}" style="left:${px(x)};top:${px(y)};width:${px(w)};height:${px(h)}">${html}</div>`;
+}
+function draw(parts) {
+  board.innerHTML = parts.join('');
+}
+
+function bump(e) {
+  e.classList.remove('pop');
+  void e.offsetWidth;
+  e.classList.add('pop');
+}
+function setAsk(no, text) {
+  ask.innerHTML = `<span class="no">${no}</span><span>${text}</span>`;
+  bump(ask);
+}
+function setCount(html) {
+  countEl.innerHTML = html;
+  bump(countEl);
+}
+
+/* 锯木头：一根木头 720 长，切成 6 段。cuts 是已经锯了几刀，fresh 是刚锯的那一刀弹一下 */
+const LOG_X = 100, LOG_W = 720, SEG = LOG_W / PIECES;
+function log(y, h, cuts, { fresh = -1, label = '', numbers = true } = {}) {
+  const out = [el(LOG_X, y, LOG_W, h, 'wood')];
+  for (let i = 1; i < PIECES; i++) {
+    const x = LOG_X + SEG * i;
+    if (i <= cuts) {
+      out.push(el(x - 4, y - 14, 8, h + 28, 'cut' + (i === fresh ? ' pop' : '')));
+      if (numbers) out.push(el(x - 30, y - 14 - 44, 60, 40, 'cutno', `${i}`));
+    } else {
+      out.push(el(x - 1, y, 3, h, 'mark'));
+    }
+  }
+  if (label) out.push(el(0, y, 86, h, 'lab left', label));
+  return out;
+}
+
+/* 纸条：45 厘米画成 360 */
+const CM = 8;
+function strips(mode) {
+  const w = STRIP * CM, total = JOINED * CM;
+  if (mode === 'glued') {
+    const bx = total - w;
+    return [
+      el(60, 40, w, 60, 'strip', '45 厘米'),
+      el(60 + bx, 130, w, 60, 'strip b', '45 厘米'),
+      el(60 + bx, 40, w - bx, 150, 'over pop', '粘在<br>一起'),
+      el(60, 220, total, 30, 'brace', `<span>粘好 ${JOINED} 厘米</span>`),
+    ];
+  }
+  return [
+    el(20, 40, w, 60, 'strip', '45 厘米'),
+    el(20 + w, 40, w, 60, 'strip b', '45 厘米'),
+    el(20, 100, w * 2, 30, 'brace', `<span>加起来 ${STRIP * 2} 厘米</span>`),
+    el(20, 230, total, 60, 'ghost', `粘好只有 ${JOINED} 厘米`),
+    el(20 + total, 230, w * 2 - total, 60, 'over pop', `${OVERLAP}`),
+  ];
+}
+
+/* 铁链：1 毫米画成 10，环长 300、环壁 20；相邻两个环错开 260 */
+const MM = 10, RW = RING_MM * MM, WALLW = WALL * MM, STEP = RW - WALLW * 2, RH = 140, RY = 60;
+function chain({ joints = false, zoom = false, total = false } = {}) {
+  const out = [];
+  for (let i = 0; i < RINGS; i++) {
+    out.push(el(i * STEP, RY, RW, RH, 'ring' + (i === 1 ? ' mid' : '')));
+  }
+  for (let j = 0; j < JOINTS; j++) {
+    const x = (j + 1) * STEP;
+    if (zoom && j === 0) {
+      out.push(el(x, RY + RH / 2 - 26, WALLW, 52, 'wallB pop'));
+      out.push(el(x + WALLW, RY + RH / 2 - 26, WALLW, 52, 'wallA pop'));
+      out.push(el(x - 80, RY + RH + 18, WALLW * 2 + 160, 44, 'lab', '2 + 2 = 4 毫米'));
+    } else if (joints) {
+      out.push(el(x - 8, RY - 10, WALLW * 2 + 16, RH + 20, 'joint pop'));
+      out.push(el(x - 60, RY + RH + 18, WALLW * 2 + 120, 44, 'lab', `接头 ${j + 1}`));
+    }
+  }
+  if (total) out.push(el(0, RY + RH + 80, CHAIN * MM, 30, 'brace', `<span>拉直 ${CHAIN} 毫米</span>`));
+  return out;
+}
+
+const RECAP = [
+  ['锯木头', `${PIECES} 段 → ${CUTS} 个锯口`, `${LOGS} × ${CUTS} × ${PER_CUT} = <b>${LOGS * CUTS * PER_CUT} 分钟</b>`],
+  ['纸条', '2 张 → 1 个接头', `${STRIP} + ${STRIP} − ${JOINED} = <b>${OVERLAP} 厘米</b>`],
+  ['铁链', `${RINGS} 个环 → ${JOINTS} 个接头`, `${RING_MM} × ${RINGS} − 4 × ${JOINTS} = <b>${CHAIN} 毫米</b>`],
+];
+function showRecap(n) {
+  recap.innerHTML = RECAP.map((row, i) => {
+    const hide = i < n ? '' : ' hide';
+    return `<span class="k${hide}">${row[0]}</span><span class="m${hide}">${row[1]}</span><span class="v${hide}">${row[2]}</span>`;
+  }).join('');
+  recap.classList.add('on');
+}
+
+function resetVisuals() {
+  board.innerHTML = '';
+  ask.innerHTML = '';
+  countEl.innerHTML = '';
+  countEl.classList.remove('pop');
+  recap.classList.remove('on');
+}
+
+const ASK1 = `${LOGS} 根木料，每根锯成 ${PIECES} 段，每锯一处要 ${PER_CUT} 分钟。全部锯完要多少分钟？`;
+const ASK2 = `两张 ${STRIP} 厘米的纸条，粘成一张 ${JOINED} 厘米的。中间重叠部分多长？`;
+const ASK3 = `${RINGS} 个同样的铁环套成一段铁链。每个环长 3 厘米，环粗 ${WALL} 毫米。拉直后多长？`;
+
+Anim.run([
+  {
+    title: '一根木头锯 6 段',
+    async play(id) {
+      setAsk('锯木头', ASK1);
+      draw(log(120, 90, 0));
+      say('先看一根', `先只看<b>一根</b>。虚线是要分开的地方，锯成 ${PIECES} 段，要锯几下？`);
+      await sleep(1300);
+      if (cancelled(id)) return;
+      for (let c = 1; c <= CUTS; c++) {
+        draw(log(120, 90, c, { fresh: c }));
+        await sleep(520);
+        if (cancelled(id)) return;
+      }
+      setCount(`${PIECES} 段，锯口只有 <b>${CUTS}</b> 个`);
+      say('数锯口', `刀落在<b>两段之间的缝上</b>，两头不用锯。${PIECES} 段东西排一排，接头比段<b>少 1 个</b>。`);
+      await sleep(1600);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '锯几下，不是几段',
+    async play(id) {
+      setAsk('锯木头', ASK1);
+      draw(log(120, 90, CUTS));
+      setCount(`<span class="no">${PIECES} × ${PER_CUT} = 12</span>　${CUTS} × ${PER_CUT} = <b>10 分钟</b>`);
+      say('别数段', `时间花在<b>锯</b>上，不花在段上。一根要锯 ${CUTS} 次，${CUTS} × ${PER_CUT} = 10 分钟。`);
+      await sleep(1700);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '4 根分开锯',
+    async play(id) {
+      setAsk('锯木头', ASK1);
+      const all = [];
+      for (let r = 0; r < LOGS; r++) all.push(...log(r * 110, 64, CUTS, { label: `第 ${r + 1} 根`, numbers: false }));
+      draw(all);
+      setCount(`<span class="no">${LOGS * PIECES} − 1 = ${LOGS * PIECES - 1}</span>`);
+      say('分开的', `4 根木料是<b>分开的</b>，根和根之间本来就断着，不用锯。不能把 24 段连起来数。`);
+      await sleep(1700);
+      if (cancelled(id)) return;
+      setCount(`${CUTS} × ${LOGS} = 20 次，20 × ${PER_CUT} = <b>${LOGS * CUTS * PER_CUT} 分钟</b>`);
+      say('锯木头', `每根 ${CUTS} 个锯口，${LOGS} 根一共 20 次，全部锯完要 <b>${LOGS * CUTS * PER_CUT} 分钟</b>。`);
+      await sleep(1700);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '纸条叠起来',
+    async play(id) {
+      setAsk('纸条', ASK2);
+      draw(strips('glued'));
+      say('接头', `两张纸条，<b>1 个接头</b>。接头上，两张纸叠在一起，橙色那一截<b>两张纸都有它</b>。`);
+      await sleep(1800);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '多出来的就是重叠',
+    async play(id) {
+      setAsk('纸条', ASK2);
+      draw(strips('apart'));
+      say('拉开比', `把两张纸<b>拉开首尾相接</b>，有 ${STRIP * 2} 厘米。粘好只有 ${JOINED} 厘米，短了一截。`);
+      await sleep(1500);
+      if (cancelled(id)) return;
+      setCount(`${STRIP} + ${STRIP} − ${JOINED} = <b>${OVERLAP} 厘米</b>`);
+      say('纸条', `短的那 <b>${OVERLAP} 厘米</b>就是重叠：它被算了两遍。和书法绘画一样，加起来比总的多几，重叠就是几。`);
+      await sleep(1800);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '3 个环，2 个接头',
+    async play(id) {
+      setAsk('铁链', ASK3);
+      draw(chain());
+      say('先数接头', `${RINGS} 个铁环套成一串。先别量，<b>先数接头</b>。`);
+      await sleep(1200);
+      if (cancelled(id)) return;
+      draw(chain({ joints: true }));
+      setCount(`${RINGS} 个环，接头 <b>${JOINTS}</b> 个`);
+      say('先数接头', `${RINGS} 个环排一排，接头比环<b>少 1 个</b>，是 ${JOINTS} 个。`);
+      await sleep(1500);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '一个接头叠两层',
+    async play(id) {
+      setAsk('铁链', ASK3);
+      draw(chain({ zoom: true }));
+      setCount(`每个接头重叠 ${WALL} × 2 = <b>4 毫米</b>`);
+      say('接头上', `拉直以后，接头处是<b>两个环的边贴在一起</b>：紫色是这个环的 ${WALL} 毫米，蓝色是那个环的 ${WALL} 毫米。叠了 4 毫米，不是 2 毫米。`);
+      await sleep(2000);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '拉直多长',
+    async play(id) {
+      setAsk('铁链', ASK3);
+      draw(chain({ joints: true, total: true }));
+      setCount(`${RING_MM} × ${RINGS} − 4 × ${JOINTS} = <b>${CHAIN} 毫米</b>`);
+      say('铁链', `3 厘米 = 30 毫米。${RINGS} 个环加起来 90 毫米，${JOINTS} 个接头各叠了 4 毫米，拉直是 <b>${CHAIN} 毫米</b>。`);
+      await sleep(1900);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '一根骨头',
+    async play(id) {
+      setAsk('段和接头', '几段排一排，接头比段少 1 个');
+      draw(chain({ joints: true, total: true }));
+      say('对一对', '三道题排一排——');
+      for (let n = 1; n <= RECAP.length; n++) {
+        showRecap(n);
+        await sleep(600);
+        if (cancelled(id)) return;
+      }
+      say('答案', `锯木头 <b>${LOGS * CUTS * PER_CUT} 分钟</b>，纸条重叠 <b>${OVERLAP} 厘米</b>，铁链 <b>${CHAIN} 毫米</b>。都是<b>先数接头</b>：锯的数次数，叠的减掉。`);
+      await sleep(1900);
+      if (cancelled(id)) return;
+    }
+  },
+], { reset: resetVisuals });
+</script>
+</body>
+</html>
