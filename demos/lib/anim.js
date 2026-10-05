@@ -56,6 +56,26 @@ const Anim = (function () {
     spark.classList.add('pop');
   }
 
+  // 配套练习：公众号流水线把 A4 PDF 放在 ../worksheets/<本页同名>.pdf，
+  // 存在就在提示语下面挂一个下载按钮；没有就什么都不显示。
+  function mountWorksheet(anchor) {
+    if (location.protocol === 'file:') return;
+    const stem = decodeURIComponent(location.pathname.split('/').pop() || '').replace(/\.html?$/i, '');
+    if (!stem) return;
+    const url = '../worksheets/' + encodeURIComponent(stem) + '.pdf';
+    fetch(url, { method: 'HEAD' })
+      .then((r) => {
+        if (!r.ok) return;
+        const a = document.createElement('a');
+        a.className = 'worksheet-link';
+        a.href = url;
+        a.download = stem + '-配套练习.pdf';
+        a.textContent = '⬇ 下载配套练习（A4 PDF，含参考答案）';
+        anchor.after(a);
+      })
+      .catch(() => {});
+  }
+
   function mount() {
     stage = document.getElementById('stage');
     if (!stage) throw new Error('anim.js: 找不到 #stage');
@@ -91,6 +111,7 @@ const Anim = (function () {
     hint.className = 'hint';
     hint.textContent = opts.hintText || '建议先点「自动播放」看完整动画片，再一段一段回看。';
     dotsBox.after(hint);
+    mountWorksheet(hint);
 
     playBtn = document.getElementById('playBtn');
     prevBtn = document.getElementById('prevBtn');

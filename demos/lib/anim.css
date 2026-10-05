@@ -148,6 +148,22 @@ h1 {
 
 .hint { margin-top: 8px; font-size: 13px; color: var(--ink-soft); }
 
+.worksheet-link {
+  margin-top: 14px;
+  display: inline-block;
+  padding: 9px 20px;
+  border-radius: 999px;
+  background: #fff;
+  border: 2px solid var(--brand);
+  color: var(--brand);
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 3px 8px #0001;
+}
+.worksheet-link:active { transform: scale(.96); }
+body.theme-dark .worksheet-link { background: transparent; border-color: #ffb347; color: #ffb347; }
+
 /* 深色皮肤。页面 <body class="theme-dark"> 才生效，其他动画不受影响。 */
 body.theme-dark {
   --ink: #e8eaed;
