@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>搬、借、拆 · 动态演示</title>
+<meta name="description" content="巧算只有一根骨头：换一个一样多的来算。搬好朋友到一起，借整还零，拆开分着乘——数一颗都没变。">
+<link rel="stylesheet" href="lib/anim.css?v=portrait">
+<style>
+  html, body { background: #07080a; }
+
+  .stage {
+    --k: .56;
+    --askTop: 92px;
+    --boardTop: 190px;
+    --countTop: 400px;
+    --fs: 13px;
+  }
+  body.portrait .stage {
+    --k: 1;
+    --askTop: 290px;
+    --boardTop: 620px;
+    --countTop: 1180px;
+    --fs: 28px;
+  }
+
+  .ask {
+    position: absolute;
+    left: 50%; top: var(--askTop);
+    transform: translateX(-50%);
+    width: 88%;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    text-align: center;
+    font-size: 15px; font-weight: 800; line-height: 1.5;
+    color: #e8eaed;
+  }
+  body.portrait .ask { font-size: 32px; gap: 18px; }
+  .ask:empty { display: none; }
+  .ask .no {
+    background: #ff8a3d; color: #1a1208;
+    border-radius: 999px; padding: 3px 12px;
+  }
+  body.portrait .ask .no { padding: 6px 24px; }
+  .ask.pop { animation: bump-center .45s cubic-bezier(.2, 1.6, .3, 1); }
+
+  .board {
+    position: absolute;
+    left: 50%; top: var(--boardTop);
+    width: calc(820px * var(--k));
+    height: calc(460px * var(--k));
+    transform: translateX(-50%);
+  }
+
+  .el {
+    position: absolute;
+    box-sizing: border-box;
+    display: flex; align-items: center; justify-content: center;
+    font-size: var(--fs); font-weight: 800;
+    white-space: nowrap;
+  }
+  .el.pop { animation: squash .5s cubic-bezier(.2, 1.6, .3, 1); }
+
+  .bar { border-radius: 8px; color: #0b1a33; }
+  .bar.a { background: #6ea8ff; }
+  .bar.b { background: #c084fc; color: #1f0b33; }
+  .bar.c { background: #5ecf8a; color: #062b14; }
+  .bar.d { background: #ffb347; color: #1a1208; }
+  .bar.dim { opacity: .35; }
+
+  .brace {
+    border: 3px solid #e8c27a;
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+    align-items: flex-end;
+  }
+  .brace span { position: absolute; top: 100%; margin-top: 6px; color: #e8c27a; }
+
+  .tile {
+    border-radius: 12px;
+    background: #1c2230;
+    border: 3px solid #3a4456;
+    color: #f4f6f8;
+    font-size: calc(var(--fs) * 1.25);
+  }
+  .tile.plus { border-color: #5ecf8a; color: #5ecf8a; }
+  .tile.minus { border-color: #ff6b6b; color: #ff6b6b; }
+  .tile.ghost { border-style: dashed; opacity: .4; }
+
+  .pocket {
+    border-radius: 18px;
+    background: #2a1f12;
+    border: 3px solid #8a5a2b;
+    color: #e8c27a;
+    flex-direction: column; gap: 6px;
+    line-height: 1.2;
+  }
+  .pocket b { color: #ffb347; font-size: calc(var(--fs) * 1.4); }
+  .shop {
+    border-radius: 18px;
+    background: #111c2a;
+    border: 3px solid #2f4a6a;
+    color: #9ec5ff;
+    flex-direction: column; gap: 6px;
+    line-height: 1.2;
+  }
+  .bill {
+    background: #5ecf8a; color: #062b14;
+    border-radius: 8px;
+    border: 3px solid #a7f3c2;
+  }
+  .coin {
+    background: #ffd166; color: #1a1208;
+    border-radius: 50%;
+    border: 3px solid #ffe9a8;
+  }
+  .arrow { color: #e8c27a; font-size: calc(var(--fs) * 1.3); }
+  .lab { color: #e8c27a; }
+  .red { color: #ff6b6b; }
+  .green { color: #5ecf8a; }
+
+  .bag { background: #c084fc; border-radius: 6px; box-shadow: inset 0 -5px 0 #8b4fcf; }
+  .bag.lone { background: #ffb347; box-shadow: inset 0 -5px 0 #c77d1d; }
+  .bag.empty { background: none; box-shadow: none; border: 3px dashed #ff8a3d; }
+
+  .count {
+    position: absolute;
+    left: 0; right: 0; top: var(--countTop);
+    text-align: center;
+    font-size: 21px; font-weight: 800; line-height: 1.55;
+    color: #ffb347;
+  }
+  body.portrait .count { font-size: 42px; }
+  .count b { color: #5ecf8a; }
+  .count .no { color: #ff6b6b; text-decoration: line-through; }
+  .count.pop { animation: bump .45s cubic-bezier(.2, 1.6, .3, 1); }
+
+  .recap {
+    position: absolute;
+    left: 50%; top: calc(var(--countTop) - 40px);
+    transform: translateX(-50%);
+    display: none;
+    grid-template-columns: auto auto auto;
+    gap: 4px 18px;
+    font-size: 15px; font-weight: 800;
+    white-space: nowrap;
+  }
+  body.portrait .recap { top: calc(var(--countTop) - 90px); font-size: 32px; gap: 20px 26px; }
+  .recap.on { display: grid; }
+  .recap .k { color: #e8c27a; text-align: right; }
+  .recap .m { color: #ffb347; }
+  .recap .v { color: #f4f6f8; }
+  .recap .v b { color: #5ecf8a; }
+  .recap .hide { visibility: hidden; }
+
+  @keyframes squash {
+    0% { transform: scale(1.3, .6); }
+    55% { transform: scale(.9, 1.15); }
+    100% { transform: scale(1, 1); }
+  }
+  @keyframes bump {
+    0% { transform: scale(.75); }
+    55% { transform: scale(1.12); }
+    100% { transform: scale(1); }
+  }
+  @keyframes bump-center {
+    0% { transform: translateX(-50%) scale(.75); }
+    55% { transform: translateX(-50%) scale(1.12); }
+    100% { transform: translateX(-50%) scale(1); }
+  }
+</style>
+</head>
+<body class="theme-dark">
+
+<h1>搬、借、拆：巧算只有一根骨头</h1>
+<div class="problem">
+  难算的数，<b>换一个一样多的</b>来算。搬好朋友到一起，借整还零，拆开分着乘——数一颗都没变。
+</div>
+
+<div class="stage-wrap">
+  <div class="stage" id="stage">
+    <div class="ask" id="ask"></div>
+    <div class="board" id="board"></div>
+    <div class="count" id="count"></div>
+    <div class="recap" id="recap"></div>
+  </div>
+</div>
+
+<script src="lib/anim.js"></script>
+<script>
+const { cancelled, say } = Anim;
+const SLOW = 2;
+const sleep = ms => Anim.sleep(ms * SLOW);
+
+const board = document.getElementById('board');
+const ask = document.getElementById('ask');
+const countEl = document.getElementById('count');
+const recap = document.getElementById('recap');
+
+/* 坐标都按竖版像素写，横版乘 --k */
+const px = (v) => `calc(${v}px * var(--k))`;
+function el(x, y, w, h, cls, html = '') {
+  return `<div class="el ${cls}" style="left:${px(x)};top:${px(y)};width:${px(w)};height:${px(h)}">${html}</div>`;
+}
+function draw(parts) { board.innerHTML = parts.join(''); }
+
+function bump(e) {
+  e.classList.remove('pop');
+  void e.offsetWidth;
+  e.classList.add('pop');
+}
+function setAsk(no, text) {
+  ask.innerHTML = `<span class="no">${no}</span><span>${text}</span>`;
+  bump(ask);
+}
+function setCount(html) {
+  countEl.innerHTML = html;
+  bump(countEl);
+}
+
+/* ── 搬：四个数配成两对，每对正好 1000。1 个单位画 0.8 像素 ── */
+const NUMS = [487, 169, 513, 831];
+const U = 0.8, BAR_H = 70;
+const COLORS = ['a', 'b', 'c', 'd'];
+function barsApart() {
+  return NUMS.map((n, i) => el(10, i * 100, n * U, BAR_H, `bar ${COLORS[i]}`, n));
+}
+function barsPaired({ pop = false } = {}) {
+  const p = pop ? ' pop' : '';
+  return [
+    el(10, 40, 487 * U, BAR_H, 'bar a' + p, 487),
+    el(10 + 487 * U, 40, 513 * U, BAR_H, 'bar c' + p, 513),
+    el(10, 120, 1000 * U, 30, 'brace', '<span>1000</span>'),
+    el(10, 230, 169 * U, BAR_H, 'bar b' + p, 169),
+    el(10 + 169 * U, 230, 831 * U, BAR_H, 'bar d' + p, 831),
+    el(10, 310, 1000 * U, 30, 'brace', '<span>1000</span>'),
+  ];
+}
+
+/* 搬要带符号：528 − 173 + 72 */
+function tiles(order, y, { pop = false } = {}) {
+  const spec = { '528': ['528', ''], '-173': ['− 173', ' minus'], '+72': ['+ 72', ' plus'] };
+  const w = [200, 230, 200];
+  let x = 60;
+  return order.map((k, i) => {
+    const [txt, cls] = spec[k];
+    const out = el(x, y, w[i], 90, 'tile' + cls + (pop && k !== '528' ? ' pop' : ''), txt);
+    x += w[i] + 30;
+    return out;
+  });
+}
+
+/* ── 借：口袋、店家、3 张 100 和 2 枚 1 元 ── */
+function money({ pocket, bills, coins, billsAt, coinsAt, arrowBills, arrowCoins, pop = '' }) {
+  const out = [
+    el(0, 60, 230, 150, 'pocket', `口袋里<b>${pocket}</b>`),
+    el(590, 60, 230, 150, 'shop', `对方`),
+  ];
+  const bx = billsAt === 'pocket' ? 10 : 520;
+  for (let i = 0; i < bills; i++) out.push(el(bx + i * 100, 240, 90, 70, 'bill' + (pop === 'bills' ? ' pop' : ''), '100'));
+  const cx = coinsAt === 'pocket' ? 60 : 650;
+  for (let i = 0; i < coins; i++) out.push(el(cx + i * 70, 360, 60, 60, 'coin' + (pop === 'coins' ? ' pop' : ''), '1'));
+  if (arrowBills) out.push(el(310, 240, 200, 70, 'arrow', arrowBills));
+  if (arrowCoins) out.push(el(310, 360, 200, 60, 'arrow', arrowCoins));
+  return out;
+}
+
+/* ── 拆：10 × 10 的糖袋格子，少一格；旁边单独一袋 ── */
+const CELL = 42, BAG = 36, GX = 40, GY = 12;
+function bags({ full = false, lone = true, pop = false } = {}) {
+  const out = [];
+  for (let r = 0; r < 10; r++) {
+    for (let c = 0; c < 10; c++) {
+      const last = r === 9 && c === 9;
+      if (last && !full) out.push(el(GX + c * CELL, GY + r * CELL, BAG, BAG, 'bag empty'));
+      else out.push(el(GX + c * CELL, GY + r * CELL, BAG, BAG, 'bag' + (last && pop ? ' pop' : '')));
+    }
+  }
+  out.push(el(480, 20, 330, 44, 'lab', full ? '100 袋，每袋 37 颗' : '99 袋，每袋 37 颗'));
+  if (lone) {
+    out.push(el(560, 150, 110, 110, 'bag lone' + (pop ? ' pop' : ''), '37'));
+    out.push(el(480, 280, 330, 44, 'lab', '单独的 37，是整整 1 袋'));
+  }
+  return out;
+}
+
+const RECAP = [
+  ['搬', '好朋友搬到一起', '487 + 513 和 169 + 831 → <b>2000</b>'],
+  ['借', '借 300，还 2', '+ 298 → <b>765</b>　− 298 → <b>169</b>'],
+  ['拆', '99 袋 + 1 袋', '37 × (99 + 1) = <b>3700</b>'],
+];
+function showRecap(n) {
+  recap.innerHTML = RECAP.map((row, i) => {
+    const hide = i < n ? '' : ' hide';
+    return `<span class="k${hide}">${row[0]}</span><span class="m${hide}">${row[1]}</span><span class="v${hide}">${row[2]}</span>`;
+  }).join('');
+  recap.classList.add('on');
+}
+
+function resetVisuals() {
+  board.innerHTML = '';
+  ask.innerHTML = '';
+  countEl.innerHTML = '';
+  countEl.classList.remove('pop');
+  recap.classList.remove('on');
+}
+
+const ASK1 = '487 + 169 + 513 + 831 = ？';
+const ASK1B = '528 − 173 + 72 = ？';
+const ASK2A = '467 + 298 = ？';
+const ASK2B = '467 − 298 = ？';
+const ASK3 = '37 × 99 + 37 = ？';
+
+Anim.run([
+  {
+    title: '先别算，先看末两位',
+    async play(id) {
+      setAsk('搬', ASK1);
+      draw(barsApart());
+      say('先别动笔', '四个数从左往右硬加，要进位三次。<b>先别动笔</b>，看每个数的末两位。');
+      await sleep(1500);
+      if (cancelled(id)) return;
+      setCount('87 和 13　69 和 31　都凑成 100');
+      say('找好朋友', '87 和 13 凑成 100，69 和 31 也凑成 100。好朋友都没挨着，<b>搬</b>到一起去。');
+      await sleep(1700);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '搬到一起，正好两个 1000',
+    async play(id) {
+      setAsk('搬', ASK1);
+      draw(barsPaired({ pop: true }));
+      say('积木换顺序', '加法里，谁和谁先加<b>随便挑</b>。积木换个顺序堆，还是那么多块。');
+      await sleep(1500);
+      if (cancelled(id)) return;
+      setCount('(487 + 513) + (169 + 831) = 1000 + 1000 = <b>2000</b>');
+      say('搬', '两对好朋友各凑成 1000，一共 <b>2000</b>。一次进位都没有。');
+      await sleep(1700);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '搬家要带着符号',
+    async play(id) {
+      setAsk('搬', ASK1B);
+      draw([
+        ...tiles(['528', '-173', '+72'], 60),
+        el(60, 200, 700, 40, 'lab', '28 和 72 是好朋友，把 72 搬到前面来'),
+        ...tiles(['528', '+72', '-173'], 290, { pop: true }),
+      ]);
+      say('带着符号', '减法里也能搬，但<b>符号是数的影子</b>，搬家要一起走。72 前面是加号，搬过去还是加号；173 带着减号一起退后。');
+      await sleep(2000);
+      if (cancelled(id)) return;
+      setCount('<span class="no">528 − 72 + 173</span>　528 + 72 − 173 = 600 − 173 = <b>427</b>');
+      say('搬', '先加 72 凑成 600，再减 173，得 <b>427</b>。把符号丢在原地，算出来就错了。');
+      await sleep(1800);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '收 298 元：先收 300',
+    async play(id) {
+      setAsk('借', ASK2A);
+      draw(money({ pocket: 467, bills: 3, coins: 0, billsAt: 'shop', arrowBills: '' }));
+      say('没有零钱', '口袋里有 467 元，对方要给你 298 元。他没有零钱，<b>先给你 3 张 100</b>。');
+      await sleep(1400);
+      if (cancelled(id)) return;
+      draw(money({ pocket: 467, bills: 3, coins: 2, billsAt: 'pocket', coinsAt: 'shop', arrowBills: '← 收 300', arrowCoins: '找他 2 →', pop: 'coins' }));
+      setCount('298 = 300 − 2　　467 + 300 − 2 = <b>765</b>');
+      say('借', '收了 300，多收了 2，<b>找回去 2 元</b>。467 加 300 是 767，再减 2，是 <b>765</b>。');
+      await sleep(1900);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '付 298 元：找回来的是加',
+    async play(id) {
+      setAsk('借', ASK2B);
+      draw(money({ pocket: 467, bills: 3, coins: 0, billsAt: 'pocket' }));
+      say('买东西', '还是 467 元，这回<b>买</b> 298 元的东西。付 3 张 100。');
+      await sleep(1300);
+      if (cancelled(id)) return;
+      draw(money({ pocket: 467, bills: 3, coins: 2, billsAt: 'shop', coinsAt: 'pocket', arrowBills: '付 300 →', arrowCoins: '← 找回 2', pop: 'coins' }));
+      setCount('<span class="no">467 − 300 − 2</span>　467 − 300 + 2 = <b>169</b>');
+      say('借', '多付了 2 元，店家<b>找回 2 元到你口袋</b>——是加回来，不是再减。467 减 300 是 167，加 2，是 <b>169</b>。');
+      await sleep(2000);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '借了多少，还多少',
+    async play(id) {
+      setAsk('借', '298 看成 300，借了 2，就要还 2');
+      draw([
+        el(40, 40, 740, 90, 'tile plus', '+ 298　＝　+ 300 − 2'),
+        el(40, 150, 740, 44, 'lab', '收多了，找出去：多的减掉'),
+        el(40, 240, 740, 90, 'tile minus', '− 298　＝　− 300 + 2'),
+        el(40, 350, 740, 44, 'lab', '付多了，找回来：多的加回来'),
+      ]);
+      setCount('钱包里的钱，一分都没有算错');
+      say('一句话', '298 不好算，就<b>换一个一样多的</b>：300 − 2。加法里多加的要减回，减法里多减的要加回。借 2 还 2，钱一分不差。');
+      await sleep(2300);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '99 袋，再加 1 袋',
+    async play(id) {
+      setAsk('拆', ASK3);
+      draw(bags({ lone: false }));
+      say('每袋 37', '37 × 99 是 <b>99 袋糖，每袋 37 颗</b>。排成 10 行 10 列，差 1 格就满。');
+      await sleep(1500);
+      if (cancelled(id)) return;
+      draw(bags({ lone: true, pop: true }));
+      setCount('37 × 99 + 37 　=　 99 袋 + <b>1 袋</b>');
+      say('拆', '后面单独的那个 37，<b>不是 1 颗，是整整 1 袋</b>。');
+      await sleep(1800);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '放进空位，正好 100 袋',
+    async play(id) {
+      setAsk('拆', ASK3);
+      draw(bags({ full: true, lone: false, pop: true }));
+      say('填满', '把那 1 袋放进空位，<b>正好 100 袋</b>。糖一颗没多，一颗没少。');
+      await sleep(1500);
+      if (cancelled(id)) return;
+      setCount('<span class="no">3663 + 37</span>　37 × (99 + 1) = 37 × 100 = <b>3700</b>');
+      say('拆', '袋数可以拆开分着乘，也可以合起来一起乘。99 袋加 1 袋是 100 袋，<b>3700</b> 颗。');
+      await sleep(1900);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '一根骨头',
+    async play(id) {
+      setAsk('搬 · 借 · 拆', '难算的数，换一个一样多的来算');
+      draw(bags({ full: true, lone: false }));
+      say('对一对', '三招排一排——');
+      for (let n = 1; n <= RECAP.length; n++) {
+        showRecap(n);
+        await sleep(600);
+        if (cancelled(id)) return;
+      }
+      say('答案', '搬：<b>2000</b>。借：<b>765</b> 和 <b>169</b>。拆：<b>3700</b>。三招都是同一件事：数没变，只是换了个好算的数法。');
+      await sleep(2000);
+      if (cancelled(id)) return;
+    }
+  },
+], { reset: resetVisuals });
+</script>
+</body>
+</html>
