@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>错中求解和重合 · 动态演示</title>
+<meta name="description" content="看错了数、两段叠在一起，都是有一截算多了或算少了。先找出那一截：多了减掉，少了补上。">
+<link rel="stylesheet" href="lib/anim.css?v=portrait">
+<style>
+  html, body { background: #07080a; }
+
+  .stage {
+    --k: .56;
+    --askTop: 92px;
+    --boardTop: 190px;
+    --countTop: 400px;
+    --fs: 13px;
+  }
+  body.portrait .stage {
+    --k: 1;
+    --askTop: 290px;
+    --boardTop: 620px;
+    --countTop: 1180px;
+    --fs: 28px;
+  }
+
+  .ask {
+    position: absolute;
+    left: 50%; top: var(--askTop);
+    transform: translateX(-50%);
+    width: 88%;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    text-align: center;
+    font-size: 15px; font-weight: 800; line-height: 1.5;
+    color: #e8eaed;
+  }
+  body.portrait .ask { font-size: 32px; gap: 18px; }
+  .ask:empty { display: none; }
+  .ask .no {
+    background: #ff8a3d; color: #1a1208;
+    border-radius: 999px; padding: 3px 12px;
+  }
+  body.portrait .ask .no { padding: 6px 24px; }
+  .ask.pop { animation: bump-center .45s cubic-bezier(.2, 1.6, .3, 1); }
+
+  .board {
+    position: absolute;
+    left: 50%; top: var(--boardTop);
+    width: calc(820px * var(--k));
+    height: calc(460px * var(--k));
+    transform: translateX(-50%);
+  }
+
+  .el {
+    position: absolute;
+    box-sizing: border-box;
+    display: flex; align-items: center; justify-content: center;
+    font-size: var(--fs); font-weight: 800;
+    white-space: nowrap;
+  }
+  .el.pop { animation: squash .5s cubic-bezier(.2, 1.6, .3, 1); }
+
+  .bar { border-radius: 6px; color: #0b1a33; }
+  .bar.a { background: #6ea8ff; }
+  .bar.b { background: #c084fc; color: #1f0b33; }
+  .bar.keep { background: #5ecf8a; color: #062b14; }
+  .bar.cut { background: #3a4456; color: #aeb8c4; }
+  .bar.extra { background: #ffb347; color: #1a1208; }
+  .bar.wrong { background: none; border: 3px dashed #ff6b6b; color: #ff6b6b; }
+  .over { background: #ffb347; border-radius: 6px; color: #1a1208; opacity: .92; }
+
+  .lab { color: #e8c27a; }
+  .lab.left { justify-content: flex-end; }
+  .red { color: #ff6b6b; }
+  .green { color: #5ecf8a; }
+
+  .brace {
+    border: 3px solid #e8c27a;
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+    align-items: flex-end;
+  }
+  .brace span { position: absolute; top: 100%; margin-top: 6px; color: #e8c27a; }
+
+  .digit {
+    border-radius: 14px;
+    background: #1c2230;
+    border: 3px solid #3a4456;
+    color: #f4f6f8;
+    font-size: calc(var(--fs) * 2);
+  }
+  .digit.up { border-color: #ff6b6b; color: #ff6b6b; }
+  .digit.down { border-color: #6ea8ff; color: #6ea8ff; }
+
+  .axis { background: #aeb8c4; border-radius: 2px; }
+  .tick { background: #aeb8c4; border-radius: 2px; }
+
+  .count {
+    position: absolute;
+    left: 0; right: 0; top: var(--countTop);
+    text-align: center;
+    font-size: 21px; font-weight: 800; line-height: 1.55;
+    color: #ffb347;
+  }
+  body.portrait .count { font-size: 42px; }
+  .count b { color: #5ecf8a; }
+  .count .no { color: #ff6b6b; text-decoration: line-through; }
+  .count.pop { animation: bump .45s cubic-bezier(.2, 1.6, .3, 1); }
+
+  .recap {
+    position: absolute;
+    left: 50%; top: calc(var(--countTop) - 40px);
+    transform: translateX(-50%);
+    display: none;
+    grid-template-columns: auto auto auto;
+    gap: 4px 18px;
+    font-size: 15px; font-weight: 800;
+    white-space: nowrap;
+  }
+  body.portrait .recap { top: calc(var(--boardTop) + 60px); font-size: 30px; gap: 34px 22px; }
+  .recap.on { display: grid; }
+  .recap .k { color: #e8c27a; text-align: right; }
+  .recap .m { color: #ffb347; }
+  .recap .v { color: #f4f6f8; }
+  .recap .v b { color: #5ecf8a; }
+  .recap .hide { visibility: hidden; }
+
+  @keyframes squash {
+    0% { transform: scale(1.3, .6); }
+    55% { transform: scale(.9, 1.15); }
+    100% { transform: scale(1, 1); }
+  }
+  @keyframes bump {
+    0% { transform: scale(.75); }
+    55% { transform: scale(1.12); }
+    100% { transform: scale(1); }
+  }
+  @keyframes bump-center {
+    0% { transform: translateX(-50%) scale(.75); }
+    55% { transform: translateX(-50%) scale(1.12); }
+    100% { transform: translateX(-50%) scale(1); }
+  }
+</style>
+</head>
+<body class="theme-dark">
+
+<h1>错中求解和重合：多算的那一截</h1>
+<div class="problem">
+  看错了数、两段叠在一起，都是<b>有一截算多了或算少了</b>。先找出那一截：多了减掉，少了补上。
+</div>
+
+<div class="stage-wrap">
+  <div class="stage" id="stage">
+    <div class="ask" id="ask"></div>
+    <div class="board" id="board"></div>
+    <div class="count" id="count"></div>
+    <div class="recap" id="recap"></div>
+  </div>
+</div>
+
+<script src="lib/anim.js"></script>
+<script>
+const { cancelled, say } = Anim;
+const SLOW = 2;
+const sleep = ms => Anim.sleep(ms * SLOW);
+
+/* 加法：272 看成 227，得 545 */
+const ADD_RIGHT = 272, ADD_SEEN = 227, ADD_GOT = 545;
+const ADD_OTHER = ADD_GOT - ADD_SEEN;
+const ADD_ANS = ADD_RIGHT + ADD_OTHER;
+/* 被减数：716 − △ − 228，716 看成 761，得 379 */
+const MIN_RIGHT = 716, MIN_SEEN = 761, MIN_B = 228, MIN_GOT = 379;
+const MIN_TRI = MIN_SEEN - MIN_B - MIN_GOT;
+const MIN_ANS = MIN_RIGHT - MIN_TRI - MIN_B;
+/* 减数：个位 5 看成 0，十位 1 看成 4，得 222 */
+const SUB_GOT = 222, SUB_MORE = (4 - 1) * 10 - (5 - 0);
+const SUB_ANS = SUB_GOT + SUB_MORE;
+/* 电线：B→D 327，A→C 431，BC 115 */
+const BD = 327, AC = 431, BC = 115;
+const AD = BD + AC - BC;
+/* 跳高跳远：一共 32，都参加 8，只跳高 11 */
+const ALL = 32, BOTH = 8, ONLY_H = 11;
+const ONLY_L = ALL - ONLY_H - BOTH;
+
+const board = document.getElementById('board');
+const ask = document.getElementById('ask');
+const countEl = document.getElementById('count');
+const recap = document.getElementById('recap');
+
+/* 坐标都按竖版像素写，横版乘 --k */
+const px = (v) => `calc(${v}px * var(--k))`;
+function el(x, y, w, h, cls, html = '') {
+  return `<div class="el ${cls}" style="left:${px(x)};top:${px(y)};width:${px(w)};height:${px(h)}">${html}</div>`;
+}
+function draw(parts) { board.innerHTML = parts.join(''); }
+
+function bump(e) {
+  e.classList.remove('pop');
+  void e.offsetWidth;
+  e.classList.add('pop');
+}
+function setAsk(no, text) {
+  ask.innerHTML = `<span class="no">${no}</span><span>${text}</span>`;
+  bump(ask);
+}
+function setCount(html) {
+  countEl.innerHTML = html;
+  bump(countEl);
+}
+
+/* ── 加法：两段接成一根。1 画 1.2 像素 ── */
+const AU = 1.2, AX = 110;
+function addRow(y, first, { label, extra = false, total }) {
+  const w1 = first * AU, w2 = ADD_OTHER * AU;
+  const out = [
+    el(0, y, AX - 14, 70, 'lab left', label),
+    el(AX, y, w1, 70, 'bar a', first),
+    el(AX + w1, y, w2, 70, 'bar b', '另一个加数'),
+  ];
+  if (extra) out.push(el(AX + ADD_SEEN * AU, y - 6, (ADD_RIGHT - ADD_SEEN) * AU, 82, 'bar extra pop', ADD_RIGHT - ADD_SEEN));
+  if (total) out.push(el(AX, y + 80, (first + ADD_OTHER) * AU, 26, 'brace', `<span>${total}</span>`));
+  return out;
+}
+
+/* ── 被减数：一根条子剪掉 △ 和 228，剩下的是结果。1 画 1 像素 ── */
+const MU = 1, MX = 110;
+function minRow(y, whole, { label, keep, extra = false }) {
+  const kw = keep * MU, tw = MIN_TRI * MU, bw = MIN_B * MU;
+  const out = [
+    el(0, y, MX - 14, 70, 'lab left', label),
+    el(MX, y, kw, 70, 'bar keep', keep ?? '?'),
+    el(MX + kw, y, tw, 70, 'bar cut', '剪 △'),
+    el(MX + kw + tw, y, bw, 70, 'bar cut', `剪 ${MIN_B}`),
+    el(MX, y + 80, whole * MU, 26, 'brace', `<span>${whole}</span>`),
+  ];
+  if (extra) out.push(el(MX + MIN_RIGHT * MU - MIN_TRI * MU - MIN_B * MU, y - 6, (MIN_SEEN - MIN_RIGHT) * MU, 82, 'bar extra pop', MIN_SEEN - MIN_RIGHT));
+  return out;
+}
+
+/* ── 减数：被减数不知道多长，画成 640；减数剪多了 25，剩下的就少 25。1 画 1.6 像素 ── */
+const SU = 1.6, SX = 110, SW = 640;
+function subRow(y, keep, { label, wrong = false, extra = false }) {
+  const kw = keep * SU;
+  const out = [
+    el(0, y, SX - 14, 70, 'lab left', label),
+    el(SX, y, kw, 70, 'bar keep', keep),
+    el(SX + kw, y, SW - kw, 70, 'bar cut', wrong ? '剪掉看错的减数' : '剪掉真的减数'),
+  ];
+  if (extra) out.push(el(SX + SUB_GOT * SU, y - 6, SUB_MORE * SU, 82, 'bar extra pop', SUB_MORE));
+  return out;
+}
+
+/* ── 电线：A 到 D 643 米，1 画 1.2 像素 ── */
+const LU = 1.2, LX = 24;
+const xA = LX, xC = LX + AC * LU, xD = LX + AD * LU, xB = xD - BD * LU;
+function wires({ overlap = false } = {}) {
+  const out = [
+    el(xA, 40, AC * LU, 64, 'bar a', `A 到 C　${AC}`),
+    el(xB, 130, BD * LU, 64, 'bar b', `B 到 D　${BD}`),
+    el(xA, 270, AD * LU, 6, 'axis'),
+  ];
+  for (const [x, name] of [[xA, 'A'], [xB, 'B'], [xC, 'C'], [xD, 'D']]) {
+    out.push(el(x - 3, 256, 6, 34, 'tick'));
+    out.push(el(x - 30, 296, 60, 40, 'lab', name));
+  }
+  if (overlap) {
+    out.push(el(xB, 34, BC * LU, 166, 'over pop', `BC<br>${BC}`));
+    out.push(el(xA, 350, AD * LU, 26, 'brace', '<span>A 到 D　?</span>'));
+  }
+  return out;
+}
+
+/* ── 跳高跳远：1 人画 24 像素 ── */
+const PU = 24, PX = 24;
+function jumps({ overlap = false, solved = false } = {}) {
+  const hW = (ONLY_H + BOTH) * PU, lX = PX + ONLY_H * PU, lW = (BOTH + ONLY_L) * PU;
+  const out = [
+    el(PX, 40, hW, 64, 'bar a', '参加跳高'),
+    el(lX, 130, lW, 64, 'bar b', '参加跳远'),
+    el(PX, 230, ALL * PU, 26, 'brace', `<span>一共 ${ALL} 人</span>`),
+  ];
+  if (overlap) {
+    out.push(el(PX, 330, ONLY_H * PU, 50, 'lab', `只跳高 ${ONLY_H}`));
+    out.push(el(lX, 34, BOTH * PU, 166, 'over pop', `都参加<br>${BOTH}`));
+    out.push(el(lX, 330, BOTH * PU, 50, 'lab', `都参加 ${BOTH}`));
+    out.push(el(lX + BOTH * PU, 330, ONLY_L * PU, 50, solved ? 'lab green pop' : 'lab red', solved ? `只跳远 ${ONLY_L}` : '只跳远 ?'));
+  }
+  return out;
+}
+
+const RULES = [
+  ['加数', `看小了 ${ADD_RIGHT - ADD_SEEN}`, `结果也小 ${ADD_RIGHT - ADD_SEEN}　<b>${ADD_GOT} + ${ADD_RIGHT - ADD_SEEN} = ${ADD_ANS}</b>`],
+  ['被减数', `看大了 ${MIN_SEEN - MIN_RIGHT}`, `结果也大 ${MIN_SEEN - MIN_RIGHT}　<b>${MIN_GOT} − ${MIN_SEEN - MIN_RIGHT} = ${MIN_ANS}</b>`],
+  ['减数', `看大了 ${SUB_MORE}`, `结果反而小 ${SUB_MORE}　<b>${SUB_GOT} + ${SUB_MORE} = ${SUB_ANS}</b>`],
+];
+const RECAP = [
+  ['错中求解', '看错几，结果差几', `<b>${SUB_ANS}</b> · <b>${ADD_ANS}</b> · <b>${MIN_ANS}</b>`],
+  ['电线', 'BC 算了两遍', `${AC} + ${BD} − ${BC} = <b>${AD} 米</b>`],
+  ['跳高跳远', '都参加的只算一次', `${ALL} − ${ONLY_H} − ${BOTH} = <b>${ONLY_L} 人</b>`],
+];
+function showGrid(rows, n) {
+  recap.innerHTML = rows.map((row, i) => {
+    const hide = i < n ? '' : ' hide';
+    return `<span class="k${hide}">${row[0]}</span><span class="m${hide}">${row[1]}</span><span class="v${hide}">${row[2]}</span>`;
+  }).join('');
+  recap.classList.add('on');
+}
+
+function resetVisuals() {
+  board.innerHTML = '';
+  ask.innerHTML = '';
+  countEl.innerHTML = '';
+  countEl.classList.remove('pop');
+  recap.classList.remove('on');
+}
+
+const ASK_ADD = `把加数 ${ADD_RIGHT} 看成了 ${ADD_SEEN}，算出 ${ADD_GOT}。正确结果是多少？`;
+const ASK_MIN = `算 ${MIN_RIGHT} − △ − ${MIN_B} 时，把 ${MIN_RIGHT} 看成 ${MIN_SEEN}，得 ${MIN_GOT}。正确结果是多少？`;
+const ASK_SUB = `把减数个位上的 5 看成 0，十位上的 1 看成 4，得 ${SUB_GOT}。正确结果是多少？`;
+const ASK_WIRE = `B 到 D 架了 ${BD} 米电线，A 到 C 架了 ${AC} 米，B 到 C 是 ${BC} 米。A 到 D 多少米？`;
+const ASK_JUMP = `跳高、跳远一共 ${ALL} 人，两样都参加的 ${BOTH} 人，只跳高的 ${ONLY_H} 人。只跳远的几人？`;
+
+Anim.run([
+  {
+    title: '加数看短了',
+    async play(id) {
+      setAsk('看错加数', ASK_ADD);
+      draw(addRow(60, ADD_SEEN, { label: '看错的', total: `算出 ${ADD_GOT}` }));
+      say('先看画面', `加法是<b>两段接成一根</b>。他把 ${ADD_RIGHT} 看成了 ${ADD_SEEN}，蓝色那段<b>画短了</b>。另一个加数没看错，一点没变。`);
+      await sleep(1800);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '短多少，补多少',
+    async play(id) {
+      setAsk('看错加数', ASK_ADD);
+      draw([
+        ...addRow(20, ADD_SEEN, { label: '看错的', total: `${ADD_GOT}` }),
+        ...addRow(220, ADD_RIGHT, { label: '真的', extra: true, total: '?' }),
+      ]);
+      say('补上', `换回真的 ${ADD_RIGHT}，蓝色那段长出 <b>${ADD_RIGHT - ADD_SEEN}</b>，整根也就长出 ${ADD_RIGHT - ADD_SEEN}。`);
+      await sleep(1700);
+      if (cancelled(id)) return;
+      setCount(`${ADD_RIGHT} − ${ADD_SEEN} = ${ADD_RIGHT - ADD_SEEN}　${ADD_GOT} + ${ADD_RIGHT - ADD_SEEN} = <b>${ADD_ANS}</b>`);
+      say('看错加数', `加数看小了 ${ADD_RIGHT - ADD_SEEN}，结果就小了 ${ADD_RIGHT - ADD_SEEN}，补上：正确结果是 <b>${ADD_ANS}</b>。`);
+      await sleep(1800);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '被减数看长了',
+    async play(id) {
+      setAsk('看错被减数', ASK_MIN);
+      draw(minRow(20, MIN_SEEN, { label: '看错的', keep: MIN_GOT }));
+      say('剪条子', `减法是<b>一根条子剪掉几段</b>，剩下的是结果。他以为条子有 ${MIN_SEEN} 长，剪掉 △ 和 ${MIN_B}，剩 ${MIN_GOT}。`);
+      await sleep(1800);
+      if (cancelled(id)) return;
+      draw([
+        ...minRow(20, MIN_SEEN, { label: '看错的', keep: MIN_GOT, extra: true }),
+        ...minRow(220, MIN_RIGHT, { label: '真的', keep: MIN_ANS }),
+      ]);
+      setCount(`${MIN_SEEN} − ${MIN_RIGHT} = ${MIN_SEEN - MIN_RIGHT}　${MIN_GOT} − ${MIN_SEEN - MIN_RIGHT} = <b>${MIN_ANS}</b>`);
+      say('看错被减数', `剪掉的两段没变，条子却<b>多看了 ${MIN_SEEN - MIN_RIGHT}</b>，多的全留在剩下的那段里。减回去：正确结果是 <b>${MIN_ANS}</b>。`);
+      await sleep(2000);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '十位上的 1 是 10',
+    async play(id) {
+      setAsk('看错减数', ASK_SUB);
+      draw([
+        el(110, 20, 240, 40, 'lab', '十位'),
+        el(470, 20, 240, 40, 'lab', '个位'),
+        el(160, 70, 140, 140, 'digit', '1'),
+        el(520, 70, 140, 140, 'digit', '5'),
+        el(0, 120, 140, 40, 'lab left', '真的'),
+        el(160, 250, 140, 140, 'digit up pop', '4'),
+        el(520, 250, 140, 140, 'digit down pop', '0'),
+        el(0, 300, 140, 40, 'lab left', '看成'),
+        el(80, 410, 300, 44, 'red', '10 看成 40：多 30'),
+        el(440, 410, 300, 44, 'lab', '5 看成 0：少 5'),
+      ]);
+      say('十位上的 1', `十位上的 1 不是 1，是 <b>10</b>；看成 4，就是 40。所以减数<b>多看了 30</b>，不是 3。个位 5 看成 0，少看了 5。`);
+      await sleep(2000);
+      if (cancelled(id)) return;
+      setCount(`多 30，少 5：减数一共<b>多看了 ${SUB_MORE}</b>`);
+      say('一共', `多 30、少 5，抵掉 5，减数一共多看了 <b>${SUB_MORE}</b>。`);
+      await sleep(1600);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '减数看大，结果反而小',
+    async play(id) {
+      setAsk('看错减数', ASK_SUB);
+      draw([
+        ...subRow(20, SUB_GOT, { label: '看错的', wrong: true }),
+        ...subRow(220, SUB_ANS, { label: '真的', extra: false }),
+        el(SX + SUB_GOT * SU, 214, SUB_MORE * SU, 82, 'bar extra pop', SUB_MORE),
+      ]);
+      say('剪多了', `减数是<b>剪掉的那段</b>。减数看大了 ${SUB_MORE}，就是<b>多剪了 ${SUB_MORE}</b>，剩下的反而短了 ${SUB_MORE}。`);
+      await sleep(1900);
+      if (cancelled(id)) return;
+      setCount(`<span class="no">${SUB_GOT} − ${SUB_MORE}</span>　${SUB_GOT} + ${SUB_MORE} = <b>${SUB_ANS}</b>`);
+      say('看错减数', `剪多了，剩下的就少了，要<b>补回去</b>：正确结果是 <b>${SUB_ANS}</b>。减数是反着的，看大了要加。`);
+      await sleep(1900);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '往哪边补',
+    async play(id) {
+      setAsk('错中求解', '看错几，结果差几——先看往哪边差');
+      showGrid(RULES, 0);
+      say('排一排', '三道题摆一起——');
+      for (let n = 1; n <= RULES.length; n++) {
+        showGrid(RULES, n);
+        await sleep(700);
+        if (cancelled(id)) return;
+      }
+      say('错中求解', '加数、被减数看大了，结果跟着大；<b>减数看大了，结果反而小</b>。每次都问一句：这一截是多算了，还是少算了？');
+      await sleep(2100);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '两根电线叠在一起',
+    async play(id) {
+      setAsk('重合', ASK_WIRE);
+      draw(wires());
+      say('两根电线', `一根从 A 到 C，一根从 B 到 D。两根<b>中间有一段叠在一起</b>：B 到 C。`);
+      await sleep(1600);
+      if (cancelled(id)) return;
+      draw(wires({ overlap: true }));
+      setCount(`${AC} + ${BD} = ${AC + BD}，BC 算了两遍　${AC + BD} − ${BC} = <b>${AD} 米</b>`);
+      say('电线', `${AC} + ${BD} 把橙色的 BC <b>算了两遍</b>，多算了一个 ${BC}。减掉：A 到 D 是 <b>${AD} 米</b>。`);
+      await sleep(2000);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '都参加的只算一次',
+    async play(id) {
+      setAsk('重合', ASK_JUMP);
+      draw(jumps({ overlap: true }));
+      say('一共 32 人', `两样都参加的 ${BOTH} 人，跳高里有他们，跳远里也有他们。可是 ${ALL} 人里，<b>每人只数一次</b>。`);
+      await sleep(1900);
+      if (cancelled(id)) return;
+      draw(jumps({ overlap: true, solved: true }));
+      setCount(`${ALL} − ${ONLY_H} − ${BOTH} = <b>${ONLY_L} 人</b>`);
+      say('跳高跳远', `一排 ${ALL} 人，分成三段：只跳高 ${ONLY_H}、都参加 ${BOTH}、只跳远。剩下的就是只跳远的 <b>${ONLY_L} 人</b>。`);
+      await sleep(1900);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '多算的那一截',
+    async play(id) {
+      setAsk('一根骨头', '先找多算或少算的那一截');
+      for (let n = 1; n <= RECAP.length; n++) {
+        showGrid(RECAP, n);
+        await sleep(600);
+        if (cancelled(id)) return;
+      }
+      say('答案', `看错减数 <b>${SUB_ANS}</b>，看错加数 <b>${ADD_ANS}</b>，看错被减数 <b>${MIN_ANS}</b>；电线 <b>${AD} 米</b>；只跳远 <b>${ONLY_L} 人</b>。都是先找那一截：多了减掉，少了补上。`);
+      await sleep(2100);
+      if (cancelled(id)) return;
+    }
+  },
+], { reset: resetVisuals });
+</script>
+</body>
+</html>
