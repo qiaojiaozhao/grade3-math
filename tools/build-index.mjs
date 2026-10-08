@@ -44,6 +44,7 @@ const ZHUANTI = {
     { file: '专题/段和接头.md', name: '段和接头', mark: '重叠 · 锯木头', ink: '#3f6212', paper: '#ecfccb', demo: ['接头'] },
     { file: '专题/搬借拆.md', name: '搬、借、拆', mark: '巧算 · 分配律', ink: '#0f766e', paper: '#ccfbf1', demo: ['搬借拆'] },
     { file: '专题/错中求解和重合.md', name: '多算的那一截', mark: '错中求解 · 重合', ink: '#9f1239', paper: '#ffe4e6', demo: ['错中求解'] },
+    { file: '专题/有序数.md', name: '一个顺序全数清', mark: '数线段 · 数图形 · 握手', ink: '#1e3a8a', paper: '#dbeafe', demo: ['有序数'] },
   ],
 };
 
@@ -88,6 +89,7 @@ const PAGE_SLUG = {
   '专题/段和接头.md': 'duan-he-jie-tou',
   '专题/搬借拆.md': 'ban-jie-chai',
   '专题/错中求解和重合.md': 'cuo-zhong-qiu-jie-he-chong-he',
+  '专题/有序数.md': 'you-xu-shu',
   '认出母题.md': 'ren-chu-mu-ti',
   '大纲.md': 'da-gang',
   '单元/画线段图.md': 'hua-xian-duan-tu',

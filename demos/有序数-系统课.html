@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>有序数 · 动态演示</title>
+<meta name="description" content="系统课。联欢会 5 个人握手、一条线上 5 个点数线段、一个点射出 5 条射线数角、三角形底边 5 个点数三角形——算出来都是 4+3+2+1=10。数长方形横竖各数一次再相乘，数正方形要按边长一层层数，组两位数分先后要翻倍。">
+<link rel="stylesheet" href="lib/anim.css?v=portrait">
+<style>
+  html, body { background: #07080a; }
+
+  .stage {
+    --k: .56;
+    --askTop: 92px;
+    --boardTop: 190px;
+    --countTop: 400px;
+    --fs: 13px;
+  }
+  body.portrait .stage {
+    --k: 1;
+    --askTop: 290px;
+    --boardTop: 620px;
+    --countTop: 1180px;
+    --fs: 28px;
+  }
+
+  .ask {
+    position: absolute;
+    left: 50%; top: var(--askTop);
+    transform: translateX(-50%);
+    width: 88%;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    text-align: center;
+    font-size: 15px; font-weight: 800; line-height: 1.5;
+    color: #e8eaed;
+  }
+  body.portrait .ask { font-size: 32px; gap: 18px; }
+  .ask:empty { display: none; }
+  .ask .no { background: #ff8a3d; color: #1a1208; border-radius: 999px; padding: 3px 12px; }
+  body.portrait .ask .no { padding: 6px 24px; }
+  .ask.pop { animation: bump-center .45s cubic-bezier(.2, 1.6, .3, 1); }
+
+  .board {
+    position: absolute;
+    left: 50%; top: var(--boardTop);
+    width: calc(820px * var(--k));
+    height: calc(460px * var(--k));
+    transform: translateX(-50%);
+  }
+  /* 几何图形统一画在这一层：viewBox 用未缩放坐标，整层随 --k 缩放 */
+  .ink {
+    position: absolute; left: 0; top: 0;
+    width: calc(820px * var(--k));
+    height: calc(460px * var(--k));
+    overflow: visible;
+  }
+
+  .el {
+    position: absolute;
+    box-sizing: border-box;
+    display: flex; align-items: center; justify-content: center;
+    font-size: var(--fs); font-weight: 800;
+    white-space: nowrap;
+  }
+  .el.pop { animation: squash .5s cubic-bezier(.2, 1.6, .3, 1); }
+
+  /* 联欢会的人：身体是装饰，要数的是连线 */
+  .person { flex-direction: column; gap: calc(4px * var(--k)); }
+  .person .head {
+    width: calc(42px * var(--k)); height: calc(42px * var(--k));
+    border-radius: 50%; background: #6ea8ff; box-shadow: inset 0 -6px 0 #4a84db;
+  }
+  .person .torso {
+    width: calc(52px * var(--k)); height: calc(46px * var(--k));
+    border-radius: calc(14px * var(--k)) calc(14px * var(--k)) calc(6px * var(--k)) calc(6px * var(--k));
+    background: #4a4a52; box-shadow: inset 0 4px 0 #5e5e68;
+  }
+  .person.on .head { background: #ffb347; box-shadow: inset 0 -6px 0 #d8902a; }
+  .person .who { color: #9aa3ad; font-size: var(--fs); }
+  .person.on .who { color: #ffb347; }
+
+  .pt { border-radius: 50%; background: #ff8a3d; box-shadow: inset 0 -5px 0 #d8702a; }
+  .pt.dim { background: #4a4a52; box-shadow: inset 0 -5px 0 #3a3a42; }
+  .ptno { color: #9aa3ad; }
+  .ptno.on { color: #ffb347; }
+
+  .card {
+    background: #e8c27a; color: #1a1208; border-radius: calc(8px * var(--k));
+    font-size: calc(30px * var(--k)); font-weight: 900;
+  }
+  .card.dim { background: #4a4a52; color: #9aa3ad; }
+  .made { color: #5ecf8a; font-size: calc(26px * var(--k)); font-weight: 900; }
+
+  .lab { color: #e8c27a; }
+  .red { color: #ff6b6b; }
+  .green { color: #5ecf8a; }
+
+  .count {
+    position: absolute;
+    left: 0; right: 0; top: var(--countTop);
+    text-align: center;
+    font-size: 21px; font-weight: 800; line-height: 1.55;
+    color: #ffb347;
+  }
+  body.portrait .count { font-size: 42px; }
+  .count b { color: #5ecf8a; }
+  .count .no { color: #ff6b6b; text-decoration: line-through; }
+  .count.pop { animation: bump .45s cubic-bezier(.2, 1.6, .3, 1); }
+
+  .recap {
+    position: absolute;
+    left: 50%; top: calc(var(--countTop) - 76px);
+    transform: translateX(-50%);
+    display: none;
+    grid-template-columns: auto auto auto;
+    gap: 4px 18px;
+    font-size: 15px; font-weight: 800;
+    white-space: nowrap;
+  }
+  body.portrait .recap { top: calc(var(--countTop) - 170px); font-size: 30px; gap: 20px 26px; }
+  .recap.on { display: grid; }
+  .recap .k { color: #e8c27a; text-align: right; }
+  .recap .m { color: #9aa3ad; }
+  .recap .v { color: #f4f6f8; }
+  .recap .v b { color: #5ecf8a; }
+  .recap .hide { visibility: hidden; }
+
+  @keyframes squash {
+    0% { transform: scale(1.3, .6); }
+    55% { transform: scale(.9, 1.15); }
+    100% { transform: scale(1, 1); }
+  }
+  @keyframes bump {
+    0% { transform: scale(.75); }
+    55% { transform: scale(1.12); }
+    100% { transform: scale(1); }
+  }
+  @keyframes bump-center {
+    0% { transform: translateX(-50%) scale(.75); }
+    55% { transform: translateX(-50%) scale(1.12); }
+    100% { transform: translateX(-50%) scale(1); }
+  }
+</style>
+</head>
+<body class="theme-dark">
+
+<h1>有序数：从第一个出发，能连的都数上，数完换下一个</h1>
+<div class="problem">
+  联欢会 5 个人两两握手、一条线上 5 个点数线段、一个点射出 5 条射线数角、三角形底边 5 个点数三角形——算出来<b>都是 4+3+2+1=10</b>。数长方形横竖各数一次再相乘，数正方形要按边长一层层数。
+</div>
+
+<div class="stage-wrap">
+  <div class="stage" id="stage">
+    <div class="ask" id="ask"></div>
+    <div class="board" id="board">
+      <svg class="ink" id="ink" viewBox="0 0 820 460" preserveAspectRatio="none"></svg>
+      <div id="tags"></div>
+    </div>
+    <div class="count" id="count"></div>
+    <div class="recap" id="recap"></div>
+  </div>
+</div>
+
+<script src="lib/anim.js"></script>
+<script>
+const { cancelled, say } = Anim;
+const SLOW = 2;
+const sleep = ms => Anim.sleep(ms * SLOW);
+
+const ink = document.getElementById('ink');
+const tags = document.getElementById('tags');
+const ask = document.getElementById('ask');
+const countEl = document.getElementById('count');
+const recap = document.getElementById('recap');
+
+/* 标签层按竖版像素写，横版乘 --k；几何层交给 svg viewBox 自动缩放 */
+const px = (v) => `calc(${v}px * var(--k))`;
+function el(x, y, w, h, cls, html = '') {
+  return `<div class="el ${cls}" style="left:${px(x)};top:${px(y)};width:${px(w)};height:${px(h)}">${html}</div>`;
+}
+function drawInk(parts) { ink.innerHTML = parts.join(''); }
+function drawTags(parts) { tags.innerHTML = parts.join(''); }
+function bump(e) { e.classList.remove('pop'); void e.offsetWidth; e.classList.add('pop'); }
+function setAsk(no, text) { ask.innerHTML = `<span class="no">${no}</span><span>${text}</span>`; bump(ask); }
+function setCount(html) { countEl.innerHTML = html; bump(countEl); }
+
+/* ── 五个点：整套动画的那张图 ── */
+const XS = [90, 250, 410, 570, 730];
+const BASE = 330;
+const N = XS.length;
+
+/* 两点之间一道弧。跨得越远，拱得越高 */
+function arc(i, j, { on = false, dim = false } = {}) {
+  const span = j - i;
+  const lift = 110 * span;
+  const color = on ? '#ffb347' : (dim ? '#3a3a42' : '#6ea8ff');
+  const w = on ? 5 : 3;
+  return `<path d="M ${XS[i]} ${BASE} Q ${(XS[i] + XS[j]) / 2} ${BASE - lift} ${XS[j]} ${BASE}"
+    fill="none" stroke="${color}" stroke-width="${w}" stroke-linecap="round"/>`;
+}
+
+/* 所有弧按「从第 i 个出发」分组，便于一组一组点亮 */
+const PAIRS = [];
+for (let i = 0; i < N; i++) for (let j = i + 1; j < N; j++) PAIRS.push([i, j]);
+
+function baseline() {
+  return `<line x1="${XS[0] - 40}" y1="${BASE}" x2="${XS[N - 1] + 40}" y2="${BASE}"
+    stroke="#4a4a52" stroke-width="8" stroke-linecap="round"/>`;
+}
+
+function people(onIdx = -1) {
+  return XS.map((x, i) => el(x - 32, BASE - 118, 64, 118, 'person' + (i === onIdx ? ' on' : ''),
+    `<div class="head"></div><div class="torso"></div><div class="who">${i + 1}</div>`)).join('');
+}
+
+function dots(onIdx = -1) {
+  const out = [];
+  XS.forEach((x, i) => {
+    out.push(el(x - 13, BASE - 13, 26, 26, 'pt' + (i === onIdx ? '' : ' dim')));
+    out.push(el(x - 24, BASE + 22, 48, 34, 'ptno' + (i === onIdx ? ' on' : ''), `${i + 1}`));
+  });
+  return out.join('');
+}
+
+/* ── 第 3 幕：一个点射出 5 条射线 ── */
+const VX = 410, VY = 415, RAY_LEN = 330;
+const RAY_DEG = [-160, -130, -100, -70, -40];
+function rayEnd(d) {
+  const r = d * Math.PI / 180;
+  return [VX + Math.cos(r) * RAY_LEN, VY + Math.sin(r) * RAY_LEN];
+}
+function rays(onPair = null) {
+  const out = RAY_DEG.map((d, i) => {
+    const [x, y] = rayEnd(d);
+    const on = onPair && (onPair[0] === i || onPair[1] === i);
+    return `<line x1="${VX}" y1="${VY}" x2="${x}" y2="${y}"
+      stroke="${on ? '#ffb347' : '#6ea8ff'}" stroke-width="${on ? 5 : 3}" stroke-linecap="round"/>`;
+  });
+  if (onPair) {
+    const r = 150;
+    const [a, b] = [RAY_DEG[onPair[0]], RAY_DEG[onPair[1]]].map(d => d * Math.PI / 180);
+    out.push(`<path d="M ${VX + Math.cos(a) * r} ${VY + Math.sin(a) * r}
+      A ${r} ${r} 0 0 1 ${VX + Math.cos(b) * r} ${VY + Math.sin(b) * r}"
+      fill="none" stroke="#ffb347" stroke-width="4" stroke-dasharray="7 5"/>`);
+  }
+  out.push(`<circle cx="${VX}" cy="${VY}" r="11" fill="#ff8a3d"/>`);
+  return out.join('');
+}
+
+/* ── 第 4 幕：三角形底边 5 个点，顶点往下连 ── */
+const APEX = [410, 60];
+const TBASE = 390;
+const TXS = [110, 260, 410, 560, 710];
+function triangle(onPair = null) {
+  const out = [`<line x1="${TXS[0]}" y1="${TBASE}" x2="${TXS[4]}" y2="${TBASE}"
+    stroke="#4a4a52" stroke-width="8" stroke-linecap="round"/>`];
+  if (onPair) {
+    const [i, j] = onPair;
+    out.push(`<path d="M ${APEX[0]} ${APEX[1]} L ${TXS[i]} ${TBASE} L ${TXS[j]} ${TBASE} Z"
+      fill="rgba(255,179,71,.22)" stroke="none"/>`);
+  }
+  TXS.forEach((x, i) => {
+    const on = onPair && (onPair[0] === i || onPair[1] === i);
+    out.push(`<line x1="${APEX[0]}" y1="${APEX[1]}" x2="${x}" y2="${TBASE}"
+      stroke="${on ? '#ffb347' : '#6ea8ff'}" stroke-width="${on ? 5 : 3}" stroke-linecap="round"/>`);
+    out.push(`<circle cx="${x}" cy="${TBASE}" r="9" fill="${on ? '#ffb347' : '#ff8a3d'}"/>`);
+  });
+  return out.join('');
+}
+
+/* ── 第 5 幕：长方形格子。竖线 5 条、横线 3 条 ── */
+const GX = [90, 250, 410, 570, 730];
+const GY = [170, 290, 410];
+function grid(rows = 1, hi = null) {
+  const yTop = GY[0], yBot = GY[rows];
+  const out = [];
+  if (hi) {
+    const [[i, j], [a, b]] = hi;
+    out.push(`<rect x="${GX[i]}" y="${GY[a]}" width="${GX[j] - GX[i]}" height="${GY[b] - GY[a]}"
+      fill="rgba(255,179,71,.26)" stroke="#ffb347" stroke-width="4"/>`);
+  }
+  for (let c = 0; c < GX.length; c++) {
+    out.push(`<line x1="${GX[c]}" y1="${yTop}" x2="${GX[c]}" y2="${yBot}"
+      stroke="#6ea8ff" stroke-width="3"/>`);
+  }
+  for (let r = 0; r <= rows; r++) {
+    out.push(`<line x1="${GX[0]}" y1="${GY[r]}" x2="${GX[4]}" y2="${GY[r]}"
+      stroke="#6ea8ff" stroke-width="3"/>`);
+  }
+  return out.join('');
+}
+
+/* ── 第 6 幕：3×3 方格数正方形 ── */
+const SQ0 = [260, 140], SQC = 100;
+function squares(hi = null) {
+  const out = [];
+  if (hi) {
+    const [r, c, size] = hi;
+    out.push(`<rect x="${SQ0[0] + c * SQC}" y="${SQ0[1] + r * SQC}" width="${size * SQC}" height="${size * SQC}"
+      fill="rgba(255,179,71,.26)" stroke="#ffb347" stroke-width="4"/>`);
+  }
+  for (let i = 0; i <= 3; i++) {
+    out.push(`<line x1="${SQ0[0] + i * SQC}" y1="${SQ0[1]}" x2="${SQ0[0] + i * SQC}" y2="${SQ0[1] + 3 * SQC}"
+      stroke="#6ea8ff" stroke-width="3"/>`);
+    out.push(`<line x1="${SQ0[0]}" y1="${SQ0[1] + i * SQC}" x2="${SQ0[0] + 3 * SQC}" y2="${SQ0[1] + i * SQC}"
+      stroke="#6ea8ff" stroke-width="3"/>`);
+  }
+  return out.join('');
+}
+
+/* ── 第 7 幕：5 张数字卡组两位数 ── */
+const DIGITS = [1, 2, 3, 4, 5];
+function cards(tens = -1, ones = -1) {
+  const out = [];
+  DIGITS.forEach((d, i) => {
+    const on = i === tens || i === ones;
+    out.push(el(XS[i] - 36, 150, 72, 92, 'card' + (on ? '' : ' dim'), `${d}`));
+  });
+  if (tens >= 0) out.push(el(XS[0] - 40, 280, 180, 60, 'lab', '十位'));
+  if (tens >= 0 && ones >= 0) {
+    out.push(el(240, 300, 340, 80, 'made', `组成 ${DIGITS[tens]}${DIGITS[ones]}`));
+  }
+  return out.join('');
+}
+
+const RECAP = [
+  ['5 个人握手', '人是点，握手是连线', '4+3+2+1 = <b>10 次</b>'],
+  ['5 个点数线段', '点是点，线段是连线', '4+3+2+1 = <b>10 条</b>'],
+  ['5 条射线数角', '射线是点，角是夹出来的', '4+3+2+1 = <b>10 个</b>'],
+  ['底边 5 个点数三角形', '就是数底边的线段', '4+3+2+1 = <b>10 个</b>'],
+  ['一行 4 格数长方形', '数上边那条线的线段', '4+3+2+1 = <b>10 个</b>'],
+  ['5 张卡组两位数', '分先后，每对能排 2 个', '10 × 2 = <b>20 个</b>'],
+];
+function showRecap(n) {
+  recap.innerHTML = RECAP.map((row, i) => {
+    const hide = i < n ? '' : ' hide';
+    return `<span class="k${hide}">${row[0]}</span><span class="m${hide}">${row[1]}</span><span class="v${hide}">${row[2]}</span>`;
+  }).join('');
+  recap.classList.add('on');
+}
+
+function resetVisuals() {
+  ink.innerHTML = '';
+  tags.innerHTML = '';
+  ask.innerHTML = '';
+  countEl.innerHTML = '';
+  countEl.classList.remove('pop');
+  recap.classList.remove('on');
+}
+
+const SUM = '4 + 3 + 2 + 1';
+
+Anim.run([
+  {
+    title: '握手：从第一个人开始',
+    async play(id) {
+      setAsk('握手', '联欢会 5 个人，每两个人握一次手。一共握几次？');
+      drawInk([baseline()]);
+      drawTags([people()]);
+      say('先别算', '很多孩子算 5 × 4 = 20。<b>可是你和我握的那一次，只算一次</b>。');
+      await sleep(1600);
+      if (cancelled(id)) return;
+
+      let done = [];
+      for (let i = 0; i < N - 1; i++) {
+        const mine = PAIRS.filter(p => p[0] === i);
+        for (const p of mine) {
+          done.push(p);
+          drawInk([baseline(), ...done.map(q => arc(q[0], q[1], { on: q === p }))]);
+          drawTags([people(i)]);
+          await sleep(300);
+          if (cancelled(id)) return;
+        }
+        setCount(`第 ${i + 1} 个人：新握 <b>${N - 1 - i} 次</b>`);
+        say('换下一个', `第 ${i + 1} 个人和右边每个人都握一次，${N - 1 - i} 次。<b>握过的不再握</b>，所以下一个人要少一次。`);
+        await sleep(900);
+        if (cancelled(id)) return;
+      }
+      setCount(`${SUM} = <b>10 次</b>　<span class="no">5 × 4 = 20</span>`);
+      say('答案', `越往后越少：4、3、2、1。一共 <b>10 次</b>。5 × 4 = 20 把每次握手都数了两遍。`);
+      await sleep(2200);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '数线段：只数挨着的就漏了',
+    async play(id) {
+      setAsk('数线段', '一条线上有 5 个点。一共有几条线段？');
+      drawInk([baseline(), ...PAIRS.filter(p => p[1] - p[0] === 1).map(p => arc(p[0], p[1]))]);
+      drawTags([dots()]);
+      setCount('挨着的只有 <b>4 条</b>');
+      say('孩子的答案', '孩子一数就是 4 条：1—2、2—3、3—4、4—5。<b>他只数了挨着的</b>。');
+      await sleep(1900);
+      if (cancelled(id)) return;
+
+      for (let span = 2; span <= 4; span++) {
+        const upto = PAIRS.filter(p => p[1] - p[0] <= span);
+        drawInk([baseline(), ...upto.map(p => arc(p[0], p[1], { on: p[1] - p[0] === span }))]);
+        drawTags([dots()]);
+        setCount(`隔 ${span - 1} 个点的，还有 <b>${N - span} 条</b>`);
+        say('长的也要数', `隔着点照样是一条线段。隔 ${span - 1} 个点的有 ${N - span} 条。`);
+        await sleep(1300);
+        if (cancelled(id)) return;
+      }
+      setCount(`${SUM} = <b>10 条</b>　<span class="no">4 条</span>`);
+      say('同一个数', '和握手一模一样：<b>4+3+2+1=10</b>。人换成点，握手换成线段，题还是那道题。');
+      await sleep(2300);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '数角：射线当点',
+    async play(id) {
+      setAsk('数角', '从一个点射出 5 条射线。一共夹出几个角？');
+      drawInk([rays()]);
+      drawTags([]);
+      say('哪个是点', '把 5 条射线<b>当成 5 个点</b>，两条射线夹一个角，就是两点连一条线。');
+      await sleep(1700);
+      if (cancelled(id)) return;
+
+      let k = 0;
+      for (let i = 0; i < N - 1; i++) {
+        for (let j = i + 1; j < N; j++) {
+          k++;
+          drawInk([rays([i, j])]);
+          setCount(`数到第 <b>${k}</b> 个角`);
+          await sleep(230);
+          if (cancelled(id)) return;
+        }
+        say('换下一条', `从第 ${i + 1} 条射线数起，和右边每一条都夹一个角，${N - 1 - i} 个。`);
+        await sleep(600);
+        if (cancelled(id)) return;
+      }
+      drawInk([rays()]);
+      setCount(`${SUM} = <b>10 个角</b>`);
+      say('还是 10', '只数挨着两条夹的角，只有 4 个，跨过去的大角全漏了。<b>还是 4+3+2+1</b>。');
+      await sleep(2300);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '数三角形：就是数底边',
+    async play(id) {
+      setAsk('数三角形', '三角形底边上有 5 个点，顶点和每个点都连起来。图里有几个三角形？');
+      drawInk([triangle()]);
+      drawTags([]);
+      say('先看一个', '每个三角形都是：<b>顶点 + 底边上的两个点</b>。顶点是固定的，变的只有底边那两个点。');
+      await sleep(1900);
+      if (cancelled(id)) return;
+
+      let k = 0;
+      for (let i = 0; i < N - 1; i++) {
+        for (let j = i + 1; j < N; j++) {
+          k++;
+          drawInk([triangle([i, j])]);
+          setCount(`第 <b>${k}</b> 个三角形`);
+          await sleep(240);
+          if (cancelled(id)) return;
+        }
+        if (cancelled(id)) return;
+      }
+      drawInk([triangle()]);
+      setCount(`${SUM} = <b>10 个三角形</b>`);
+      say('换了身衣服', '底边上选两个点，就是<b>数底边有几条线段</b>。数三角形和数线段是同一道题。');
+      await sleep(2400);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '数长方形：横竖各数一次',
+    async play(id) {
+      setAsk('数长方形', '一行 4 个小格。图里有几个长方形？');
+      drawInk([grid(1)]);
+      drawTags([]);
+      say('先看一行', '一行里的长方形，只要在<b>上边那条线</b>上挑两个点，左右两条边就定了。');
+      await sleep(1800);
+      if (cancelled(id)) return;
+
+      let k = 0;
+      for (let i = 0; i < N - 1; i++) {
+        for (let j = i + 1; j < N; j++) {
+          k++;
+          drawInk([grid(1, [[i, j], [0, 1]])]);
+          setCount(`第 <b>${k}</b> 个长方形`);
+          await sleep(230);
+          if (cancelled(id)) return;
+        }
+      }
+      drawInk([grid(1)]);
+      setCount(`竖线挑 2 条：${SUM} = <b>10 个</b>`);
+      say('又是 10', '一行 4 格就是<b>数线段</b>：10 个长方形。');
+      await sleep(1800);
+      if (cancelled(id)) return;
+
+      setAsk('数长方形', '再加一行，变成 2 行 4 列。几个长方形？');
+      drawInk([grid(2)]);
+      setCount('横着 <b>10</b> 种　竖着 <b>?</b> 种');
+      say('加一行', '现在上下也能挑了。<b>横着挑的 10 种，每一种都能配竖着的几种</b>。');
+      await sleep(1900);
+      if (cancelled(id)) return;
+
+      const ROWPAIRS = [[0, 1], [1, 2], [0, 2]];
+      for (let r = 0; r < ROWPAIRS.length; r++) {
+        drawInk([grid(2, [[0, 4], ROWPAIRS[r]])]);
+        setCount(`竖着第 <b>${r + 1}</b> 种：3 条横线挑 2 条`);
+        await sleep(800);
+        if (cancelled(id)) return;
+      }
+      drawInk([grid(2)]);
+      setCount(`10 × 3 = <b>30 个长方形</b>`);
+      say('相乘', '横着 10 种、竖着 3 种，<b>每种横配每种竖</b>，所以是 10 × 3 = 30。横竖各数一次再相乘。');
+      await sleep(2400);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '数正方形：不能相乘',
+    async play(id) {
+      setAsk('数正方形', '3 行 3 列的小方格。有几个正方形？');
+      drawInk([squares()]);
+      drawTags([]);
+      say('小心', '长方形能相乘，<b>正方形不行</b>——四条边要一样长，挑完横的，竖的就被定死了。');
+      await sleep(2000);
+      if (cancelled(id)) return;
+
+      const LAYERS = [[1, 9], [2, 4], [3, 1]];
+      for (const [size, total] of LAYERS) {
+        let k = 0;
+        for (let r = 0; r + size <= 3; r++) {
+          for (let c = 0; c + size <= 3; c++) {
+            k++;
+            drawInk([squares([r, c, size])]);
+            setCount(`边长 ${size} 格的：第 <b>${k}</b> 个`);
+            await sleep(260);
+            if (cancelled(id)) return;
+          }
+        }
+        say('一层一层', `边长 ${size} 格的正方形有 <b>${total}</b> 个。`);
+        await sleep(800);
+        if (cancelled(id)) return;
+      }
+      drawInk([squares()]);
+      setCount(`9 + 4 + 1 = <b>14 个正方形</b>`);
+      say('按边长数', '正方形要<b>按边长一层一层数</b>：1 格的 9 个、2 格的 4 个、3 格的 1 个。这是这一类题唯一不能相乘的地方。');
+      await sleep(2500);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '组两位数：分先后就翻倍',
+    async play(id) {
+      setAsk('组两位数', '用 1、2、3、4、5 组成两位数，数字不重复。能组几个？');
+      drawInk([]);
+      drawTags([cards()]);
+      say('哪里不一样', '握手的时候，你和我握、我和你握，<b>是同一次</b>。可是 12 和 21，<b>是两个数</b>。');
+      await sleep(2100);
+      if (cancelled(id)) return;
+
+      drawTags([cards(0, 1)]);
+      setCount('先定十位，再定个位');
+      say('先定十位', '十位定成 1，个位还能挑剩下的 4 张：12、13、14、15。');
+      await sleep(1500);
+      if (cancelled(id)) return;
+
+      drawTags([cards(1, 0)]);
+      setCount('<b>12</b> 和 <b>21</b> 是两个数');
+      say('分先后', '同样是 1 和 2 这一对，摆在十位个位上<b>能排出 2 个数</b>。握手只算 1 次。');
+      await sleep(1900);
+      if (cancelled(id)) return;
+
+      setCount(`每对能排 2 个：10 × 2 = <b>20 个</b>　<span class="no">10 个</span>`);
+      say('答案', '5 张卡两两搭配有 10 对，每对分先后能排 2 个，一共 <b>20 个</b>。也可以直接想：十位 5 种 × 个位 4 种。');
+      await sleep(2400);
+      if (cancelled(id)) return;
+    }
+  },
+  {
+    title: '一根骨头',
+    async play(id) {
+      setAsk('有序数', '从第一个出发，能连的都数上；数完换下一个，数过的不再数');
+      drawInk([baseline(), ...PAIRS.map(p => arc(p[0], p[1]))]);
+      drawTags([dots()]);
+      say('对一对', '六道题排一排——');
+      for (let n = 1; n <= RECAP.length; n++) {
+        showRecap(n);
+        await sleep(650);
+        if (cancelled(id)) return;
+      }
+      say('答案', '握手、线段、角、三角形，<b>都是 4+3+2+1=10</b>；长方形横竖各数一次再相乘；正方形按边长一层层数；分先后的要翻倍。拿到题先问一句：<b>我在数什么，分不分先后</b>。');
+      await sleep(2600);
+      if (cancelled(id)) return;
+    }
+  },
+], { reset: resetVisuals });
+</script>
+</body>
+</html>
