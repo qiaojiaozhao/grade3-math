@@ -170,7 +170,9 @@ function lane(parts, mark) {
     line.innerHTML = '<span>' + mark.label + '</span>';
     box.appendChild(line);
   }
-  box.style.minWidth = x + 'px';
+  box.style.width = x + 'px';
+  box.style.marginLeft = 'auto';
+  box.style.marginRight = 'auto';
   return { box, nodes, width: x };
 }
 
@@ -212,14 +214,15 @@ Anim.run([
         { yuan: 36, tone: 'book', text: '' },
         { yuan: 18, tone: 'book', text: '' },
         { yuan: 6, tone: 'short', up: '还差', text: '6 元' },
-      ], { at: 54, label: '带着的钱到这儿' });
-      b.nodes[0].el.textContent = '';
-      b.nodes[1].el.textContent = '';
+      ]);
+      b.nodes[0].el.textContent = '3 本';
+      b.nodes[1].el.className = 'seg light';
+      b.nodes[1].el.textContent = '18 元';
       const cover = document.createElement('div');
       cover.className = 'seg mark';
       cover.style.left = (36 * U) + 'px';
       cover.style.width = (24 * U) + 'px';
-      cover.innerHTML = '<span class="up">多买的 2 本</span>2 本';
+      cover.innerHTML = '<span class="up">多买的 2 本</span>';
       b.box.appendChild(cover);
       show([a.box, b.box]);
       say('再买', '改成 <b>5 本</b>，多买的 2 本先吃掉剩下的 18 元，还不够，又差出 6 元。');
@@ -260,15 +263,22 @@ Anim.run([
     title: '两次都剩',
     async play(id) {
       const a = lane([
-        { yuan: 30, tone: 'book', text: '每人 5 本' },
-        { yuan: 14, tone: 'left', up: '大剩', text: '14 本' },
+        { yuan: 12, tone: 'book', text: '每人 5 本' },
+        { yuan: 9, tone: 'left', text: '12 本' },
+        { yuan: 5, tone: 'left', text: '2 本' },
       ]);
+      a.nodes[1].el.style.padding = '0';
+      a.nodes[2].el.style.padding = '0';
+      a.nodes[2].el.style.boxShadow = 'inset 4px 0 0 #07080a';
       const b = lane([
-        { yuan: 42, tone: 'book', text: '每人 7 本' },
-        { yuan: 2, tone: 'left', up: '小剩', text: '2' },
+        { yuan: 12, tone: 'book', text: '每人 5 本' },
+        { yuan: 9, tone: 'short', text: '12 本' },
+        { yuan: 5, tone: 'left', text: '2 本' },
       ]);
+      b.nodes[1].el.style.padding = '0';
+      b.nodes[2].el.style.padding = '0';
       show([a.box, b.box], '(14 − 2) ÷ 2 = <b>6 人</b>');
-      say('两盈', '两次都有剩。每人多拿 2 本，剩的从 14 变成 2，少掉的 <b>12 本</b>就是每人多拿的。');
+      say('两盈', '两次都在线段里面。14 本拆成还剩的 <b>2 本</b>，和挪走的 <b>12 本</b>。');
       await sleep(1100);
       if (cancelled(id)) return;
     }
@@ -277,15 +287,20 @@ Anim.run([
     title: '两次都不够',
     async play(id) {
       const a = lane([
-        { yuan: 41, tone: 'book', text: '有的花' },
-        { yuan: 15, tone: 'short', up: '大缺', text: '15 朵' },
+        { yuan: 12, tone: 'book', text: '有的花' },
+        { yuan: 5, tone: 'short', text: '缺 1' },
+        { yuan: 9, tone: 'short', text: '14 朵' },
       ]);
+      a.nodes[1].el.style.padding = '0';
+      a.nodes[2].el.style.padding = '0';
+      a.nodes[2].el.style.boxShadow = 'inset 4px 0 0 #07080a';
       const b = lane([
-        { yuan: 41, tone: 'book', text: '有的花' },
-        { yuan: 1, tone: 'short', up: '小缺', text: '1' },
+        { yuan: 12, tone: 'book', text: '有的花' },
+        { yuan: 5, tone: 'short', text: '缺 1' },
       ]);
+      b.nodes[1].el.style.padding = '0';
       show([a.box, b.box], '(15 − 1) ÷ 2 = <b>7 瓶</b>');
-      say('两亏', '两次都不够。每瓶少插 2 朵，缺的从 1 变成 15，多缺的 <b>14 朵</b>就是每瓶少插的。');
+      say('两亏', '两次都在线段外面。和下面一样的是缺 <b>1</b> 朵，多出来的 <b>14</b> 朵才是每瓶少插的。');
       await sleep(1100);
       if (cancelled(id)) return;
     }
