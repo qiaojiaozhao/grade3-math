@@ -63,7 +63,7 @@ const MOTIFS = [
   { unit: '画线段图', file: '归一问题.md', name: '归一', mark: '先求 1 份', ink: '#155e75', paper: '#cffafe', demo: ['几盒笔'] },
   { unit: '倒推与假设', file: '还原问题.md', name: '还原', mark: '从结果倒回去', ink: '#be185d', paper: '#fce7f3', demo: ['桃子'] },
   { unit: '倒推与假设', file: '假设法.md', name: '鸡兔同笼', mark: '两种混在一起', ink: '#b45309', paper: '#fff6d8', demo: ['鸡兔'] },
-  { unit: '倒推与假设', file: '盈亏问题.md', name: '盈亏', mark: '一多一少', ink: '#be123c', paper: '#ffe4e6', demo: [] },
+  { unit: '倒推与假设', file: '盈亏问题.md', name: '盈亏', mark: '每人多分一截', ink: '#be123c', paper: '#ffe4e6', demo: ['盈亏'] },
   { unit: '数清楚', file: '植树问题.md', name: '植树', mark: '两头都算', ink: '#3d8a4a', paper: '#e8f6ee', demo: ['握手'] },
   { unit: '数清楚', file: '买赠问题.md', name: '买赠', mark: '送的也要喝', ink: '#b45309', paper: '#fff7ed', demo: ['买五'] },
   { unit: '数清楚', file: '过火车问题.md', name: '过火车', mark: '车头进车尾出', ink: '#9a3412', paper: '#ffedd5', demo: ['过桥'] },
