@@ -48,6 +48,23 @@
   }
   body.portrait .moneyline span { font-size: 18px; }
 
+  .vline {
+    position: absolute;
+    top: 34px; bottom: 4px;
+    border-left: 3px dashed #8d97a3;
+    z-index: 3;
+  }
+  .vline span {
+    position: absolute;
+    top: -30px; left: 0;
+    transform: translateX(-50%);
+    font-size: 16px;
+    font-weight: 700;
+    color: #8d97a3;
+    white-space: nowrap;
+  }
+  body.portrait .vline span { font-size: 20px; }
+
   .seg {
     position: absolute;
     bottom: 18px;
@@ -163,14 +180,22 @@ function lane(parts, mark) {
     nodes.push({ el, x, w });
     x += w;
   }
-  if (mark) {
+  if (mark && mark.at != null) {
     const line = document.createElement('div');
     line.className = 'moneyline';
     line.style.width = (mark.at * U) + 'px';
     line.innerHTML = '<span>' + mark.label + '</span>';
     box.appendChild(line);
   }
-  box.style.width = x + 'px';
+  if (mark && mark.vline != null) {
+    const v = document.createElement('div');
+    v.className = 'vline';
+    v.style.left = (mark.vline * U) + 'px';
+    if (mark.down) v.style.bottom = (-mark.down) + 'px';
+    if (mark.vlabel) v.innerHTML = '<span>' + mark.vlabel + '</span>';
+    box.appendChild(v);
+  }
+  box.style.width = Math.max(x, (mark && mark.w ? mark.w * U : 0)) + 'px';
   box.style.marginLeft = 'auto';
   box.style.marginRight = 'auto';
   return { box, nodes, width: x };
@@ -196,9 +221,9 @@ Anim.run([
       const a = lane([
         { yuan: 36, tone: 'book', text: '3 本' },
         { yuan: 18, tone: 'left', up: '还剩', text: '18 元' },
-      ]);
+      ], { vline: 54, vlabel: '钱就这么多', w: 60 });
       show([a.box]);
-      say('先看', '钱是一条线段。<b>3 本</b>占一段，右边还剩一截。');
+      say('先看', '虚线是带着的钱，就这么多。买 <b>3 本</b>，离虚线还剩 18 元。');
       await sleep(900);
       if (cancelled(id)) return;
     }
@@ -209,12 +234,12 @@ Anim.run([
       const a = lane([
         { yuan: 36, tone: 'book', text: '3 本' },
         { yuan: 18, tone: 'left', up: '还剩', text: '18 元' },
-      ]);
+      ], { vline: 54, vlabel: '钱就这么多', down: 28, w: 60 });
       const b = lane([
         { yuan: 36, tone: 'book', text: '' },
         { yuan: 18, tone: 'book', text: '' },
         { yuan: 6, tone: 'short', up: '还差', text: '6 元' },
-      ]);
+      ], { vline: 54, w: 60 });
       b.nodes[0].el.textContent = '3 本';
       b.nodes[1].el.className = 'seg light';
       b.nodes[1].el.textContent = '18 元';
@@ -225,7 +250,7 @@ Anim.run([
       cover.innerHTML = '<span class="up">多买的 2 本</span>';
       b.box.appendChild(cover);
       show([a.box, b.box]);
-      say('再买', '改成 <b>5 本</b>，多买的 2 本先吃掉剩下的 18 元，还不够，又差出 6 元。');
+      say('再买', '改成 <b>5 本</b>，多买的 2 本先把剩的 18 元花光，再多花 6 元，就越过了虚线。');
       await sleep(1100);
       if (cancelled(id)) return;
     }
@@ -278,7 +303,7 @@ Anim.run([
       b.nodes[1].el.style.padding = '0';
       b.nodes[2].el.style.padding = '0';
       show([a.box, b.box], '(14 − 2) ÷ 2 = <b>6 人</b>');
-      say('两盈', '两次都在线段里面。14 本拆成还剩的 <b>2 本</b>，和挪走的 <b>12 本</b>。');
+      say('两盈', '两次都有剩。每人多拿 2 本，剩的从 14 本变成 2 本，<b>少了 12 本</b>，就是大家多拿走的。');
       await sleep(1100);
       if (cancelled(id)) return;
     }
@@ -300,7 +325,7 @@ Anim.run([
       ]);
       b.nodes[1].el.style.padding = '0';
       show([a.box, b.box], '(15 − 1) ÷ 2 = <b>7 瓶</b>');
-      say('两亏', '两次都在线段外面。和下面一样的是缺 <b>1</b> 朵，多出来的 <b>14</b> 朵才是每瓶少插的。');
+      say('两亏', '两次都不够。每瓶少插 2 朵，缺的从 15 朵变成 1 朵，<b>少缺了 14 朵</b>，是每瓶省下来的。');
       await sleep(1100);
       if (cancelled(id)) return;
     }
@@ -310,12 +335,12 @@ Anim.run([
     async play(id) {
       board.innerHTML =
         '<div class="kinds">' +
-        '<div class="kind on"><i>一盈一亏</i>剩的和差的加起来</div>' +
-        '<div class="kind"><i>两盈</i>大剩减小剩</div>' +
-        '<div class="kind"><i>两亏</i>大缺减小缺</div>' +
+        '<div class="kind on"><i>一边一个</i>剩的和差的加起来</div>' +
+        '<div class="kind"><i>都剩</i>大的减小的</div>' +
+        '<div class="kind"><i>都不够</i>大的减小的</div>' +
         '</div>' +
         '<div class="formula">再除以每人相差几 = <b>人数</b></div>';
-      say('一句', '先看两次是剩还是不够。一剩一不够就<b>相加</b>，两次一样就<b>相减</b>。');
+      say('一句', '先看两次在线的哪一边。一边一个就<b>相加</b>，同在一边就<b>相减</b>。');
       await sleep(1000);
       if (cancelled(id)) return;
     }
